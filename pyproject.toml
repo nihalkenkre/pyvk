@@ -1,0 +1,7 @@
+[build_system]
+requires=['setuptools', 'setuptools-scm']
+build-backend='setuptools.build_meta'
+
+[project]
+name='pyvk'
+version="1.0.0"
