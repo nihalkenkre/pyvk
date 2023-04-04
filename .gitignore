@@ -1,11 +1,13 @@
 # VSCode 
 *vscode
 
-# Python Env/Extension build
+# Python Env/Extension build/Cache
 *env*
 *egg*
 *build*
 *dist*
+*pyd*
+*cache*
 
 # Logs
 *log*
