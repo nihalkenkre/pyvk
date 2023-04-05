@@ -81,7 +81,7 @@ PyMemberDef vk_phy_dev_limits_members[] = {
     {"max_viewport_dimensions", T_OBJECT_EX, offsetof(vk_phy_dev_limits, max_viewport_dimensions), 1, "Max Viewport Dimensions"},
 
     {"viewport_bounds_range", T_OBJECT_EX, offsetof(vk_phy_dev_limits, viewport_bounds_range), 1, "Viewport bound range"},
-    {"viewport_sub_pixel_bits", T_OBJECT_EX, offsetof(vk_phy_dev_limits, viewport_sub_pixel_bits), 1, "Viewport Sub Pixel Bits"},
+    {"viewport_sub_pixel_bits", T_UINT, offsetof(vk_phy_dev_limits, viewport_sub_pixel_bits), 1, "Viewport Sub Pixel Bits"},
 
     {"min_memory_map_alignment", T_ULONGLONG, offsetof(vk_phy_dev_limits, min_memory_map_alignment), 1, "Min Memory Map Alignment"},
     {"min_texel_buffer_offset_alignment", T_LONG, offsetof(vk_phy_dev_limits, min_texel_buffer_offset_alignment), 1, "Min Texel Buffer Offset Alignment"},

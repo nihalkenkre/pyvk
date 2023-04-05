@@ -183,91 +183,109 @@ class PhysicalDevice(object):
         self._pd = pd
 
     def get_features(self):
-        return PhysicalDeviceFeatures(self._pd.get_features())
+        return self._pd.get_features()
 
     def get_properties(self):
-        return PhysicalDeviceProperties(self._pd.get_properties())
+        return self._pd.get_properties()
 
     def get_memory_properties(self):
-        return PhysicalDeviceMemoryProperties(self._pd.get_memory_properties())
+        return self._pd.get_memory_properties()
 
 
-class PhysicalDeviceFeatures(object):
-    def __init__(self, pdf=vk.physical_device_features) -> None:
-        if not isinstance(pdf, vk.physical_device_features):
-            raise TypeError(
-                'Please pass an object of type vulkan.physical_device_features')
+# class PhysicalDeviceFeatures(object):
+#     def __init__(self, pdf=vk.physical_device_features) -> None:
+#         if not isinstance(pdf, vk.physical_device_features):
+#             raise TypeError(
+#                 'Please pass an object of type vulkan.physical_device_features')
 
-        self._pdf = pdf
+#         self._pdf = pdf
 
-        for a in dir(pdf):
-            if not a.startswith('__'):
-                setattr(self, a, getattr(pdf, a))
-
-
-class PhysicalDeviceProperties(object):
-    def __init__(self, pdp=vk.physical_device_properties):
-        if not isinstance(pdp, vk.physical_device_properties):
-            raise TypeError(
-                'Please pass an object of type vulkan.physical_device_properties')
-
-        self._pdp = pdp
-
-        for a in dir(pdp):
-            if not a.startswith('__'):
-                if a == 'limits':
-                    print('populating limits')
-                    setattr(self, a, PhysicalDeviceLimits(getattr(pdp, a)))
-                elif a == 'sparse_properties':
-                    print('populating sparse_properties')
-                    setattr(self, a, PhysicalDeviceSparseProperties(
-                        getattr(pdp, a)))
-                else:
-                    setattr(self, a, getattr(pdp, a))
+#         for a in dir(pdf):
+#             if not a.startswith('__'):
+#                 setattr(self, a, getattr(pdf, a))
 
 
-class PhysicalDeviceLimits(object):
-    def __init__(self, pdl=vk.physical_device_limits):
-        if not isinstance(pdl, vk.physical_device_limits):
-            raise TypeError(
-                'Please pass an object of type vulkan.physical_device_limits')
+# class PhysicalDeviceProperties(object):
+#     def __init__(self, pdp=vk.physical_device_properties):
+#         if not isinstance(pdp, vk.physical_device_properties):
+#             raise TypeError(
+#                 'Please pass an object of type vulkan.physical_device_properties')
 
-        self._pdl = pdl
+#         self._pdp = pdp
 
-        length = len(dir(pdl))
-
-        for idx, a in enumerate(dir(pdl)):
-            if not a.startswith('__'):
-                print(a, getattr(pdl, a), idx, length)
-                setattr(self, a, getattr(pdl, a))
-
-        print('done populating limits')
-
-
-class PhysicalDeviceSparseProperties(object):
-    def __init__(self, pdsp=vk.physical_device_sparse_properties):
-        if not isinstance(pdsp, vk.physical_device_sparse_properties):
-            raise TypeError(
-                'Please pass an object of type vulkan.physical_device_sparse_properties')
-
-        self._pdl = pdsp
-
-        for a in dir(pdsp):
-            if not a.startswith('__'):
-                setattr(self, a, getattr(pdsp, a))
+#         for a in dir(pdp):
+#             if not a.startswith('__'):
+#                 if a == 'limits':
+#                     setattr(self, a, PhysicalDeviceLimits(getattr(pdp, a)))
+#                 elif a == 'sparse_properties':
+#                     setattr(self, a, PhysicalDeviceSparseProperties(
+#                         getattr(pdp, a)))
+#                 else:
+#                     setattr(self, a, getattr(pdp, a))
 
 
-class PhysicalDeviceMemoryProperties(object):
-    def __init__(self, pdmp=vk.physical_device_memory_properties):
-        if not isinstance(pdmp, vk.physical_device_memory_properties):
-            raise TypeError(
-                'Please pass an object of type vulkan.physical_device_memory_properties')
+# class PhysicalDeviceLimits(object):
+#     def __init__(self, pdl=vk.physical_device_limits):
+#         if not isinstance(pdl, vk.physical_device_limits):
+#             raise TypeError(
+#                 'Please pass an object of type vulkan.physical_device_limits')
 
-        self._pdmp = pdmp
+#         self._pdl = pdl
 
-        for a in dir(pdmp):
-            if not a.startswith('__'):
-                setattr(self, a, getattr(pdmp, a))
+#         length = len(dir(pdl))
+
+#         for idx, a in enumerate(dir(pdl)):
+#             if not a.startswith('__'):
+#                 setattr(self, a, getattr(pdl, a))
+
+
+# class PhysicalDeviceSparseProperties(object):
+#     def __init__(self, pdsp=vk.physical_device_sparse_properties):
+#         if not isinstance(pdsp, vk.physical_device_sparse_properties):
+#             raise TypeError(
+#                 'Please pass an object of type vulkan.physical_device_sparse_properties')
+
+#         self._pdl = pdsp
+
+#         for a in dir(pdsp):
+#             if not a.startswith('__'):
+#                 setattr(self, a, getattr(pdsp, a))
+
+
+# class PhysicalDeviceMemoryProperties(object):
+#     def __init__(self, pdmp=vk.physical_device_memory_properties):
+#         if not isinstance(pdmp, vk.physical_device_memory_properties):
+#             raise TypeError(
+#                 'Please pass an object of type vulkan.physical_device_memory_properties')
+
+#         self._pdmp = pdmp
+
+#         for a in dir(pdmp):
+#             if not a.startswith('__'):
+#                 setattr(self, a, getattr(pdmp, a))
+
+
+# class MemoryType(object):
+#     def __init__(self, mt=vk.memory_type):
+#         if not isinstance(mt, vk.memory_type):
+#             raise TypeError('Please pass an object of type vulkan.memory_type')
+
+#         self._mt = mt
+
+#         for a in dir(mt):
+#             setattr(self, a, getattr(mt, a))
+
+
+# class MemoryHeap(object):
+#     def __init__(self, mh=vk.memory_heap):
+#         if not isinstance(mh, vk.memory_heap):
+#             raise TypeError('Please pass an object of type vulkan.memory_heap')
+
+#         self._mh = mh
+
+#         for a in dir(mh):
+#             if not a.startswith('__'):
+#                 setattr(self, a, getattr(mh, a))
 
 
 def create_instance(instance_create_info=InstanceCreateInfo):
