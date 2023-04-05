@@ -36,7 +36,7 @@ PyObject *add_vk_phy_dev_sparse_props_to_module(PyObject *mod)
 
     Py_INCREF(&vk_phy_dev_sparse_props_type);
 
-    if (PyModule_AddObject(mod, "physical_device_sparse_props", (PyObject *)&vk_phy_dev_sparse_props_type) < 0)
+    if (PyModule_AddObject(mod, "physical_device_sparse_properties", (PyObject *)&vk_phy_dev_sparse_props_type) < 0)
     {
         PyErr_SetString(PyExc_TypeError, "Could not add phy_dev_sparse_props_type to module");
         goto shutdown;

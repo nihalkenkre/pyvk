@@ -28,6 +28,34 @@ class Result(Enum):
     ERROR_INCOMPATIBLE_DRIVER = -9
 
 
+class MemoryPropertyFlagBits(Enum):
+    DEVICE_LOCAL_BIT = 0x00000001
+    HOST_VISIBLE_BIT = 0x00000002
+    HOST_COHERENT_BIT = 0x00000004
+    HOST_CACHED_BIT = 0x00000008
+    LAZILY_ALLOCATED_BIT = 0x00000010
+    PROTECTED_BIT = 0x00000020
+    DEVICE_COHERENT_BIT_AMD = 0x00000040
+    DEVICE_UNCACHED_BIT_AMD = 0x00000080
+    RDMA_CAPABLE_BIT_NV = 0x00000100
+
+
+class MemoryHeapFlagBits(Enum):
+    DEVICE_LOCAL_BIT = 0x00000001
+    MULTI_INSTANCE_BIT = 0x00000002
+    MULTI_INSTANCE_BIT_KHR = MULTI_INSTANCE_BIT
+
+
+class SampleCountFlagBits(Enum):
+    COUNT_1_BIT = 0x00000001
+    COUNT_2_BIT = 0x00000002
+    COUNT_4_BIT = 0x00000004
+    COUNT_8_BIT = 0x00000008
+    COUNT_16_BIT = 0x00000010
+    COUNT_32_BIT = 0x00000020
+    COUNT_64_BIT = 0x00000040
+
+
 class ApplicationInfo(vk.application_info):
     def __new__(cls, s_type=StructureType, p_next=None,
                 app_name='', app_ver=(1, 0, 0, 0),
@@ -157,6 +185,12 @@ class PhysicalDevice(object):
     def get_features(self):
         return PhysicalDeviceFeatures(self._pd.get_features())
 
+    def get_properties(self):
+        return PhysicalDeviceProperties(self._pd.get_properties())
+
+    def get_memory_properties(self):
+        return PhysicalDeviceMemoryProperties(self._pd.get_memory_properties())
+
 
 class PhysicalDeviceFeatures(object):
     def __init__(self, pdf=vk.physical_device_features) -> None:
@@ -165,6 +199,75 @@ class PhysicalDeviceFeatures(object):
                 'Please pass an object of type vulkan.physical_device_features')
 
         self._pdf = pdf
+
+        for a in dir(pdf):
+            if not a.startswith('__'):
+                setattr(self, a, getattr(pdf, a))
+
+
+class PhysicalDeviceProperties(object):
+    def __init__(self, pdp=vk.physical_device_properties):
+        if not isinstance(pdp, vk.physical_device_properties):
+            raise TypeError(
+                'Please pass an object of type vulkan.physical_device_properties')
+
+        self._pdp = pdp
+
+        for a in dir(pdp):
+            if not a.startswith('__'):
+                if a == 'limits':
+                    print('populating limits')
+                    setattr(self, a, PhysicalDeviceLimits(getattr(pdp, a)))
+                elif a == 'sparse_properties':
+                    print('populating sparse_properties')
+                    setattr(self, a, PhysicalDeviceSparseProperties(
+                        getattr(pdp, a)))
+                else:
+                    setattr(self, a, getattr(pdp, a))
+
+
+class PhysicalDeviceLimits(object):
+    def __init__(self, pdl=vk.physical_device_limits):
+        if not isinstance(pdl, vk.physical_device_limits):
+            raise TypeError(
+                'Please pass an object of type vulkan.physical_device_limits')
+
+        self._pdl = pdl
+
+        length = len(dir(pdl))
+
+        for idx, a in enumerate(dir(pdl)):
+            if not a.startswith('__'):
+                print(a, getattr(pdl, a), idx, length)
+                setattr(self, a, getattr(pdl, a))
+
+        print('done populating limits')
+
+
+class PhysicalDeviceSparseProperties(object):
+    def __init__(self, pdsp=vk.physical_device_sparse_properties):
+        if not isinstance(pdsp, vk.physical_device_sparse_properties):
+            raise TypeError(
+                'Please pass an object of type vulkan.physical_device_sparse_properties')
+
+        self._pdl = pdsp
+
+        for a in dir(pdsp):
+            if not a.startswith('__'):
+                setattr(self, a, getattr(pdsp, a))
+
+
+class PhysicalDeviceMemoryProperties(object):
+    def __init__(self, pdmp=vk.physical_device_memory_properties):
+        if not isinstance(pdmp, vk.physical_device_memory_properties):
+            raise TypeError(
+                'Please pass an object of type vulkan.physical_device_memory_properties')
+
+        self._pdmp = pdmp
+
+        for a in dir(pdmp):
+            if not a.startswith('__'):
+                setattr(self, a, getattr(pdmp, a))
 
 
 def create_instance(instance_create_info=InstanceCreateInfo):

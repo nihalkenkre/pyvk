@@ -118,7 +118,7 @@ PyMemberDef vk_phy_dev_limits_members[] = {
     {"max_sample_mask_words", T_UINT, offsetof(vk_phy_dev_limits, max_sample_mask_words), 1, "Max Sample Mask Words"},
 
     {"timestamp_compute_and_graphics", T_BOOL, offsetof(vk_phy_dev_limits, timestamp_compute_and_graphics), 1, "Timestamp Compute and Graphics"},
-    {"timestamp_period", T_BOOL, offsetof(vk_phy_dev_limits, timestamp_period), 1, "Timestamp Period"},
+    {"timestamp_period", T_FLOAT, offsetof(vk_phy_dev_limits, timestamp_period), 1, "Timestamp Period"},
 
     {"max_clip_distances", T_UINT, offsetof(vk_phy_dev_limits, max_clip_distances), 1, "Max Clip Distances"},
     {"max_cull_distances", T_UINT, offsetof(vk_phy_dev_limits, max_cull_distances), 1, "Max Cull Distances"},
