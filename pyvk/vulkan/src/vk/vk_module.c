@@ -38,13 +38,6 @@ PyObject *vk_create_instance(PyObject *self, PyObject *args, PyObject *kwds)
         goto shutdown;
     }
 
-    if (PyObject_TypeCheck(instance_ci_obj, &vk_instance_ci_type) == 0)
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass object of type vulkan.instance_create_info");
-
-        goto shutdown;
-    }
-
     vk_instance_ci *ci_obj = (vk_instance_ci *)instance_ci_obj;
 
     vk_instance *inst = PyObject_New(vk_instance, &vk_instance_type);
@@ -441,12 +434,12 @@ PyMODINIT_FUNC PyInit_vulkan(void)
         goto shutdown;
     }
 
-    mod = add_enums_to_module(mod);
+    /*mod = add_enums_to_module(mod);
 
     if (mod == NULL)
     {
         goto shutdown;
-    }
+    }*/
 
     return mod;
 

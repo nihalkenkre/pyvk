@@ -17,7 +17,7 @@ typedef struct vk_phy_dev_features
 
     bool geometry_shader;
     bool tessellation_shader;
-    
+
     bool sample_rate_shading;
     bool dual_src_blend;
     bool logic_op;
@@ -61,7 +61,7 @@ typedef struct vk_phy_dev_features
     bool shader_float_64;
     bool shader_int_64;
     bool shader_int_16;
-    
+
     bool shader_resource_residency;
     bool shader_resource_min_lod;
 

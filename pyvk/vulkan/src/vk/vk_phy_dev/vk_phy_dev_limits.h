@@ -20,7 +20,7 @@ typedef struct vk_phy_dev_limits
     uint32_t max_texel_buffer_elements;
     uint32_t max_uniform_buffer_range;
     uint32_t max_storage_buffer_range;
-    
+
     uint32_t max_push_constants_size;
 
     uint32_t max_memory_allocation_count;
@@ -46,7 +46,7 @@ typedef struct vk_phy_dev_limits
     uint32_t max_descriptor_set_sampled_images;
     uint32_t max_descriptor_set_storage_images;
     uint32_t max_descriptor_set_input_attachments;
-    
+
     uint32_t max_vertex_input_attributes;
     uint32_t max_vertex_input_bindings;
     uint32_t max_vertex_input_attribute_offset;
@@ -61,7 +61,7 @@ typedef struct vk_phy_dev_limits
     uint32_t max_tessellation_control_total_output_components;
     uint32_t max_tessellation_evaluation_input_components;
     uint32_t max_tessellation_evaluation_output_components;
-    
+
     uint32_t max_geometry_shader_invocations;
     uint32_t max_geometry_input_components;
     uint32_t max_geometry_output_components;
@@ -74,9 +74,9 @@ typedef struct vk_phy_dev_limits
     uint32_t max_fragment_combined_output_resources;
 
     uint32_t max_compute_shared_memory_size;
-    PyObject* max_compute_work_group_count;
+    PyObject *max_compute_work_group_count;
     uint32_t max_compute_work_group_invocations;
-    PyObject* max_compute_work_group_size;
+    PyObject *max_compute_work_group_size;
 
     uint32_t sub_pixel_precision_bits;
     uint32_t sub_texel_precision_bits;
@@ -90,9 +90,9 @@ typedef struct vk_phy_dev_limits
     float max_sampler_anisotropy;
 
     uint32_t max_viewports;
-    PyObject* max_viewport_dimensions;
+    PyObject *max_viewport_dimensions;
 
-    PyObject* viewport_bounds_range;
+    PyObject *viewport_bounds_range;
     uint32_t viewport_sub_pixel_bits;
 
     size_t min_memory_map_alignment;
@@ -138,8 +138,8 @@ typedef struct vk_phy_dev_limits
 
     uint32_t discrete_queue_properties;
 
-    PyObject* point_size_range;
-    PyObject* line_width_range;
+    PyObject *point_size_range;
+    PyObject *line_width_range;
 
     float point_size_granularity;
     float line_width_granularity;
@@ -158,6 +158,6 @@ typedef struct vk_phy_dev_limits
 PyMemberDef vk_phy_dev_limits_members[];
 PyTypeObject vk_phy_dev_limits_type;
 
-PyObject* add_vk_phy_dev_limits_to_module(PyObject* mod);
+PyObject *add_vk_phy_dev_limits_to_module(PyObject *mod);
 
 #endif // VK_PHY_DEV_LIMITS

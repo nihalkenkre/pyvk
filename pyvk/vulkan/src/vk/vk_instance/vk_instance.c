@@ -18,7 +18,7 @@ PyObject *vk_instance_get_phy_devs(PyObject *self)
     {
         goto shutdown;
     }
-    VkPhysicalDevice *phy_devs = (VkPhysicalDevice *)PyMem_Malloc(sizeof(VkPhysicalDevice) * phy_dev_count);
+    VkPhysicalDevice *phy_devs = (VkPhysicalDevice *)malloc(sizeof(VkPhysicalDevice) * phy_dev_count);
 
     result = vkEnumeratePhysicalDevices(inst->instance, &phy_dev_count, phy_devs);
     if (result != VK_SUCCESS)
@@ -36,7 +36,7 @@ PyObject *vk_instance_get_phy_devs(PyObject *self)
         PyList_SetItem(phy_dev_list, phy_dev_idx, phy_dev);
     }
 
-    PyMem_Free(phy_devs);
+    free(phy_devs);
     {
         PyObject *return_obj = PyTuple_New(2);
         PyTuple_SetItem(return_obj, 0, phy_dev_list);
@@ -46,13 +46,14 @@ PyObject *vk_instance_get_phy_devs(PyObject *self)
     }
 
 shutdown:
-{
-    PyObject *return_obj = PyTuple_New(2);
-    PyTuple_SetItem(return_obj, 0, Py_None);
-    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+    free(phy_devs);
+    {
+        PyObject *return_obj = PyTuple_New(2);
+        PyTuple_SetItem(return_obj, 0, Py_None);
+        PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
 
-    return return_obj;
-}
+        return return_obj;
+    }
 }
 
 PyObject *vk_instance_create_surface(PyObject *self, PyObject *args)
@@ -135,6 +136,7 @@ PyTypeObject vk_instance_type = {
     .tp_doc = PyDoc_STR("Vulkan Instance Docs"),
     .tp_methods = vk_instance_methods,
     .tp_dealloc = vk_instance_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
 };
 
 PyObject *add_vk_instance_to_module(PyObject *mod)
