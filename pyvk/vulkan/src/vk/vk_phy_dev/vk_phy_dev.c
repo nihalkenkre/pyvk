@@ -10,6 +10,7 @@
 #include "vk_dev.h"
 #include "vk_surface.h"
 #include "vk_surface_caps_khr.h"
+#include "vk_surface_fmt_khr.h"
 
 #include "log.h"
 
@@ -282,19 +283,19 @@ PyObject *create_phy_dev_surf_caps_khr_obj(const VkSurfaceCapabilitiesKHR *caps)
     caps_obj->min_image_count = caps->minImageCount;
     caps_obj->max_image_count = caps->maxImageCount;
 
-    PyObject* cur_ext_obj = PyTuple_New(2);
+    PyObject *cur_ext_obj = PyTuple_New(2);
     PyTuple_SetItem(cur_ext_obj, 0, PyLong_FromLong(caps->currentExtent.width));
     PyTuple_SetItem(cur_ext_obj, 1, PyLong_FromLong(caps->currentExtent.height));
 
     caps_obj->current_extent = cur_ext_obj;
 
-    PyObject* min_ext_obj = PyTuple_New(2);
+    PyObject *min_ext_obj = PyTuple_New(2);
     PyTuple_SetItem(min_ext_obj, 0, PyLong_FromLong(caps->minImageExtent.width));
     PyTuple_SetItem(min_ext_obj, 1, PyLong_FromLong(caps->minImageExtent.height));
 
     caps_obj->min_image_extent = min_ext_obj;
 
-    PyObject* max_ext_obj = PyTuple_New(2);
+    PyObject *max_ext_obj = PyTuple_New(2);
     PyTuple_SetItem(max_ext_obj, 0, PyLong_FromLong(caps->maxImageExtent.width));
     PyTuple_SetItem(max_ext_obj, 1, PyLong_FromLong(caps->maxImageExtent.height));
 
@@ -307,8 +308,27 @@ PyObject *create_phy_dev_surf_caps_khr_obj(const VkSurfaceCapabilitiesKHR *caps)
     caps_obj->supported_usage_flags = caps->supportedUsageFlags;
 
     caps_obj->caps = *caps;
-    
+
     return (PyObject *)caps_obj;
+}
+
+PyObject *create_phy_dev_surf_fmts_khr_obj(const uint32_t fmt_count, const VkSurfaceFormatKHR *fmts)
+{
+    DEBUG_LOG("create_phy_dev_surf_fmts_khr_obj\n");
+
+    PyObject *fmts_obj = PyList_New(fmt_count);
+
+    for (uint32_t fmt_idx = 0; fmt_idx < fmt_count; ++fmt_idx)
+    {
+        vk_surface_fmt_khr *fmt_obj = PyObject_New(vk_surface_fmt_khr, &vk_surface_fmt_khr_type);
+
+        fmt_obj->color_space = (fmts + fmt_idx)->colorSpace;
+        fmt_obj->format = (fmts + fmt_idx)->format;
+
+        PyList_SetItem(fmts_obj, fmt_idx, fmt_obj);
+    }
+
+    return fmts_obj;
 }
 
 PyObject *vk_phy_dev_get_features(PyObject *self)
@@ -414,6 +434,34 @@ PyObject *vk_phy_dev_get_surface_caps_khr(PyObject *self, PyObject *args)
 
     return return_obj;
 }
+PyObject *vk_phy_dev_get_surface_fmts_khr(PyObject *self, PyObject *args)
+{
+    DEBUG_LOG("vk_phy_dev_get_surface_fmts_khr\n");
+
+    PyObject *surf_obj = NULL;
+
+    PyArg_Parse(args, "O", &surf_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    uint32_t fmt_count = 0;
+    VkResult result = vkGetPhysicalDeviceSurfaceFormatsKHR(((vk_phy_dev *)self)->phy_dev, ((vk_surface *)surf_obj)->surface, &fmt_count, NULL);
+
+    VkSurfaceFormatKHR *fmts = (VkSurfaceFormatKHR *)malloc(sizeof(VkSurfaceFormatKHR) * fmt_count);
+
+    result = vkGetPhysicalDeviceSurfaceFormatsKHR(((vk_phy_dev *)self)->phy_dev, ((vk_surface *)surf_obj)->surface, &fmt_count, fmts);
+
+    PyObject *surface_fmts_obj = create_phy_dev_surf_fmts_khr_obj(fmt_count, fmts);
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, surface_fmts_obj);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    free(fmts);
+    return return_obj;
+}
 
 PyObject *vk_phy_dev_create_dev(vk_phy_dev *self, PyObject *args)
 {
@@ -487,6 +535,7 @@ PyMethodDef vk_phy_dev_methods[] = {
     {"get_properties", (PyCFunction)vk_phy_dev_get_props, METH_NOARGS, NULL},
     {"get_memory_properties", (PyCFunction)vk_phy_dev_get_mem_props, METH_NOARGS, NULL},
     {"get_surface_capabilities_khr", (PyCFunction)vk_phy_dev_get_surface_caps_khr, METH_O, NULL},
+    {"get_surface_formats_khr", (PyCFunction)vk_phy_dev_get_surface_fmts_khr, METH_O, NULL},
     {"create_device", (PyCFunction)vk_phy_dev_create_dev, METH_O, NULL},
     {"destroy_device", (PyCFunction)vk_phy_dev_destroy_dev, METH_O, NULL},
     {NULL},

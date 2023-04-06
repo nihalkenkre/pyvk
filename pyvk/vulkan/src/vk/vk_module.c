@@ -21,6 +21,7 @@
 #include "vk_surface/vk_surface.h"
 #include "vk_surface/vk_surface_ci.h"
 #include "vk_surface/vk_surface_caps_khr.h"
+#include "vk_surface/vk_surface_fmt_khr.h"
 #include "vk_dev/vk_dev_q_ci.h"
 #include "vk_dev/vk_dev_ci.h"
 #include "vk_dev/vk_dev.h"
@@ -401,6 +402,13 @@ PyMODINIT_FUNC PyInit_vulkan(void)
     }
 
     mod = add_vk_surface_caps_khr_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_surface_fmt_khr_to_module(mod);
 
     if (mod == NULL)
     {
