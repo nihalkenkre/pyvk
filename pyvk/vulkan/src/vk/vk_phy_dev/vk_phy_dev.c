@@ -8,6 +8,8 @@
 #include "vk_phy_dev_sparse_properties.h"
 #include "vk_dev_ci.h"
 #include "vk_dev.h"
+#include "vk_surface.h"
+#include "vk_surface_caps_khr.h"
 
 #include "log.h"
 
@@ -273,6 +275,42 @@ PyObject *create_phy_dev_features_obj(const VkPhysicalDeviceFeatures *features)
     return (PyObject *)features_obj;
 }
 
+PyObject *create_phy_dev_surf_caps_khr_obj(const VkSurfaceCapabilitiesKHR *caps)
+{
+    vk_surface_caps_khr *caps_obj = PyObject_NEW(vk_surface_caps_khr, &vk_surface_caps_khr_type);
+
+    caps_obj->min_image_count = caps->minImageCount;
+    caps_obj->max_image_count = caps->maxImageCount;
+
+    PyObject* cur_ext_obj = PyTuple_New(2);
+    PyTuple_SetItem(cur_ext_obj, 0, PyLong_FromLong(caps->currentExtent.width));
+    PyTuple_SetItem(cur_ext_obj, 1, PyLong_FromLong(caps->currentExtent.height));
+
+    caps_obj->current_extent = cur_ext_obj;
+
+    PyObject* min_ext_obj = PyTuple_New(2);
+    PyTuple_SetItem(min_ext_obj, 0, PyLong_FromLong(caps->minImageExtent.width));
+    PyTuple_SetItem(min_ext_obj, 1, PyLong_FromLong(caps->minImageExtent.height));
+
+    caps_obj->min_image_extent = min_ext_obj;
+
+    PyObject* max_ext_obj = PyTuple_New(2);
+    PyTuple_SetItem(max_ext_obj, 0, PyLong_FromLong(caps->maxImageExtent.width));
+    PyTuple_SetItem(max_ext_obj, 1, PyLong_FromLong(caps->maxImageExtent.height));
+
+    caps_obj->max_image_extent = max_ext_obj;
+
+    caps_obj->max_image_array_layers = caps->maxImageArrayLayers;
+    caps_obj->supported_transforms = caps->supportedTransforms;
+    caps_obj->current_transform = caps->currentTransform;
+    caps_obj->supported_composite_alpha = caps->supportedCompositeAlpha;
+    caps_obj->supported_usage_flags = caps->supportedUsageFlags;
+
+    caps_obj->caps = *caps;
+    
+    return (PyObject *)caps_obj;
+}
+
 PyObject *vk_phy_dev_get_features(PyObject *self)
 {
     DEBUG_LOG("vk_phy_dev_get_features\n");
@@ -353,6 +391,30 @@ PyObject *vk_phy_dev_get_mem_props(PyObject *self, PyObject *args)
     return (PyObject *)mem_props_obj;
 }
 
+PyObject *vk_phy_dev_get_surface_caps_khr(PyObject *self, PyObject *args)
+{
+    DEBUG_LOG("vk_phy_dev_get_surface_caps_khr\n");
+
+    PyObject *surf_obj = NULL;
+
+    PyArg_Parse(args, "O", &surf_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    VkSurfaceCapabilitiesKHR caps;
+    VkResult result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(((vk_phy_dev *)self)->phy_dev, ((vk_surface *)surf_obj)->surface, &caps);
+
+    PyObject *surface_caps_obj = create_phy_dev_surf_caps_khr_obj(&caps);
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, surface_caps_obj);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
+}
+
 PyObject *vk_phy_dev_create_dev(vk_phy_dev *self, PyObject *args)
 {
     DEBUG_LOG("vk_phy_dev_create_dev\n");
@@ -387,7 +449,7 @@ shutdown:
     return NULL;
 }
 
-PyObject* vk_phy_dev_destroy_dev(PyObject *self, PyObject *args)
+PyObject *vk_phy_dev_destroy_dev(PyObject *self, PyObject *args)
 {
     DEBUG_LOG("vk_phy_dev_destroy_dev\n");
     PyObject *dev = NULL;
@@ -403,10 +465,10 @@ PyObject* vk_phy_dev_destroy_dev(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_TypeError, "Please pass object of vulkan.device");
     }
 
-    if (((vk_dev*)dev)->device != VK_NULL_HANDLE)
+    if (((vk_dev *)dev)->device != VK_NULL_HANDLE)
     {
         DEBUG_LOG("destroying device\n");
-        vkDestroyDevice(((vk_dev*)dev)->device, NULL);
+        vkDestroyDevice(((vk_dev *)dev)->device, NULL);
     }
 
     Py_XDECREF(dev);
@@ -424,6 +486,7 @@ PyMethodDef vk_phy_dev_methods[] = {
     {"get_features", (PyCFunction)vk_phy_dev_get_features, METH_NOARGS, NULL},
     {"get_properties", (PyCFunction)vk_phy_dev_get_props, METH_NOARGS, NULL},
     {"get_memory_properties", (PyCFunction)vk_phy_dev_get_mem_props, METH_NOARGS, NULL},
+    {"get_surface_capabilities_khr", (PyCFunction)vk_phy_dev_get_surface_caps_khr, METH_O, NULL},
     {"create_device", (PyCFunction)vk_phy_dev_create_dev, METH_O, NULL},
     {"destroy_device", (PyCFunction)vk_phy_dev_destroy_dev, METH_O, NULL},
     {NULL},

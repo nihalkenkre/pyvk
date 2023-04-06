@@ -1,5 +1,7 @@
 #include "vk_surface_ci.h"
 
+#include <structmember.h>
+
 #include "log.h"
 
 PyMemberDef vk_surface_ci_members[] = {
@@ -76,6 +78,7 @@ PyTypeObject vk_surface_ci_type = {
     .tp_basicsize = sizeof(vk_surface_ci),
     .tp_doc = PyDoc_STR("Vulkan Surface Create Info Docs"),
     .tp_members = vk_surface_ci_members,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_dealloc = vk_surface_ci_dealloc,
     .tp_new = PyType_GenericNew,
     .tp_init = vk_surface_ci_init,

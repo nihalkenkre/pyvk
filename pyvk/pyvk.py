@@ -6,6 +6,7 @@ from enum import Enum
 class StructureType(Enum):
     APPLICATION_INFO = 0
     INSTANCE_CREATE_INFO = 1
+    WIN32_SURFACE_CREATE_INFO_KHR = 1000009000
 
 
 class ExtensionNames(Enum):
@@ -14,7 +15,7 @@ class ExtensionNames(Enum):
 
 
 class InstanceCreateFlagBits(Enum):
-    NULL = 0x00000000
+    NONE = 0x00000000
     INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR = 0x00000001
 
 
@@ -54,6 +55,10 @@ class SampleCountFlagBits(Enum):
     COUNT_16_BIT = 0x00000010
     COUNT_32_BIT = 0x00000020
     COUNT_64_BIT = 0x00000040
+
+
+class Win32SurfaceCreateFlagsKHR(Enum):
+    NONE = 0x00000000
 
 
 class ApplicationInfo(vk.application_info):
@@ -119,7 +124,9 @@ class ApplicationInfo(vk.application_info):
                 raise TypeError(
                     'Please pass an integer value for patch for api_ver')
 
-        return super(ApplicationInfo, cls).__new__(cls)
+        return super(ApplicationInfo, cls).__new__(cls, s_type, p_next,
+                                                   app_name, app_ver, engine_name,
+                                                   engine_ver, api_ver)
 
     def __init__(self, s_type=StructureType, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
@@ -134,31 +141,61 @@ class InstanceCreateInfo(vk.instance_create_info):
 
         if not isinstance(s_type, StructureType):
             raise TypeError(
-                'Please pass a value from the pyvk.StructureType enum class')
+                'Please pass a value from the pyvk.StructureType enum class for s_type')
 
         if not isinstance(enabled_layers, list):
-            raise TypeError('Please pass a list of layer names')
+            raise TypeError(
+                'Please pass a list of layer names for enabled_layers')
 
         for layer in enabled_layers:
             if not isinstance(layer, str):
                 raise TypeError('Please pass a str as layer name')
 
         if not isinstance(enabled_extensions, list):
-            raise TypeError('Please pass a list of extension names')
+            raise TypeError(
+                'Please pass a list of extension names for enabled_extensions')
 
         for extension in enabled_extensions:
-            raise TypeError('Please pass a str as extension name')
+            if not isinstance(extension, str):
+                raise TypeError('Please pass a str as extension name')
 
-        return super(InstanceCreateInfo, cls).__new__(cls)
+        return super(InstanceCreateInfo, cls).__new__(cls, s_type, p_next,
+                                                      flags, app_info,
+                                                      enabled_layers, enabled_extensions)
 
     def __init__(self, s_type=StructureType, p_next=None,
-                 flags=InstanceCreateFlagBits, app_info=None, enabled_layers=[], enabled_extensions=[]):
+                 flags=InstanceCreateFlagBits, app_info=None,
+                 enabled_layers=[], enabled_extensions=[]):
+
         super(InstanceCreateInfo, self).__init__(s_type.value, p_next,
-                                                 flags.value, app_info, enabled_layers, enabled_extensions)
+                                                 flags.value, app_info,
+                                                 enabled_layers, enabled_extensions)
+
+
+class Win32SurfaceCreateInfo(vk.surface_create_info):
+    def __new__(cls, s_type=StructureType, p_next=None,
+                flags=Win32SurfaceCreateFlagsKHR, h_wnd=int):
+        if not isinstance(s_type, StructureType):
+            raise TypeError(
+                'Please pass a value from the pyvk.StructureType enum class for s_type')
+
+        if p_next is not None:
+            raise TypeError('Please pass None for p_next')
+
+        if not isinstance(h_wnd, int):
+            raise TypeError('Please pass object of type int/long for h_wnd')
+
+        return super(Win32SurfaceCreateInfo, cls).__new__(cls, s_type, p_next, flags, h_wnd)
+
+    def __init__(self, s_type=StructureType, p_next=None,
+                 flags=Win32SurfaceCreateFlagsKHR, h_wnd=int):
+
+        super(Win32SurfaceCreateInfo, self).__init__(s_type.value, p_next,
+                                                     flags.value, h_wnd)
 
 
 class Instance(object):
-    def __init__(self, i=vk.instance) -> None:
+    def __init__(self, i=vk.instance):
         if not isinstance(i, vk.instance):
             raise TypeError('Please pass an object of type vulkan.instance')
 
@@ -172,6 +209,22 @@ class Instance(object):
         for r in Result:
             if result == r.value:
                 return ret_pds, r
+
+    def create_surface(self, surface_create_info=Win32SurfaceCreateInfo):
+        if not isinstance(surface_create_info, Win32SurfaceCreateInfo):
+            raise TypeError(
+                'Please pass an object of type vulkan.surface_create_info')
+
+        s, result = self._i.create_surface(surface_create_info)
+        for r in Result:
+            if result == r.value:
+                return s, r
+
+    def destroy_surface(self, surface=vk.surface):
+        if not isinstance(surface, vk.surface):
+            raise TypeError('Please pass an object of type vulkan.surface')
+
+        self._i.destroy_surface(surface)
 
 
 class PhysicalDevice(object):
@@ -191,101 +244,15 @@ class PhysicalDevice(object):
     def get_memory_properties(self):
         return self._pd.get_memory_properties()
 
+    def get_surface_capabilities_khr(self, surface=vk.surface):
+        if not isinstance(surface, vk.surface):
+            raise TypeError('Please pass an object of type vulkan.surface')
 
-# class PhysicalDeviceFeatures(object):
-#     def __init__(self, pdf=vk.physical_device_features) -> None:
-#         if not isinstance(pdf, vk.physical_device_features):
-#             raise TypeError(
-#                 'Please pass an object of type vulkan.physical_device_features')
+        caps, result = self._pd.get_surface_capabilities_khr(surface)
 
-#         self._pdf = pdf
-
-#         for a in dir(pdf):
-#             if not a.startswith('__'):
-#                 setattr(self, a, getattr(pdf, a))
-
-
-# class PhysicalDeviceProperties(object):
-#     def __init__(self, pdp=vk.physical_device_properties):
-#         if not isinstance(pdp, vk.physical_device_properties):
-#             raise TypeError(
-#                 'Please pass an object of type vulkan.physical_device_properties')
-
-#         self._pdp = pdp
-
-#         for a in dir(pdp):
-#             if not a.startswith('__'):
-#                 if a == 'limits':
-#                     setattr(self, a, PhysicalDeviceLimits(getattr(pdp, a)))
-#                 elif a == 'sparse_properties':
-#                     setattr(self, a, PhysicalDeviceSparseProperties(
-#                         getattr(pdp, a)))
-#                 else:
-#                     setattr(self, a, getattr(pdp, a))
-
-
-# class PhysicalDeviceLimits(object):
-#     def __init__(self, pdl=vk.physical_device_limits):
-#         if not isinstance(pdl, vk.physical_device_limits):
-#             raise TypeError(
-#                 'Please pass an object of type vulkan.physical_device_limits')
-
-#         self._pdl = pdl
-
-#         length = len(dir(pdl))
-
-#         for idx, a in enumerate(dir(pdl)):
-#             if not a.startswith('__'):
-#                 setattr(self, a, getattr(pdl, a))
-
-
-# class PhysicalDeviceSparseProperties(object):
-#     def __init__(self, pdsp=vk.physical_device_sparse_properties):
-#         if not isinstance(pdsp, vk.physical_device_sparse_properties):
-#             raise TypeError(
-#                 'Please pass an object of type vulkan.physical_device_sparse_properties')
-
-#         self._pdl = pdsp
-
-#         for a in dir(pdsp):
-#             if not a.startswith('__'):
-#                 setattr(self, a, getattr(pdsp, a))
-
-
-# class PhysicalDeviceMemoryProperties(object):
-#     def __init__(self, pdmp=vk.physical_device_memory_properties):
-#         if not isinstance(pdmp, vk.physical_device_memory_properties):
-#             raise TypeError(
-#                 'Please pass an object of type vulkan.physical_device_memory_properties')
-
-#         self._pdmp = pdmp
-
-#         for a in dir(pdmp):
-#             if not a.startswith('__'):
-#                 setattr(self, a, getattr(pdmp, a))
-
-
-# class MemoryType(object):
-#     def __init__(self, mt=vk.memory_type):
-#         if not isinstance(mt, vk.memory_type):
-#             raise TypeError('Please pass an object of type vulkan.memory_type')
-
-#         self._mt = mt
-
-#         for a in dir(mt):
-#             setattr(self, a, getattr(mt, a))
-
-
-# class MemoryHeap(object):
-#     def __init__(self, mh=vk.memory_heap):
-#         if not isinstance(mh, vk.memory_heap):
-#             raise TypeError('Please pass an object of type vulkan.memory_heap')
-
-#         self._mh = mh
-
-#         for a in dir(mh):
-#             if not a.startswith('__'):
-#                 setattr(self, a, getattr(mh, a))
+        for r in Result:
+            if result == r.value:
+                return caps, r
 
 
 def create_instance(instance_create_info=InstanceCreateInfo):
@@ -305,3 +272,15 @@ def destroy_instance(instance=Instance):
         raise TypeError('Please pass an object type pyvk.Instance')
 
     vk.destroy_instance(instance._i)
+
+# THIS IS LEFT HERE AS A REFERENCE FOR FUTURE
+# class MemoryHeap(object):
+#     def __init__(self, mh=vk.memory_heap):
+#         if not isinstance(mh, vk.memory_heap):
+#             raise TypeError('Please pass an object of type vulkan.memory_heap')
+
+#         self._mh = mh
+
+#         for a in dir(mh):
+#             if not a.startswith('__'):
+#                 setattr(self, a, getattr(mh, a))

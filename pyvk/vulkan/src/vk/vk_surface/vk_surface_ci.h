@@ -2,7 +2,6 @@
 #define VK_SURFACE_CI
 
 #include <Python.h>
-#include <structmember.h>
 
 #include <Windows.h>
 #include <vulkan/vulkan.h>
@@ -21,7 +20,6 @@ typedef struct vk_surface_ci
 
 PyObject *add_vk_surface_ci_to_module(PyObject *mod);
 
-PyMemberDef vk_surface_ci_members[];
 PyTypeObject vk_surface_ci_type;
 
 #endif

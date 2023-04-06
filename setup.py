@@ -25,6 +25,7 @@ setup(
                 './pyvk/vulkan/src/vk/vk_dev/vk_dev_q_ci.c',
                 './pyvk/vulkan/src/vk/vk_dev/vk_dev_ci.c',
                 './pyvk/vulkan/src/vk/vk_dev/vk_dev.c',
+                './pyvk/vulkan/src/vk/vk_surface/vk_surface_caps_khr.c',
                 './pyvk/vulkan/src/vk/vk_surface/vk_surface_ci.c',
                 './pyvk/vulkan/src/vk/vk_surface/vk_surface.c',
                 './pyvk/vulkan/src/vk/vk_swapchain/vk_swapchain_ci.c',
