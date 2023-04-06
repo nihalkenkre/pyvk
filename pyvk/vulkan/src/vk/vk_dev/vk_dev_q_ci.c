@@ -130,6 +130,7 @@ PyTypeObject vk_dev_q_ci_type = {
         .tp_name = "vulkan.device_queue_create_info",
     .tp_basicsize = sizeof(vk_dev_q_ci),
     .tp_doc = PyDoc_STR("Vulkan Device Queue Create Info Docs"),
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_members = vk_dev_q_ci_members,
     .tp_dealloc = vk_dev_q_ci_dealloc,
     .tp_free = vk_dev_q_ci_free,

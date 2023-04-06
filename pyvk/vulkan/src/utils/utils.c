@@ -59,8 +59,6 @@ void get_floats_from_list(PyObject *obj, float **values)
             if (PyFloat_Check(value_obj))
             {
                 *(*values + v_idx) = (float)PyFloat_AsDouble(value_obj);
-
-                DEBUG_LOG("priority: %f\n", *(*values + v_idx));
             }
         }
     }

@@ -320,7 +320,7 @@ PyObject *create_phy_dev_surf_fmts_khr_obj(const uint32_t fmt_count, const VkSur
 
     for (uint32_t fmt_idx = 0; fmt_idx < fmt_count; ++fmt_idx)
     {
-        vk_surface_fmt_khr *fmt_obj = PyObject_New(vk_surface_fmt_khr, &vk_surface_fmt_khr_type);
+        vk_surface_fmt_khr *fmt_obj = PyObject_NEW(vk_surface_fmt_khr, &vk_surface_fmt_khr_type);
 
         fmt_obj->color_space = (fmts + fmt_idx)->colorSpace;
         fmt_obj->format = (fmts + fmt_idx)->format;
@@ -434,6 +434,7 @@ PyObject *vk_phy_dev_get_surface_caps_khr(PyObject *self, PyObject *args)
 
     return return_obj;
 }
+
 PyObject *vk_phy_dev_get_surface_fmts_khr(PyObject *self, PyObject *args)
 {
     DEBUG_LOG("vk_phy_dev_get_surface_fmts_khr\n");
@@ -460,6 +461,40 @@ PyObject *vk_phy_dev_get_surface_fmts_khr(PyObject *self, PyObject *args)
     PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
 
     free(fmts);
+
+    return return_obj;
+}
+
+PyObject *vk_phy_dev_get_surface_present_modes_khr(PyObject *self, PyObject *args)
+{
+    DEBUG_LOG("vk_phy_dev_get_surface_present_modes_khr\n");
+
+    PyObject *surf_obj = NULL;
+
+    PyArg_Parse(args, "O", &surf_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    uint32_t pm_count = 0;
+    VkResult result = vkGetPhysicalDeviceSurfacePresentModesKHR(((vk_phy_dev *)self)->phy_dev, ((vk_surface *)surf_obj)->surface, &pm_count, NULL);
+
+    VkPresentModeKHR *pms = (VkPresentModeKHR *)malloc(sizeof(VkPresentModeKHR) * pm_count);
+    result = vkGetPhysicalDeviceSurfacePresentModesKHR(((vk_phy_dev *)self)->phy_dev, ((vk_surface *)surf_obj)->surface, &pm_count, pms);
+
+    PyObject *pms_obj = PyList_New(pm_count);
+    for (uint32_t pm_idx = 0; pm_idx < pm_count; ++pm_idx)
+    {
+        PyList_SetItem(pms_obj, pm_idx, PyLong_FromLong(pms[pm_idx]));
+    }
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, pms_obj);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    free(pms);
+
     return return_obj;
 }
 
@@ -536,6 +571,7 @@ PyMethodDef vk_phy_dev_methods[] = {
     {"get_memory_properties", (PyCFunction)vk_phy_dev_get_mem_props, METH_NOARGS, NULL},
     {"get_surface_capabilities_khr", (PyCFunction)vk_phy_dev_get_surface_caps_khr, METH_O, NULL},
     {"get_surface_formats_khr", (PyCFunction)vk_phy_dev_get_surface_fmts_khr, METH_O, NULL},
+    {"get_surface_present_modes_khr", (PyCFunction)vk_phy_dev_get_surface_present_modes_khr, METH_O, NULL},
     {"create_device", (PyCFunction)vk_phy_dev_create_dev, METH_O, NULL},
     {"destroy_device", (PyCFunction)vk_phy_dev_destroy_dev, METH_O, NULL},
     {NULL},
