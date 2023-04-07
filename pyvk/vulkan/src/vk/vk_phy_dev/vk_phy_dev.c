@@ -548,12 +548,6 @@ PyObject *vk_phy_dev_destroy_dev(PyObject *self, PyObject *args)
     return Py_None;
 }
 
-void vk_phy_dev_dealloc(PyObject *self)
-{
-    DEBUG_LOG("vk_phy_dev_dealloc\n");
-    Py_TYPE(self)->tp_free(self);
-}
-
 PyMethodDef vk_phy_dev_methods[] = {
     {"get_features", (PyCFunction)vk_phy_dev_get_features, METH_NOARGS, NULL},
     {"get_properties", (PyCFunction)vk_phy_dev_get_props, METH_NOARGS, NULL},
@@ -572,7 +566,6 @@ PyTypeObject vk_phy_dev_type = {
     .tp_basicsize = sizeof(vk_phy_dev),
     .tp_doc = PyDoc_STR("Vulkan Physical Device Docs"),
     .tp_methods = vk_phy_dev_methods,
-    .tp_dealloc = vk_phy_dev_dealloc,
 };
 
 PyObject *add_vk_phy_dev_to_module(PyObject *mod)

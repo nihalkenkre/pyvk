@@ -101,12 +101,6 @@ PyObject *vk_instance_destroy_surface(PyObject *self, PyObject *args)
     return Py_None;
 }
 
-void vk_instance_dealloc(PyObject *self)
-{
-    DEBUG_LOG("vk_instance_dealloc\n");
-    Py_TYPE(self)->tp_free(self);
-}
-
 PyMethodDef vk_instance_methods[] = {
     {"get_physical_devices", (PyCFunction)vk_instance_get_phy_devs, METH_NOARGS, NULL},
     {"create_surface", (PyCFunction)vk_instance_create_surface, METH_O, NULL},
@@ -120,7 +114,6 @@ PyTypeObject vk_instance_type = {
     .tp_basicsize = sizeof(vk_instance),
     .tp_doc = PyDoc_STR("Vulkan Instance Docs"),
     .tp_methods = vk_instance_methods,
-    .tp_dealloc = vk_instance_dealloc,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
 };
 

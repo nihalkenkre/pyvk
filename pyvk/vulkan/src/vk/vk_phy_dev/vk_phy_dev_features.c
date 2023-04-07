@@ -71,18 +71,12 @@ PyMemberDef vk_phy_dev_features_members[] = {
     {NULL},
 };
 
-void vk_phy_dev_features_dealloc(vk_phy_dev_features *self)
-{
-    Py_TYPE((PyObject *)self)->tp_free((PyObject *)self);
-}
-
 PyTypeObject vk_phy_dev_features_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "vulkan.physical_device_features",
     .tp_basicsize = sizeof(vk_phy_dev_features),
     .tp_doc = PyDoc_STR("Vulkan Physical Device Features"),
     .tp_members = vk_phy_dev_features_members,
-    .tp_dealloc = vk_phy_dev_features_dealloc,
 };
 
 PyObject *add_vk_phy_dev_features_to_module(PyObject *mod)

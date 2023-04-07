@@ -13,9 +13,9 @@ PyMemberDef vk_instance_ci_members[] = {
     {NULL},
 };
 
-void vk_instance_ci_free(vk_instance_ci *self)
+void vk_instance_ci_dealloc(vk_instance_ci *self)
 {
-    DEBUG_LOG("vk_instance_ci_free\n");
+    DEBUG_LOG("vk_instance_ci_dealloc\n");
 
     if (self->ci.ppEnabledLayerNames)
     {
@@ -42,11 +42,6 @@ void vk_instance_ci_free(vk_instance_ci *self)
 
         free(self->ci.ppEnabledExtensionNames);
     }
-}
-
-void vk_instance_ci_dealloc(vk_instance_ci *self)
-{
-    DEBUG_LOG("vk_instance_ci_dealloc\n");
 
     if (self->p_next != Py_None)
     {
@@ -184,7 +179,6 @@ PyTypeObject vk_instance_ci_type = {
     .tp_members = vk_instance_ci_members,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_dealloc = vk_instance_ci_dealloc,
-    .tp_free = vk_instance_ci_free,
     .tp_new = PyType_GenericNew,
     .tp_init = vk_instance_ci_init,
 };

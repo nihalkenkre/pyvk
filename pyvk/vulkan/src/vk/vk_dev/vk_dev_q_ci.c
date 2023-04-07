@@ -12,19 +12,14 @@ PyMemberDef vk_dev_q_ci_members[] = {
     {NULL},
 };
 
-void vk_dev_q_ci_free(vk_dev_q_ci *self)
+void vk_dev_q_ci_dealloc(vk_dev_q_ci *self)
 {
-    DEBUG_LOG("vk_dev_q_ci_free\n");
+    DEBUG_LOG("vk_dev_q_ci_dealloc\n");
 
     if (self->ci.pQueuePriorities)
     {
         free(self->ci.pQueuePriorities);
     }
-}
-
-void vk_dev_q_ci_dealloc(vk_dev_q_ci *self)
-{
-    DEBUG_LOG("vk_dev_q_ci_dealloc\n");
 
     if (self->p_next != Py_None)
     {
@@ -110,7 +105,6 @@ PyTypeObject vk_dev_q_ci_type = {
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_members = vk_dev_q_ci_members,
     .tp_dealloc = vk_dev_q_ci_dealloc,
-    .tp_free = vk_dev_q_ci_free,
     .tp_new = PyType_GenericNew,
     .tp_init = vk_dev_q_ci_init,
 };

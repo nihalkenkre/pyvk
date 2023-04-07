@@ -7,19 +7,12 @@ PyMemberDef vk_mem_heap_members[] = {
     {NULL},
 };
 
-void vk_mem_heap_dealloc(PyObject *self)
-{
-    DEBUG_LOG("vk_mem_heap_dealloc\n");
-    Py_TYPE(self)->tp_free(self);
-}
-
 PyTypeObject vk_mem_heap_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "vulkan.memory_heap",
     .tp_basicsize = sizeof(vk_mem_heap),
     .tp_doc = PyDoc_STR("Vulkan Memory Heap Docs"),
     .tp_members = vk_mem_heap_members,
-    .tp_dealloc = vk_mem_heap_dealloc,
 };
 
 PyObject *add_vk_mem_heap_to_module(PyObject *mod)

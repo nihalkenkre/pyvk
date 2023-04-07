@@ -6,19 +6,12 @@ PyMemberDef vk_mem_type_members[] = {
     {NULL},
 };
 
-void vk_mem_type_dealloc(PyObject *self)
-{
-    DEBUG_LOG("vk_mem_type_dealloc\n");
-    Py_TYPE(self)->tp_free(self);
-}
-
 PyTypeObject vk_mem_type_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "vulkan.memory_type",
     .tp_basicsize = sizeof(vk_mem_type),
     .tp_doc = PyDoc_STR("Vulkan Memory Type Docs"),
     .tp_members = vk_mem_type_members,
-    .tp_dealloc = vk_mem_type_dealloc,
 };
 
 PyObject *add_vk_mem_type_to_module(PyObject *mod)

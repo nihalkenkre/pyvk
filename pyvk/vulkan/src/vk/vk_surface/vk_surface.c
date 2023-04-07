@@ -1,17 +1,10 @@
 #include "vk_surface.h"
 
-void vk_surface_dealloc(PyObject* self)
-{
-    DEBUG_LOG("vk_surface_dealloc\n");
-    Py_TYPE(self)->tp_free(self);
-}
-
 PyTypeObject vk_surface_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "vulkan.surface",
     .tp_basicsize = sizeof(vk_surface),
     .tp_doc = PyDoc_STR("Vulkan Surface Docs"),
-    .tp_dealloc = vk_surface_dealloc,
 };
 
 PyObject* add_vk_surface_to_module(PyObject* module)

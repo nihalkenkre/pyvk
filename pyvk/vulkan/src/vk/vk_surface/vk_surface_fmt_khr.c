@@ -8,16 +8,15 @@ PyMemberDef vk_surface_fmt_khr_members[] = {
     {NULL},
 };
 
-
 PyTypeObject vk_surface_fmt_khr_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name="vulkan.surface_formats_khr",
+        .tp_name = "vulkan.surface_formats_khr",
     .tp_basicsize = sizeof(vk_surface_fmt_khr),
-    .tp_doc=PyDoc_STR("Vulkan Surface"),
-    .tp_members=vk_surface_fmt_khr_members,
+    .tp_doc = PyDoc_STR("Vulkan Surface"),
+    .tp_members = vk_surface_fmt_khr_members,
 };
 
-PyObject* add_vk_surface_fmt_khr_to_module(PyObject* mod)
+PyObject *add_vk_surface_fmt_khr_to_module(PyObject *mod)
 {
     DEBUG_LOG("add_vk_surface_fmt_khr_to_module\n");
 

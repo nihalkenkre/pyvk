@@ -8,11 +8,6 @@ PyMemberDef vk_phy_dev_sparse_props_members[] = {
     {"residency_non_resident_strict", T_BOOL, offsetof(vk_phy_dev_sparse_props, residency_non_resident_strict), 1, "Residency Non Resident Strict"},
     {NULL},
 };
-void vk_phy_dev_sparse_props_dealloc(PyObject *self)
-{
-    DEBUG_LOG("vk_phy_dev_sparse_props_dealloc\n");
-    Py_TYPE(self)->tp_free(self);
-}
 
 PyTypeObject vk_phy_dev_sparse_props_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -20,7 +15,6 @@ PyTypeObject vk_phy_dev_sparse_props_type = {
     .tp_basicsize = sizeof(vk_phy_dev_sparse_props),
     .tp_doc = PyDoc_STR("Vulkan Physical Device Sparse Properties Docs"),
     .tp_members = vk_phy_dev_sparse_props_members,
-    .tp_dealloc = vk_phy_dev_sparse_props_dealloc,
 };
 
 PyObject *add_vk_phy_dev_sparse_props_to_module(PyObject *mod)

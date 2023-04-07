@@ -12,9 +12,9 @@ PyMemberDef vk_app_info_members[] = {
     {NULL},
 };
 
-void vk_app_info_free(vk_app_info *self)
+void vk_app_info_dealloc(vk_app_info *self)
 {
-    DEBUG_LOG("vk_app_info_free\n");
+    DEBUG_LOG("vk_app_info_dealloc\n");
 
     if (self->app_info.pApplicationName)
     {
@@ -31,11 +31,6 @@ void vk_app_info_free(vk_app_info *self)
             free(self->app_info.pEngineName);
         }
     }
-}
-
-void vk_app_info_dealloc(vk_app_info *self)
-{
-    DEBUG_LOG("vk_app_info_dealloc\n");
 
     if (self->p_next != Py_None)
     {
@@ -200,7 +195,6 @@ PyTypeObject vk_app_info_type = {
     .tp_members = vk_app_info_members,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_dealloc = vk_app_info_dealloc,
-    .tp_free = vk_app_info_free,
     .tp_new = PyType_GenericNew,
     .tp_init = vk_app_info_init,
 };
