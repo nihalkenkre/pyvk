@@ -65,13 +65,7 @@ PyObject *vk_instance_create_surface(PyObject *self, PyObject *args)
     PyArg_Parse(args, "O", &surface_ci_obj);
     if (PyErr_Occurred())
     {
-        goto shutdown;
-    }
-
-    if (PyObject_TypeCheck(surface_ci_obj, &vk_surface_ci_type) == 0)
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass object of type vulkan.surface_create_info");
-        goto shutdown;
+        return NULL;
     }
 
     vk_surface_ci *ci_obj = (vk_surface_ci *)surface_ci_obj;
@@ -84,9 +78,6 @@ PyObject *vk_instance_create_surface(PyObject *self, PyObject *args)
     PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
 
     return return_obj;
-
-shutdown:
-    return NULL;
 }
 
 PyObject *vk_instance_destroy_surface(PyObject *self, PyObject *args)
@@ -96,12 +87,6 @@ PyObject *vk_instance_destroy_surface(PyObject *self, PyObject *args)
 
     if (PyErr_Occurred())
     {
-        return NULL;
-    }
-
-    if (PyObject_TypeCheck(surf, &vk_surface_type) == 0)
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass object of type vulkan.surface");
         return NULL;
     }
 

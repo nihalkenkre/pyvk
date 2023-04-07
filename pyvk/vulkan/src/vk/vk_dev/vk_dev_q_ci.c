@@ -93,29 +93,6 @@ int vk_dev_q_ci_init(vk_dev_q_ci *self, PyObject *args, PyObject *kwds)
     }
     DEBUG_LOG("dev_q_ci parsed priorities\n");
 
-    if (PyList_Check(self->priorities) == 0 && !Py_IsNone(self->priorities))
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass a a list of floating point values between 0.0 and 1.0");
-        return -1;
-    }
-    else if (PyList_Check(self->priorities) == 1)
-    {
-        Py_ssize_t count = PyList_Size(self->priorities);
-
-        for (Py_ssize_t c_idx = 0; c_idx < count; ++c_idx)
-        {
-            if (PyFloat_Check(PyList_GetItem(self->priorities, c_idx)) == 0)
-            {
-                char buff[1024];
-                sprintf(buff, "Index %d: Please pass a floating point value between 0.0 and 1.0\n", c_idx);
-
-                PyErr_SetString(PyExc_TypeError, buff);
-
-                return -1;
-            }
-        }
-    }
-
     init_dev_q_ci_from_obj(self);
     if (PyErr_Occurred())
     {

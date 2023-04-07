@@ -175,12 +175,6 @@ int vk_dev_ci_init(vk_dev_ci *self, PyObject *args, PyObject *kwds)
 
     DEBUG_LOG("dev_ci parsed queue_create_infos\n");
 
-    if (PyList_Check(self->queue_create_infos) == 0 && !Py_IsNone(self->queue_create_infos))
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass a list of queue_create_infos or None");
-        return -1;
-    }
-
     if (enabled_layers)
     {
         tmp = self->enabled_layers;
@@ -193,12 +187,6 @@ int vk_dev_ci_init(vk_dev_ci *self, PyObject *args, PyObject *kwds)
         self->enabled_layers = Py_None;
     }
     DEBUG_LOG("dev_ci parsed enabled_layers\n");
-
-    if (PyList_Check(self->enabled_layers) == 0 && !Py_IsNone(self->enabled_layers))
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass a list of the layer names for enabled_layers or None");
-        return -1;
-    }
 
     if (enabled_extensions)
     {
@@ -213,11 +201,6 @@ int vk_dev_ci_init(vk_dev_ci *self, PyObject *args, PyObject *kwds)
     }
 
     DEBUG_LOG("dev_ci parsed enabled_extensions\n");
-    if (PyList_Check(self->enabled_extensions) == 0 && !Py_IsNone(self->enabled_extensions))
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass a list of the layer names for enabled_extensions or None");
-        return -1;
-    }
 
     if (enabled_features)
     {
@@ -231,12 +214,6 @@ int vk_dev_ci_init(vk_dev_ci *self, PyObject *args, PyObject *kwds)
         self->enabled_features = Py_None;
     }
     DEBUG_LOG("dev_ci parsed enabled_features\n");
-
-    if (PyObject_IsInstance(self->enabled_features, &vk_phy_dev_features_type) == 0 && !Py_IsNone(self->enabled_features))
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass a physical_device_features object or None");
-        return -1;
-    }
 
     init_device_ci_from_obj(self);
     if (PyErr_Occurred())

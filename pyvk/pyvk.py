@@ -11,9 +11,17 @@ class StructureType(Enum):
     WIN32_SURFACE_CREATE_INFO_KHR = 1000009000
 
 
+class InstanceLayerNames(Enum):
+    pass
+
+
 class InstanceExtensionNames(Enum):
     KHR_SURFACE_EXTENSION_NAME = 'VK_KHR_surface'
     KHR_WIN32_SURFACE_EXTENSION_NAME = 'VK_KHR_win32_surface'
+
+
+class DeviceLayerNames(Enum):
+    pass
 
 
 class DeviceExtensionNames(Enum):
@@ -460,129 +468,35 @@ class DeviceCreateFlags(Enum):
 
 
 class ApplicationInfo(vk.application_info):
-    def __new__(cls, s_type=StructureType, p_next=None,
-                app_name='', app_ver=(1, 0, 0, 0),
-                engine_name='', engine_ver=(1, 0, 0, 0), api_ver=(1, 0, 0, 0)):
-
-        if not isinstance(s_type, StructureType):
-            raise TypeError(
-                'Please pass a value from the pyvk.StructureType enum for s_type')
-
-        if p_next is not None:
-            raise TypeError('Please pass p_next as None')
-
-        if not isinstance(app_ver, tuple):
-            raise TypeError(
-                'Please pass a tuple (variant, major, minor, patch) or None for default (1, 0, 0, 0) for app_ver')
-        else:
-            if not isinstance(app_ver[0], int):
-                raise TypeError(
-                    'Please pass an integer value for variant in app_ver')
-            if not isinstance(app_ver[1], int):
-                raise TypeError(
-                    'Please pass an integer value for major in app_ver')
-            if not isinstance(app_ver[2], int):
-                raise TypeError(
-                    'Please pass an integer value for minor in app_ver')
-            if not isinstance(app_ver[3], int):
-                raise TypeError(
-                    'Please pass an integer value for patch in app_ver')
-
-        if not isinstance(engine_ver, tuple):
-            raise TypeError(
-                'Please pass a tuple (variant, major, minor, patch) or None for default (1, 0, 0, 0) for engine_ver')
-        else:
-            if not isinstance(engine_ver[0], int):
-                raise TypeError(
-                    'Please pass an integer value for variant in engine_ver')
-            if not isinstance(engine_ver[1], int):
-                raise TypeError(
-                    'Please pass an integer value for major in engine_ver')
-            if not isinstance(engine_ver[2], int):
-                raise TypeError(
-                    'Please pass an integer value for minor in engine_ver')
-            if not isinstance(engine_ver[3], int):
-                raise TypeError(
-                    'Please pass an integer value for patch in engine_ver')
-
-        if not isinstance(api_ver, tuple):
-            raise TypeError(
-                'Please pass a tuple (variant, major, minor, patch) or None for default (1, 0, 0, 0) for api_ver')
-        else:
-            if not isinstance(api_ver[0], int):
-                raise TypeError(
-                    'Please pass an integer value for variant for api_ver')
-            if not isinstance(api_ver[1], int):
-                raise TypeError(
-                    'Please pass an integer value for major for api_ver')
-            if not isinstance(api_ver[2], int):
-                raise TypeError(
-                    'Please pass an integer value for minor for api_ver')
-            if not isinstance(api_ver[3], int):
-                raise TypeError(
-                    'Please pass an integer value for patch for api_ver')
-
-        return super(ApplicationInfo, cls).__new__(cls, s_type, p_next,
-                                                   app_name, app_ver, engine_name,
-                                                   engine_ver, api_ver)
-
     def __init__(self, s_type=StructureType, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
                  engine_name='', engine_ver=(1, 0, 0, 0), api_ver=(1, 0, 0, 0)):
-        super(ApplicationInfo, self).__init__(s_type.value, p_next, app_name, app_ver,
-                                              engine_name, engine_ver, api_ver)
+        super(ApplicationInfo, self).__init__(s_type=s_type.value, p_next=p_next, app_name=app_name, app_ver=app_ver,
+                                              engine_name=engine_name, engine_ver=engine_ver, api_ver=api_ver)
 
 
 class InstanceCreateInfo(vk.instance_create_info):
-    def __new__(cls, s_type=StructureType, p_next=None,
-                flags=InstanceCreateFlagBits, app_info=None, enabled_layers=[], enabled_extensions=[]):
-
-        if not isinstance(s_type, StructureType):
-            raise TypeError(
-                'Please pass a value from the pyvk.StructureType enum class for s_type')
-
-        if not isinstance(enabled_layers, list):
-            raise TypeError(
-                'Please pass a list of layer names for enabled_layers')
-
-        for layer in enabled_layers:
-            if not isinstance(layer, str):
-                raise TypeError('Please pass a str as layer name')
-
-        if not isinstance(enabled_extensions, list):
-            raise TypeError(
-                'Please pass a list of extension names for enabled_extensions')
-
-        for extension in enabled_extensions:
-            if not isinstance(extension, str):
-                raise TypeError('Please pass a str as extension name')
-
-        return super(InstanceCreateInfo, cls).__new__(cls)
-
     def __init__(self, s_type=StructureType, p_next=None,
                  flags=InstanceCreateFlagBits, app_info=None,
                  enabled_layers=[], enabled_extensions=[]):
 
+        enabled_layers_str = []
+
+        for layer in enabled_layers:
+            enabled_layers_str.append(layer.value)
+
+        enabled_extensions_str = []
+
+        for ext in enabled_extensions:
+            enabled_extensions_str.append(ext.value)
+
         super(InstanceCreateInfo, self).__init__(s_type.value, p_next,
                                                  flags.value, app_info,
-                                                 enabled_layers, enabled_extensions)
+                                                 enabled_layers=enabled_layers_str,
+                                                 enabled_extensions=enabled_extensions_str)
 
 
 class Win32SurfaceCreateInfo(vk.surface_create_info):
-    def __new__(cls, s_type=StructureType, p_next=None,
-                flags=Win32SurfaceCreateFlagsKHR, h_wnd=int):
-        if not isinstance(s_type, StructureType):
-            raise TypeError(
-                'Please pass a value from the pyvk.StructureType enum class for s_type')
-
-        if p_next is not None:
-            raise TypeError('Please pass None for p_next')
-
-        if not isinstance(h_wnd, int):
-            raise TypeError('Please pass object of type int/long for h_wnd')
-
-        return super(Win32SurfaceCreateInfo, cls).__new__(cls)
-
     def __init__(self, s_type=StructureType, p_next=None,
                  flags=Win32SurfaceCreateFlagsKHR, h_wnd=int):
 
@@ -624,34 +538,6 @@ class Instance(object):
 
 
 class DeviceQueueCreateInfo(vk.device_queue_create_info):
-    def __new__(cls, s_type=StructureType, p_next=None,
-                flags=DeviceQueueCreateFlagBits, q_family_index=int,
-                q_count=1, priorities=[]):
-
-        if not isinstance(s_type, StructureType):
-            raise TypeError(
-                'Please pass a value from pyvk.StructureType class for s_type')
-
-        if p_next is not None:
-            raise TypeError('Please pass None object for p_next')
-
-        if not isinstance(q_family_index, int):
-            raise TypeError('Please pass an integer for q_family_index')
-
-        if not isinstance(q_count, int):
-            raise TypeError('Please pass an integer for q_count')
-
-        if not isinstance(priorities, list):
-            raise TypeError(
-                'Please pass a list of floating point values for priorities')
-
-        for p in priorities:
-            if not isinstance(p, float):
-                raise TypeError(
-                    'Please pass a floating point value for priority in priorities')
-
-        return super(DeviceQueueCreateInfo, cls).__new__(cls)
-
     def __init__(self, s_type=StructureType, p_next=None,
                  flags=DeviceQueueCreateFlagBits, q_family_index=int,
                  q_count=1, priorities=[]):
@@ -661,66 +547,38 @@ class DeviceQueueCreateInfo(vk.device_queue_create_info):
 
 
 class DeviceCreateInfo(vk.device_create_info):
-    def __new__(cls, s_type=StructureType, p_next=None,
-                flags=DeviceCreateFlags, queue_create_infos=[],
-                enabled_layers=[], enabled_extensions=[],
-                enabled_features=vk.physical_device_features):
-
-        if not isinstance(s_type, StructureType):
-            raise TypeError(
-                'Please pass a value from pyvk.StructureType class for s_type')
-
-        if p_next is not None:
-            raise TypeError('Please pass None object for p_next')
-
-        if not isinstance(queue_create_infos, list):
-            raise TypeError(
-                'Please pass a list of pyvk.QueueCreateInfo objects for queue_create_infos')
-
-        for qci in queue_create_infos:
-            if not isinstance(qci, DeviceQueueCreateInfo):
-                raise TypeError(
-                    'Please pass an object of type pyvk.DeviceQueueCreateInfo inside queue_create_infos')
-
-        if not isinstance(enabled_layers, list):
-            raise TypeError(
-                'Please pass list of layer names for enabled_layers')
-
-        for l in enabled_layers:
-            if not isinstance(l, str):
-                raise TypeError(
-                    'Please pass a str object for layer name in enabled_layers')
-
-        if not isinstance(enabled_extensions, list):
-            raise TypeError(
-                'Please pass list of extension names for enabled_extensions')
-
-        for l in enabled_extensions:
-            if not isinstance(l, str):
-                raise TypeError(
-                    'Please pass a str object for extension name in enabled_extensions')
-
-        if not isinstance(enabled_features, vk.physical_device_features):
-            raise TypeError(
-                'Please pass an object of type vk.physical_device_feature')
-
-        return super(DeviceCreateInfo, cls).__new__(cls)
-
     def __init__(self, s_type=StructureType, p_next=None,
                  flags=DeviceCreateFlags, queue_create_infos=[],
                  enabled_layers=[], enabled_extensions=[],
                  enabled_features=vk.physical_device_features):
+
+        enabled_layers_str = []
+
+        for layer in enabled_layers:
+            enabled_layers_str.append(layer.value)
+
+        enabled_extensions_str = []
+
+        for ext in enabled_extensions:
+            enabled_extensions_str.append(ext.value)
+
         super(DeviceCreateInfo, self).__init__(s_type.value, p_next, flags.value,
-                                               queue_create_infos, enabled_layers,
-                                               enabled_extensions, enabled_features)
+                                               queue_create_infos, enabled_layers=enabled_layers_str,
+                                               enabled_extensions=enabled_extensions_str,
+                                               enabled_features=enabled_features)
+
+
+class Device(object):
+    def __init__(self, device=vk.device):
+        self._d = device
+
+    def get_queue(self, queue_family_index=0, queue_index=0):
+        return self._d.get_queue(queue_family_index=queue_family_index, queue_index=queue_index)
+        # print(help(self._d))
 
 
 class PhysicalDevice(object):
     def __init__(self, pd=vk.physical_device):
-        if not isinstance(pd, vk.physical_device):
-            raise TypeError(
-                'Please pass an object of type vulkan.physical_device')
-
         self._pd = pd
 
     def get_features(self):
@@ -733,9 +591,6 @@ class PhysicalDevice(object):
         return self._pd.get_memory_properties()
 
     def get_surface_capabilities_khr(self, surface=vk.surface):
-        if not isinstance(surface, vk.surface):
-            raise TypeError('Please pass an object of type vulkan.surface')
-
         caps, result = self._pd.get_surface_capabilities_khr(surface)
 
         for r in Result:
@@ -743,9 +598,6 @@ class PhysicalDevice(object):
                 return caps, r
 
     def get_surface_formats_khr(self, surface=vk.surface):
-        if not isinstance(surface, vk.surface):
-            raise TypeError('Please pass an object of type vulkan.surface')
-
         formats, result = self._pd.get_surface_formats_khr(surface)
 
         for r in Result:
@@ -753,9 +605,6 @@ class PhysicalDevice(object):
                 return formats, r
 
     def get_surface_present_modes_khr(self, surface=vk.surface):
-        if not isinstance(surface, vk.surface):
-            raise TypeError('Please pass an object of type vulkan.surface')
-
         present_modes, result = self._pd.get_surface_present_modes_khr(surface)
 
         for r in Result:
@@ -763,28 +612,17 @@ class PhysicalDevice(object):
                 return present_modes, r
 
     def create_device(self, device_create_info=vk.device_create_info):
-        if not isinstance(device_create_info, vk.device_create_info):
-            raise TypeError(
-                'Please pass an object of type vulkan.device_create_info')
-
         device, result = self._pd.create_device(device_create_info)
 
         for r in Result:
             if result == r.value:
-                return device, r
+                return Device(device), r
 
-    def destroy_device(self, device=vk.device):
-        if not isinstance(device, vk.device):
-            raise TypeError('Please pass an object of type vulkan.device')
-
-        self._pd.destroy_device(device)
+    def destroy_device(self, device=Device):
+        self._pd.destroy_device(device._d)
 
 
 def create_instance(instance_create_info=InstanceCreateInfo):
-    if not isinstance(instance_create_info, InstanceCreateInfo):
-        raise TypeError(
-            'Please pass an object of type pyvk.InstanceCreateInfo')
-
     i, result = vk.create_instance(instance_create_info)
 
     for r in Result:
@@ -793,9 +631,6 @@ def create_instance(instance_create_info=InstanceCreateInfo):
 
 
 def destroy_instance(instance=Instance):
-    if not isinstance(instance, Instance):
-        raise TypeError('Please pass an object type pyvk.Instance')
-
     vk.destroy_instance(instance._i)
 
 # THIS IS LEFT HERE AS A REFERENCE FOR FUTURE

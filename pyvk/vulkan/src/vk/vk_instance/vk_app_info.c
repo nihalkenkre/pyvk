@@ -12,7 +12,7 @@ PyMemberDef vk_app_info_members[] = {
     {NULL},
 };
 
-/*void vk_app_info_free(vk_app_info *self)
+void vk_app_info_free(vk_app_info *self)
 {
     DEBUG_LOG("vk_app_info_free\n");
 
@@ -32,7 +32,7 @@ PyMemberDef vk_app_info_members[] = {
         }
     }
 }
-*/
+
 void vk_app_info_dealloc(vk_app_info *self)
 {
     DEBUG_LOG("vk_app_info_dealloc\n");
@@ -123,7 +123,7 @@ int vk_app_info_init(vk_app_info *self, PyObject *args, PyObject *kwds)
 
     PyObject *tmp = NULL;
 
-    static char *kwlist[] = {"s_type", "p_next", "app_name", "app_ver", "engine_name", "engine_ver", "api_ver", NULL};
+    char *kwlist[] = {"s_type", "p_next", "app_name", "app_ver", "engine_name", "engine_ver", "api_ver", NULL};
 
     PyArg_ParseTupleAndKeywords(args, kwds, "|kOsOsOO", kwlist, &self->s_type, &p_next, &self->app_name, &app_ver, &self->engine_name, &engine_ver, &api_ver);
     if (PyErr_Occurred())
@@ -200,7 +200,7 @@ PyTypeObject vk_app_info_type = {
     .tp_members = vk_app_info_members,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_dealloc = vk_app_info_dealloc,
-    // .tp_free = vk_app_info_free,
+    .tp_free = vk_app_info_free,
     .tp_new = PyType_GenericNew,
     .tp_init = vk_app_info_init,
 };

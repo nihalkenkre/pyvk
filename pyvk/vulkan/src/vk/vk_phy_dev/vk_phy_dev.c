@@ -510,12 +510,6 @@ PyObject *vk_phy_dev_create_dev(vk_phy_dev *self, PyObject *args)
         return NULL;
     }
 
-    if (PyObject_TypeCheck(dev_ci_obj, &vk_dev_ci_type) == 0)
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass object of vulkan.device_create_info");
-        goto shutdown;
-    }
-
     vk_dev_ci *ci_obj = (vk_dev_ci *)dev_ci_obj;
 
     vk_dev *dev = PyObject_NEW(vk_dev, &vk_dev_type);
@@ -541,11 +535,6 @@ PyObject *vk_phy_dev_destroy_dev(PyObject *self, PyObject *args)
     if (PyErr_Occurred())
     {
         return NULL;
-    }
-
-    if (PyObject_TypeCheck(dev, &vk_dev_type) == 0)
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass object of vulkan.device");
     }
 
     if (((vk_dev *)dev)->device != VK_NULL_HANDLE)
