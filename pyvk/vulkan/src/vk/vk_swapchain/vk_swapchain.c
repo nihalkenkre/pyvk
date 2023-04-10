@@ -1,17 +1,10 @@
 #include "vk_swapchain.h"
 
-void vk_swapchain_dealloc(PyObject *self)
-{
-    DEBUG_LOG("vk_swapchain_dealloc\n");
-    Py_TYPE(self)->tp_free(self);
-}
-
 PyTypeObject vk_swapchain_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "vulkan.swapchain",
     .tp_basicsize = sizeof(vk_swapchain),
     .tp_doc = PyDoc_STR("Vulkan Swapchain Docs"),
-    .tp_dealloc = vk_swapchain_dealloc,
 };
 
 PyObject *add_vk_swapchain_to_module(PyObject *mod)

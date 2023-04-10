@@ -38,7 +38,7 @@ PyObject *vk_create_instance(PyObject *self, PyObject *args, PyObject *kwds)
     PyArg_Parse(args, "O", &instance_ci_obj);
     if (PyErr_Occurred())
     {
-        goto shutdown;
+        return NULL;
     }
 
     vk_instance_ci *ci_obj = (vk_instance_ci *)instance_ci_obj;
@@ -51,10 +51,6 @@ PyObject *vk_create_instance(PyObject *self, PyObject *args, PyObject *kwds)
     PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
 
     return return_obj;
-
-shutdown:
-
-    return NULL;
 }
 
 PyObject *vk_destroy_instance(PyObject *self, PyObject *args, PyObject *kwds)

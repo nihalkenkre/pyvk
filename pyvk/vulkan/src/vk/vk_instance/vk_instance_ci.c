@@ -103,7 +103,8 @@ int vk_instance_ci_init(vk_instance_ci *self, PyObject *args, PyObject *kwds)
 
     char *kwlist[] = {"s_type", "p_next", "flags", "app_info", "enabled_layers", "enabled_extensions", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|kOIOOO", kwlist, &self->s_type, &p_next, &self->flags, &app_info, &enabled_layers, &enabled_extensions);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|kOIOOO", kwlist, &self->s_type, &p_next, &self->flags, &app_info,
+                                &enabled_layers, &enabled_extensions);
     if (PyErr_Occurred())
     {
         return -1;

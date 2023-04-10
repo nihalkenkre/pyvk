@@ -1,6 +1,9 @@
 #include "vk_dev.h"
 #include "vk_queue.h"
 
+#include "vk_swapchain_ci.h"
+#include "vk_swapchain.h"
+
 #include "log.h"
 
 void vk_dev_dealloc(PyObject *self)
@@ -33,8 +36,33 @@ PyObject *vk_dev_get_queue(vk_dev *self, PyObject *args, PyObject *kwds)
     return q_obj;
 }
 
+PyObject *vk_dev_create_swapchain(vk_dev *self, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_create_swapchain\n");
+
+    PyObject *sc_ci = NULL;
+
+    PyArg_Parse(args, "O", &sc_ci);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_swapchain_ci *ci_obj = (vk_swapchain_ci *)sc_ci;
+    vk_swapchain *sc = PyObject_NEW(vk_swapchain, &vk_swapchain_type);
+
+    VkResult result = vkCreateSwapchainKHR(self->device, &ci_obj->ci, NULL, &sc->swapchain);
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, (PyObject *)sc);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
+}
+
 PyMethodDef vk_dev_methods[] = {
     {"get_queue", (PyCFunction)vk_dev_get_queue, METH_VARARGS | METH_KEYWORDS, NULL},
+    {"create_swapchain", (PyCFunction)vk_dev_create_swapchain, METH_O, NULL},
     {NULL},
 };
 

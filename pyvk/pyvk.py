@@ -9,6 +9,7 @@ class StructureType(Enum):
     DEVICE_QUEUE_CREATE_INFO = 2
     DEVICE_CREATE_INFO = 3
     WIN32_SURFACE_CREATE_INFO_KHR = 1000009000
+    SWAPCHAIN_CREATE_INFO_KHR = 1000001000
 
 
 class InstanceLayerNames(Enum):
@@ -45,7 +46,10 @@ class Result(Enum):
     ERROR_FEATURE_NOT_PRESENT = -8
     ERROR_INCOMPATIBLE_DRIVER = -9
     ERROR_TOO_MANY_OBJECTS = -10
+    ERROR_UNKNOWN = -13
     ERROR_SURFACE_LOST_KHR = -1000000000
+    ERROR_NATIVE_WINDOW_IN_USE_KHR = -1000000001
+    ERROR_COMPRESSION_EXHAUSTED_EXT = -1000338000
 
 
 class MemoryPropertyFlagBits(Enum):
@@ -472,6 +476,19 @@ class DeviceCreateFlags(Enum):
     NONE = 0x00000000
 
 
+class SharingMode(Enum):
+    EXCLUSIVE = 0
+    CONCURRENT = 1
+
+
+class SwapchainCreateFlagBitsKHR(Enum):
+    NONE = 0x00000000
+    SPLIT_INSTANCE_BIND_REGIONS_BIT_KHR = 0x00000001
+    PROTECTED_BIT_KHR = 0x00000002
+    MUTABLE_FORMAT_BIT_KHR = 0x00000004
+    DEFERRED_MEMORY_ALLOCATION_BIT_EXT = 0x00000008
+
+
 class ApplicationInfo(vk.application_info):
     def __init__(self, s_type=StructureType, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
@@ -573,13 +590,45 @@ class DeviceCreateInfo(vk.device_create_info):
                                                enabled_features=enabled_features)
 
 
+class SwapchainCreateInfoKHR(vk.swapchain_create_info):
+    def __init__(self, s_type=StructureType, p_next=None, flags=SwapchainCreateFlagBitsKHR,
+                 surface=vk.surface, min_image_count=1, image_format=Format, image_color_space=ColorSpace,
+                 image_extent=(), image_array_layers=1, image_usage_flags=ImageUsageFlagBits, image_sharing_mode=SharingMode,
+                 queue_family_indices=[
+                 ], pre_transform=SurfaceTransformFlagBits, composite_alpha=CompositeAlphFlagBitsKHR,
+                 present_mode=PresentModeKHR, clipped=True, old_swapchain=vk.swapchain):
+
+        if len(image_extent) != 2:
+            raise ValueError(
+                'Please pass a tuple of size 2 for image_extent in pyvk.SwapchainCreateInfo')
+
+        flags_value = flags.value if isinstance(flags, SwapchainCreateFlagBitsKHR) else flags
+        image_format_value = image_format.value if isinstance(image_format, Format) else image_format
+        image_color_space_value = image_color_space.value if isinstance(image_color_space, ColorSpace) else image_color_space
+        image_sharing_mode_value = image_sharing_mode.value if isinstance(image_sharing_mode, SharingMode) else image_sharing_mode
+        pre_transform_value = pre_transform.value if isinstance(pre_transform, SurfaceTransformFlagBits) else pre_transform
+        composite_alpha_value = composite_alpha.value if isinstance(composite_alpha, CompositeAlphFlagBitsKHR) else composite_alpha
+        present_mode_value = present_mode.value if isinstance(present_mode, PresentModeKHR) else present_mode
+
+        super(SwapchainCreateInfoKHR, self).__init__(s_type.value, p_next, flags_value, surface, min_image_count,
+                                                     image_format_value, image_color_space_value, image_extent, image_array_layers,
+                                                     image_usage_flags, image_sharing_mode_value, queue_family_indices, pre_transform_value,
+                                                     composite_alpha_value, present_mode_value, clipped, old_swapchain)
+
+
 class Device(object):
     def __init__(self, device=vk.device):
         self._d = device
 
     def get_queue(self, queue_family_index=0, queue_index=0):
         return self._d.get_queue(queue_family_index=queue_family_index, queue_index=queue_index)
-        # print(help(self._d))
+
+    def create_swapchain(self, swapchain_create_info=SwapchainCreateInfoKHR):
+        sc, result = self._d.create_swapchain(swapchain_create_info)
+
+        for r in Result:
+            if result == r.value:
+                return sc, r
 
 
 class PhysicalDevice(object):
