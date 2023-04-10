@@ -25,6 +25,7 @@
 #include "vk_dev/vk_dev_q_ci.h"
 #include "vk_dev/vk_dev_ci.h"
 #include "vk_dev/vk_dev.h"
+#include "vk_queue/vk_q_fly_props.h"
 #include "vk_queue/vk_queue.h"
 #include "vk_swapchain/vk_swapchain_ci.h"
 #include "vk_swapchain/vk_swapchain.h"
@@ -242,6 +243,13 @@ PyMODINIT_FUNC PyInit_vulkan(void)
     }
 
     mod = add_vk_swapchain_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_q_fly_props_to_module(mod);
 
     if (mod == NULL)
     {

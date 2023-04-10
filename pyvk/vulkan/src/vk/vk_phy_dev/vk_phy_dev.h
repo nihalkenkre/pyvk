@@ -3,7 +3,6 @@
 
 #include <Python.h>
 #include <vulkan/vulkan.h>
-#include <structmember.h>
 
 #include "vk_phy_dev_mem_props.h"
 

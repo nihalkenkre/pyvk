@@ -463,6 +463,17 @@ class PresentModeKHR(Enum):
     SHARED_CONTINUOUS_REFRESH_KHR = 1000111001
 
 
+class QueueFlagBits(Enum):
+    GRAPHICS_BIT = 0x00000001
+    COMPUTE_BIT = 0x00000002
+    TRANSFER_BIT = 0x00000004
+    SPARSE_BINDING_BIT = 0x00000008
+    PROTECTED_BIT = 0x00000010
+    VIDEO_DECODE_BIT_KHR = 0x00000020
+    VIDEO_ENCODE_BIT_KHR = 0x00000040
+    OPTICAL_FLOW_BIT_NV = 0x00000100
+
+
 class DeviceQueueCreateFlagBits(Enum):
     NONE = 0x00000000
     PROTECTED_BIT = 0x00000001
@@ -602,13 +613,20 @@ class SwapchainCreateInfoKHR(vk.swapchain_create_info):
             raise ValueError(
                 'Please pass a tuple of size 2 for image_extent in pyvk.SwapchainCreateInfo')
 
-        flags_value = flags.value if isinstance(flags, SwapchainCreateFlagBitsKHR) else flags
-        image_format_value = image_format.value if isinstance(image_format, Format) else image_format
-        image_color_space_value = image_color_space.value if isinstance(image_color_space, ColorSpace) else image_color_space
-        image_sharing_mode_value = image_sharing_mode.value if isinstance(image_sharing_mode, SharingMode) else image_sharing_mode
-        pre_transform_value = pre_transform.value if isinstance(pre_transform, SurfaceTransformFlagBits) else pre_transform
-        composite_alpha_value = composite_alpha.value if isinstance(composite_alpha, CompositeAlphFlagBitsKHR) else composite_alpha
-        present_mode_value = present_mode.value if isinstance(present_mode, PresentModeKHR) else present_mode
+        flags_value = flags.value if isinstance(
+            flags, SwapchainCreateFlagBitsKHR) else flags
+        image_format_value = image_format.value if isinstance(
+            image_format, Format) else image_format
+        image_color_space_value = image_color_space.value if isinstance(
+            image_color_space, ColorSpace) else image_color_space
+        image_sharing_mode_value = image_sharing_mode.value if isinstance(
+            image_sharing_mode, SharingMode) else image_sharing_mode
+        pre_transform_value = pre_transform.value if isinstance(
+            pre_transform, SurfaceTransformFlagBits) else pre_transform
+        composite_alpha_value = composite_alpha.value if isinstance(
+            composite_alpha, CompositeAlphFlagBitsKHR) else composite_alpha
+        present_mode_value = present_mode.value if isinstance(
+            present_mode, PresentModeKHR) else present_mode
 
         super(SwapchainCreateInfoKHR, self).__init__(s_type.value, p_next, flags_value, surface, min_image_count,
                                                      image_format_value, image_color_space_value, image_extent, image_array_layers,
@@ -664,6 +682,9 @@ class PhysicalDevice(object):
         for r in Result:
             if result == r.value:
                 return present_modes, r
+
+    def get_queue_family_properties(self):
+        return self._pd.get_queue_family_properties()
 
     def create_device(self, device_create_info=vk.device_create_info):
         device, result = self._pd.create_device(device_create_info)

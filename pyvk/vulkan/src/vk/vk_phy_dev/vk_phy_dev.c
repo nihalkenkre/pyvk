@@ -11,6 +11,9 @@
 #include "vk_surface.h"
 #include "vk_surface_caps_khr.h"
 #include "vk_surface_fmt_khr.h"
+#include "vk_q_fly_props.h"
+
+#include <structmember.h>
 
 #include "log.h"
 
@@ -548,6 +551,40 @@ PyObject *vk_phy_dev_destroy_dev(PyObject *self, PyObject *args)
     return Py_None;
 }
 
+PyObject *vk_phy_dev_get_q_fly_props(vk_phy_dev *self)
+{
+    DEBUG_LOG("vk_phy_dev_get_q_fly_props\n");
+
+    uint32_t q_fly_count = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(self->phy_dev, &q_fly_count, NULL);
+
+    VkQueueFamilyProperties *q_fly_props = (VkQueueFamilyProperties *)malloc(sizeof(VkQueueFamilyProperties) * q_fly_count);
+    vkGetPhysicalDeviceQueueFamilyProperties(self->phy_dev, &q_fly_count, q_fly_props);
+
+    PyObject *q_fly_props_obj = PyList_New(q_fly_count);
+
+    for (uint32_t q_fly_idx = 0; q_fly_idx < q_fly_count; ++q_fly_idx)
+    {
+        vk_q_fly_props *prop = PyObject_New(vk_q_fly_props, &vk_q_fly_props_type);
+        prop->q_count = (q_fly_props + q_fly_idx)->queueCount;
+        prop->q_flags = (q_fly_props + q_fly_idx)->queueFlags;
+        prop->timestamp_valid_bits = (q_fly_props + q_fly_idx)->timestampValidBits;
+
+        PyObject *gran_obj = PyTuple_New(3);
+        PyTuple_SetItem(gran_obj, 0, PyLong_FromLong((q_fly_props + q_fly_idx)->minImageTransferGranularity.width));
+        PyTuple_SetItem(gran_obj, 1, PyLong_FromLong((q_fly_props + q_fly_idx)->minImageTransferGranularity.height));
+        PyTuple_SetItem(gran_obj, 2, PyLong_FromLong((q_fly_props + q_fly_idx)->minImageTransferGranularity.depth));
+
+        prop->min_image_xfer_grains = gran_obj;
+
+        PyList_SetItem(q_fly_props_obj, q_fly_idx, prop);
+    }
+
+    free(q_fly_props);
+
+    return q_fly_props_obj;
+}
+
 PyMethodDef vk_phy_dev_methods[] = {
     {"get_features", (PyCFunction)vk_phy_dev_get_features, METH_NOARGS, NULL},
     {"get_properties", (PyCFunction)vk_phy_dev_get_props, METH_NOARGS, NULL},
@@ -555,6 +592,7 @@ PyMethodDef vk_phy_dev_methods[] = {
     {"get_surface_capabilities_khr", (PyCFunction)vk_phy_dev_get_surface_caps_khr, METH_O, NULL},
     {"get_surface_formats_khr", (PyCFunction)vk_phy_dev_get_surface_fmts_khr, METH_O, NULL},
     {"get_surface_present_modes_khr", (PyCFunction)vk_phy_dev_get_surface_present_modes_khr, METH_O, NULL},
+    {"get_queue_family_properties", (PyCFunction)vk_phy_dev_get_q_fly_props, METH_NOARGS, NULL},
     {"create_device", (PyCFunction)vk_phy_dev_create_dev, METH_O, NULL},
     {"destroy_device", (PyCFunction)vk_phy_dev_destroy_dev, METH_O, NULL},
     {NULL},

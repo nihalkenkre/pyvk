@@ -32,6 +32,7 @@ setup(
                 './pyvk/vulkan/src/vk/vk_swapchain/vk_swapchain_ci.c',
                 './pyvk/vulkan/src/vk/vk_swapchain/vk_swapchain.c',
                 './pyvk/vulkan/src/vk/vk_queue/vk_queue.c',
+                './pyvk/vulkan/src/vk/vk_queue/vk_q_fly_props.c',
                 './pyvk/vulkan/src/utils/log.c',
                 './pyvk/vulkan/src/utils/utils.c',
             ],
