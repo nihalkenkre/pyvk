@@ -8,6 +8,7 @@ class StructureType(Enum):
     INSTANCE_CREATE_INFO = 1
     DEVICE_QUEUE_CREATE_INFO = 2
     DEVICE_CREATE_INFO = 3
+    COMMAND_POOL_CREATE_INFO = 39
     WIN32_SURFACE_CREATE_INFO_KHR = 1000009000
     SWAPCHAIN_CREATE_INFO_KHR = 1000001000
 
@@ -500,6 +501,13 @@ class SwapchainCreateFlagBitsKHR(Enum):
     DEFERRED_MEMORY_ALLOCATION_BIT_EXT = 0x00000008
 
 
+class CommandPoolCreateFlagBits(Enum):
+    NONE = 0x00000000
+    TRANSIENT_BIT = 0x00000001
+    RESET_COMMAND_BUFFER_BIT = 0x00000002
+    PROTECTED_BIT = 0x00000004
+
+
 class ApplicationInfo(vk.application_info):
     def __init__(self, s_type=StructureType, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
@@ -510,7 +518,7 @@ class ApplicationInfo(vk.application_info):
 
 class InstanceCreateInfo(vk.instance_create_info):
     def __init__(self, s_type=StructureType, p_next=None,
-                 flags=InstanceCreateFlagBits, app_info=None,
+                 flags=InstanceCreateFlagBits.NONE, app_info=None,
                  enabled_layers=[], enabled_extensions=[]):
 
         enabled_layers_str = []
@@ -531,7 +539,7 @@ class InstanceCreateInfo(vk.instance_create_info):
 
 class Win32SurfaceCreateInfo(vk.surface_create_info):
     def __init__(self, s_type=StructureType, p_next=None,
-                 flags=Win32SurfaceCreateFlagsKHR, h_wnd=int):
+                 flags=Win32SurfaceCreateFlagsKHR.NONE, h_wnd=int):
 
         super(Win32SurfaceCreateInfo, self).__init__(s_type.value, p_next,
                                                      flags.value, h_wnd)
@@ -539,9 +547,6 @@ class Win32SurfaceCreateInfo(vk.surface_create_info):
 
 class Instance(object):
     def __init__(self, i=vk.instance):
-        if not isinstance(i, vk.instance):
-            raise TypeError('Please pass an object of type vulkan.instance')
-
         self._i = i
 
     def get_physical_devices(self):
@@ -554,25 +559,18 @@ class Instance(object):
                 return ret_pds, r
 
     def create_surface(self, surface_create_info=Win32SurfaceCreateInfo):
-        if not isinstance(surface_create_info, Win32SurfaceCreateInfo):
-            raise TypeError(
-                'Please pass an object of type vulkan.surface_create_info')
-
         s, result = self._i.create_surface(surface_create_info)
         for r in Result:
             if result == r.value:
                 return s, r
 
     def destroy_surface(self, surface=vk.surface):
-        if not isinstance(surface, vk.surface):
-            raise TypeError('Please pass an object of type vulkan.surface')
-
         self._i.destroy_surface(surface)
 
 
 class DeviceQueueCreateInfo(vk.device_queue_create_info):
     def __init__(self, s_type=StructureType, p_next=None,
-                 flags=DeviceQueueCreateFlagBits, q_family_index=int,
+                 flags=DeviceQueueCreateFlagBits.NONE, q_family_index=int,
                  q_count=1, priorities=[]):
 
         super(DeviceQueueCreateInfo, self).__init__(s_type.value, p_next, flags.value, q_family_index,
@@ -581,7 +579,7 @@ class DeviceQueueCreateInfo(vk.device_queue_create_info):
 
 class DeviceCreateInfo(vk.device_create_info):
     def __init__(self, s_type=StructureType, p_next=None,
-                 flags=DeviceCreateFlags, queue_create_infos=[],
+                 flags=DeviceCreateFlags.NONE, queue_create_infos=[],
                  enabled_layers=[], enabled_extensions=[],
                  enabled_features=vk.physical_device_features):
 
@@ -602,7 +600,7 @@ class DeviceCreateInfo(vk.device_create_info):
 
 
 class SwapchainCreateInfoKHR(vk.swapchain_create_info):
-    def __init__(self, s_type=StructureType, p_next=None, flags=SwapchainCreateFlagBitsKHR,
+    def __init__(self, s_type=StructureType, p_next=None, flags=SwapchainCreateFlagBitsKHR.NONE,
                  surface=vk.surface, min_image_count=1, image_format=Format, image_color_space=ColorSpace,
                  image_extent=None, image_array_layers=1, image_usage_flags=ImageUsageFlagBits, image_sharing_mode=SharingMode,
                  queue_family_indices=[
@@ -701,6 +699,19 @@ class PhysicalDevice(object):
         self._pd.destroy_device(device._d)
 
 
+class CommandPoolCreateInfo(vk.command_pool_create_info):
+    def __init__(self, s_type=StructureType, p_next=None, flags=CommandPoolCreateFlagBits.NONE,
+                 queue_family_index=0):
+
+        s_type_value = s_type.value if isinstance(
+            s_type, StructureType) else s_type
+        flags_value = flags.value if isinstance(
+            flags, CommandPoolCreateFlagBits) else flags
+
+        super(CommandPoolCreateInfo, self).__init__(
+            s_type_value, p_next, flags_value, queue_family_index)
+
+
 def create_instance(instance_create_info=InstanceCreateInfo):
     i, result = vk.create_instance(instance_create_info)
 
@@ -715,9 +726,6 @@ def destroy_instance(instance=Instance):
 # THIS IS LEFT HERE AS A REFERENCE FOR FUTURE
 # class MemoryHeap(object):
 #     def __init__(self, mh=vk.memory_heap):
-#         if not isinstance(mh, vk.memory_heap):
-#             raise TypeError('Please pass an object of type vulkan.memory_heap')
-
 #         self._mh = mh
 
 #         for a in dir(mh):

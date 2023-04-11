@@ -6,12 +6,6 @@
 
 #include "log.h"
 
-void vk_dev_dealloc(PyObject *self)
-{
-    DEBUG_LOG("vk_dev_dealloc\n");
-    Py_TYPE(self)->tp_free(self);
-}
-
 PyObject *vk_dev_get_queue(vk_dev *self, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_dev_get_queue\n");
@@ -72,13 +66,25 @@ PyObject *vk_dev_destroy_swapchain(vk_dev *self, PyObject *args)
         return NULL;
     }
 
-    if (((vk_swapchain*)swapchain)->swapchain != VK_NULL_HANDLE)
+    if (((vk_swapchain *)swapchain)->swapchain != VK_NULL_HANDLE)
     {
         DEBUG_LOG("destroying swapchain\n");
-        vkDestroySwapchainKHR(self->device, ((vk_swapchain*)swapchain)->swapchain, NULL);
+        vkDestroySwapchainKHR(self->device, ((vk_swapchain *)swapchain)->swapchain, NULL);
     }
 
     Py_XDECREF(swapchain);
+
+    return Py_None;
+}
+
+PyObject *vk_dev_create_cmd_pool(vk_dev *self, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_create_cmd_pool\n");
+}
+
+PyObject *vk_dev_destroy_cmd_pool(vk_dev* self, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_destroy_cmd_pool\n");
 
     return Py_None;
 }
@@ -87,6 +93,8 @@ PyMethodDef vk_dev_methods[] = {
     {"get_queue", (PyCFunction)vk_dev_get_queue, METH_VARARGS | METH_KEYWORDS, NULL},
     {"create_swapchain", (PyCFunction)vk_dev_create_swapchain, METH_O, NULL},
     {"destroy_swapchain", (PyCFunction)vk_dev_destroy_swapchain, METH_O, NULL},
+    {"create_command_pool", (PyCFunction)vk_dev_create_cmd_pool, METH_O, NULL},
+    {"destroy_command_pool", (PyCFunction)vk_dev_destroy_cmd_pool, METH_O, NULL},
     {NULL},
 };
 
@@ -95,7 +103,6 @@ PyTypeObject vk_dev_type = {
     .tp_basicsize = sizeof(vk_dev),
     .tp_doc = PyDoc_STR("Vulkan Device Docs"),
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    .tp_dealloc = vk_dev_dealloc,
     .tp_methods = vk_dev_methods,
 };
 

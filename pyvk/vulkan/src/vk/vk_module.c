@@ -29,6 +29,8 @@
 #include "vk_queue/vk_queue.h"
 #include "vk_swapchain/vk_swapchain_ci.h"
 #include "vk_swapchain/vk_swapchain.h"
+#include "vk_cmd_pool/vk_cmd_pool_ci.h"
+#include "vk_cmd_pool/vk_cmd_pool.h"
 
 PyObject *vk_create_instance(PyObject *self, PyObject *args, PyObject *kwds)
 {
@@ -251,6 +253,20 @@ PyMODINIT_FUNC PyInit_vulkan(void)
     }
 
     mod = add_vk_queue_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_cmd_pool_ci_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_cmd_pool_to_module(mod);
 
     if (mod == NULL)
     {
