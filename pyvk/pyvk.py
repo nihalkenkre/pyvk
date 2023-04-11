@@ -604,14 +604,15 @@ class DeviceCreateInfo(vk.device_create_info):
 class SwapchainCreateInfoKHR(vk.swapchain_create_info):
     def __init__(self, s_type=StructureType, p_next=None, flags=SwapchainCreateFlagBitsKHR,
                  surface=vk.surface, min_image_count=1, image_format=Format, image_color_space=ColorSpace,
-                 image_extent=(), image_array_layers=1, image_usage_flags=ImageUsageFlagBits, image_sharing_mode=SharingMode,
+                 image_extent=None, image_array_layers=1, image_usage_flags=ImageUsageFlagBits, image_sharing_mode=SharingMode,
                  queue_family_indices=[
                  ], pre_transform=SurfaceTransformFlagBits, composite_alpha=CompositeAlphFlagBitsKHR,
                  present_mode=PresentModeKHR, clipped=True, old_swapchain=vk.swapchain):
 
-        if len(image_extent) != 2:
-            raise ValueError(
-                'Please pass a tuple of size 2 for image_extent in pyvk.SwapchainCreateInfo')
+        if image_extent is not None:
+            if len(image_extent) != 2:
+                raise ValueError(
+                    'Please pass a tuple of size 2 for image_extent in pyvk.SwapchainCreateInfo')
 
         flags_value = flags.value if isinstance(
             flags, SwapchainCreateFlagBitsKHR) else flags
@@ -647,6 +648,9 @@ class Device(object):
         for r in Result:
             if result == r.value:
                 return sc, r
+
+    def destroy_swapchain(self, swapchain=vk.swapchain):
+        self._d.destroy_swapchain(swapchain)
 
 
 class PhysicalDevice(object):

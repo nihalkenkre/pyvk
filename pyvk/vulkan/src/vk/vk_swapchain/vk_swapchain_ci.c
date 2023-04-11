@@ -75,8 +75,8 @@ void init_swapchain_ci_from_obj(vk_swapchain_ci *obj)
     obj->ci.imageFormat = obj->image_format;
     obj->ci.imageColorSpace = obj->image_color_space;
 
-    obj->ci.imageExtent.width = PyLong_FromLong(PyTuple_GetItem(obj->image_extent, 0));
-    obj->ci.imageExtent.height = PyLong_FromLong(PyTuple_GetItem(obj->image_extent, 1));
+    obj->ci.imageExtent.width = PyLong_AsLong(PyTuple_GetItem(obj->image_extent, 0));
+    obj->ci.imageExtent.height = PyLong_AsLong(PyTuple_GetItem(obj->image_extent, 1));
 
     obj->ci.imageArrayLayers = obj->image_array_layers;
     obj->ci.imageUsage = obj->image_usage_flags;

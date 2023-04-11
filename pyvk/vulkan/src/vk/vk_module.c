@@ -66,12 +66,6 @@ PyObject *vk_destroy_instance(PyObject *self, PyObject *args, PyObject *kwds)
         return NULL;
     }
 
-    if (PyObject_TypeCheck(inst, &vk_instance_type) == 0)
-    {
-        PyErr_SetString(PyExc_TypeError, "Please pass object of type vulkan.instance");
-        return NULL;
-    }
-
     if (((vk_instance *)inst)->instance != VK_NULL_HANDLE)
     {
         DEBUG_LOG("destroying instance\n");

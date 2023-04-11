@@ -60,9 +60,33 @@ PyObject *vk_dev_create_swapchain(vk_dev *self, PyObject *args)
     return return_obj;
 }
 
+PyObject *vk_dev_destroy_swapchain(vk_dev *self, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_destroy_swapchain\n");
+
+    PyObject *swapchain = NULL;
+    PyArg_Parse(args, "O", &swapchain);
+
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    if (((vk_swapchain*)swapchain)->swapchain != VK_NULL_HANDLE)
+    {
+        DEBUG_LOG("destroying swapchain\n");
+        vkDestroySwapchainKHR(self->device, ((vk_swapchain*)swapchain)->swapchain, NULL);
+    }
+
+    Py_XDECREF(swapchain);
+
+    return Py_None;
+}
+
 PyMethodDef vk_dev_methods[] = {
     {"get_queue", (PyCFunction)vk_dev_get_queue, METH_VARARGS | METH_KEYWORDS, NULL},
     {"create_swapchain", (PyCFunction)vk_dev_create_swapchain, METH_O, NULL},
+    {"destroy_swapchain", (PyCFunction)vk_dev_destroy_swapchain, METH_O, NULL},
     {NULL},
 };
 
