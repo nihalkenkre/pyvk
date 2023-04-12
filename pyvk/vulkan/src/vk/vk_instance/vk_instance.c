@@ -33,7 +33,7 @@ PyObject *vk_instance_get_phy_devs(PyObject *self)
         vk_phy_dev *phy_dev = PyObject_New(vk_phy_dev, &vk_phy_dev_type);
         phy_dev->phy_dev = phy_devs[phy_dev_idx];
 
-        PyList_SetItem(phy_dev_list, phy_dev_idx, phy_dev);
+        PyList_SetItem(phy_dev_list, phy_dev_idx, (PyObject *)phy_dev);
     }
 
     free(phy_devs);

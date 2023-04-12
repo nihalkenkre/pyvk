@@ -22,7 +22,6 @@ typedef struct vk_phy_dev_props
     VkPhysicalDeviceProperties props;
 } vk_phy_dev_props;
 
-PyMemberDef vk_phy_dev_props_members[];
 PyTypeObject vk_phy_dev_props_type;
 
 PyObject* add_vk_phy_dev_props_to_module(PyObject* mod);

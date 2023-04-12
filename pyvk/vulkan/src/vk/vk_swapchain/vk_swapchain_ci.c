@@ -26,9 +26,11 @@ PyMemberDef vk_swapchain_ci_members[] = {
     {NULL},
 };
 
-void vk_swapchain_ci_dealloc(vk_swapchain_ci *self)
+void vk_swapchain_ci_dealloc(PyObject *self_obj)
 {
     DEBUG_LOG("vk_swapchain_ci_dealloc\n");
+
+    vk_swapchain_ci *self = (vk_swapchain_ci *)self_obj;
 
     if (self->p_next != Py_None)
     {
@@ -57,15 +59,17 @@ void vk_swapchain_ci_dealloc(vk_swapchain_ci *self)
 
     if (self->ci.pQueueFamilyIndices != NULL)
     {
-        free(self->ci.pQueueFamilyIndices);
+        free((uint32_t *)self->ci.pQueueFamilyIndices);
     }
 
     Py_TYPE((PyObject *)self)->tp_free((PyObject *)self);
 }
 
-void init_swapchain_ci_from_obj(vk_swapchain_ci *obj)
+void init_swapchain_ci_from_obj(PyObject *obj_obj)
 {
     DEBUG_LOG("init_swapchain_ci_from_obj\n");
+
+    vk_swapchain_ci *obj = (vk_swapchain_ci *)obj_obj;
 
     obj->ci.sType = obj->s_type;
     obj->ci.pNext = NULL;
@@ -82,15 +86,15 @@ void init_swapchain_ci_from_obj(vk_swapchain_ci *obj)
     obj->ci.imageUsage = obj->image_usage_flags;
 
     obj->ci.imageSharingMode = obj->image_sharing_mode;
-    obj->ci.queueFamilyIndexCount = PyList_Size(obj->queue_family_indices);
-    get_floats_from_list(obj->queue_family_indices, &obj->ci.pQueueFamilyIndices);
+    obj->ci.queueFamilyIndexCount = (uint32_t)PyList_Size(obj->queue_family_indices);
+    get_uint32s_from_list(obj->queue_family_indices, &obj->ci.pQueueFamilyIndices);
 
     obj->ci.preTransform = obj->pre_transform;
     obj->ci.compositeAlpha = obj->composite_alpha;
     obj->ci.presentMode = obj->present_mode;
     obj->ci.clipped = obj->clipped;
 
-    if ((vk_swapchain *)obj->old_swapchain != Py_None)
+    if (obj->old_swapchain != Py_None)
     {
         obj->ci.oldSwapchain = ((vk_swapchain *)obj->old_swapchain)->swapchain;
     }
@@ -100,9 +104,11 @@ void init_swapchain_ci_from_obj(vk_swapchain_ci *obj)
     }
 }
 
-int vk_swapchain_ci_init(vk_swapchain_ci *self, PyObject *args, PyObject *kwds)
+int vk_swapchain_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_swapchain_ci_init\n");
+
+    vk_swapchain_ci *self = (vk_swapchain_ci *)self_obj;
 
     PyObject *p_next = NULL;
     PyObject *surface = NULL;
@@ -192,7 +198,7 @@ int vk_swapchain_ci_init(vk_swapchain_ci *self, PyObject *args, PyObject *kwds)
     }
     DEBUG_LOG("swapchain_ci parsed old_swapchain\n");
 
-    init_swapchain_ci_from_obj(self);
+    init_swapchain_ci_from_obj(self_obj);
     if (PyErr_Occurred())
     {
         return -1;

@@ -12,7 +12,6 @@ typedef struct vk_surface
 
 PyObject *add_vk_surface_to_module(PyObject *mod);
 
-PyMethodDef vk_surface_methods[];
 PyTypeObject vk_surface_type;
 
 #endif // VK_SURFACE

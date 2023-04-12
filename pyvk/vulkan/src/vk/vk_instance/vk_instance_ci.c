@@ -2,6 +2,7 @@
 #include "vk_app_info.h"
 
 #include "log.h"
+#include "utils.h"
 
 PyMemberDef vk_instance_ci_members[] = {
     {"s_type", T_ULONG, offsetof(vk_instance_ci, s_type), 0, "Pass the vulkan.STRUCTURE_TYPE_INSTANCE_CREATE_INFO enum"},
@@ -13,9 +14,11 @@ PyMemberDef vk_instance_ci_members[] = {
     {NULL},
 };
 
-void vk_instance_ci_dealloc(vk_instance_ci *self)
+void vk_instance_ci_dealloc(PyObject *self_obj)
 {
     DEBUG_LOG("vk_instance_ci_dealloc\n");
+
+    vk_instance_ci *self = (vk_instance_ci *)self_obj;
 
     if (self->ci.ppEnabledLayerNames)
     {
@@ -66,9 +69,11 @@ void vk_instance_ci_dealloc(vk_instance_ci *self)
     Py_TYPE((PyObject *)self)->tp_free((PyObject *)self);
 }
 
-void init_instance_ci_from_obj(vk_instance_ci *obj)
+void init_instance_ci_from_obj(PyObject *obj_obj)
 {
     DEBUG_LOG("init_instance_ci_from_obj\n");
+
+    vk_instance_ci *obj = (vk_instance_ci *)obj_obj;
 
     obj->ci.sType = obj->s_type;
     obj->ci.pNext = NULL;
@@ -90,9 +95,11 @@ void init_instance_ci_from_obj(vk_instance_ci *obj)
     obj->ci.ppEnabledExtensionNames = extension_names;
 }
 
-int vk_instance_ci_init(vk_instance_ci *self, PyObject *args, PyObject *kwds)
+int vk_instance_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_instance_ci_init\n");
+
+    vk_instance_ci *self = (vk_instance_ci *)self_obj;
 
     PyObject *p_next = NULL;
     PyObject *app_info = NULL;
@@ -163,7 +170,7 @@ int vk_instance_ci_init(vk_instance_ci *self, PyObject *args, PyObject *kwds)
     }
     DEBUG_LOG("instance_ci parsed enabled_extensions\n");
 
-    init_instance_ci_from_obj(self);
+    init_instance_ci_from_obj(self_obj);
     if (PyErr_Occurred())
     {
         return -1;

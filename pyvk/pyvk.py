@@ -633,6 +633,19 @@ class SwapchainCreateInfoKHR(vk.swapchain_create_info):
                                                      composite_alpha_value, present_mode_value, clipped, old_swapchain)
 
 
+class CommandPoolCreateInfo(vk.command_pool_create_info):
+    def __init__(self, s_type=StructureType, p_next=None, flags=CommandPoolCreateFlagBits.NONE,
+                 queue_family_index=0):
+
+        s_type_value = s_type.value if isinstance(
+            s_type, StructureType) else s_type
+        flags_value = flags.value if isinstance(
+            flags, CommandPoolCreateFlagBits) else flags
+
+        super(CommandPoolCreateInfo, self).__init__(
+            s_type_value, p_next, flags_value, queue_family_index)
+
+
 class Device(object):
     def __init__(self, device=vk.device):
         self._d = device
@@ -649,6 +662,16 @@ class Device(object):
 
     def destroy_swapchain(self, swapchain=vk.swapchain):
         self._d.destroy_swapchain(swapchain)
+
+    def create_command_pool(self, comamnd_pool_create_info=CommandPoolCreateInfo):
+        cp, result = self._d.create_command_pool(comamnd_pool_create_info)
+
+        for r in Result:
+            if result == r.value:
+                return cp, r
+
+    def destroy_command_pool(self, command_pool=vk.command_pool):
+        self._d.destroy_command_pool(command_pool)
 
 
 class PhysicalDevice(object):
@@ -697,19 +720,6 @@ class PhysicalDevice(object):
 
     def destroy_device(self, device=Device):
         self._pd.destroy_device(device._d)
-
-
-class CommandPoolCreateInfo(vk.command_pool_create_info):
-    def __init__(self, s_type=StructureType, p_next=None, flags=CommandPoolCreateFlagBits.NONE,
-                 queue_family_index=0):
-
-        s_type_value = s_type.value if isinstance(
-            s_type, StructureType) else s_type
-        flags_value = flags.value if isinstance(
-            flags, CommandPoolCreateFlagBits) else flags
-
-        super(CommandPoolCreateInfo, self).__init__(
-            s_type_value, p_next, flags_value, queue_family_index)
 
 
 def create_instance(instance_create_info=InstanceCreateInfo):

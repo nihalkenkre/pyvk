@@ -328,7 +328,7 @@ PyObject *create_phy_dev_surf_fmts_khr_obj(const uint32_t fmt_count, const VkSur
         fmt_obj->color_space = (fmts + fmt_idx)->colorSpace;
         fmt_obj->format = (fmts + fmt_idx)->format;
 
-        PyList_SetItem(fmts_obj, fmt_idx, fmt_obj);
+        PyList_SetItem(fmts_obj, fmt_idx, (PyObject *)fmt_obj);
     }
 
     return fmts_obj;
@@ -501,9 +501,11 @@ PyObject *vk_phy_dev_get_surface_present_modes_khr(PyObject *self, PyObject *arg
     return return_obj;
 }
 
-PyObject *vk_phy_dev_create_dev(vk_phy_dev *self, PyObject *args)
+PyObject *vk_phy_dev_create_dev(PyObject *self_obj, PyObject *args)
 {
     DEBUG_LOG("vk_phy_dev_create_dev\n");
+
+    vk_phy_dev *self = (vk_phy_dev *)self_obj;
 
     PyObject *dev_ci_obj = NULL;
 
@@ -517,33 +519,33 @@ PyObject *vk_phy_dev_create_dev(vk_phy_dev *self, PyObject *args)
 
     vk_dev *dev = PyObject_NEW(vk_dev, &vk_dev_type);
 
-    VkResult result = vkCreateDevice(((vk_phy_dev *)self)->phy_dev, &ci_obj->ci, NULL, &dev->device);
+    VkResult result = vkCreateDevice(self->phy_dev, &ci_obj->ci, NULL, &dev->device);
 
     PyObject *return_obj = PyTuple_New(2);
     PyTuple_SetItem(return_obj, 0, (PyObject *)dev);
     PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
 
     return return_obj;
-
-shutdown:
-    return NULL;
 }
 
-PyObject *vk_phy_dev_destroy_dev(PyObject *self, PyObject *args)
+PyObject *vk_phy_dev_destroy_dev(PyObject *self_obj, PyObject *args)
 {
     DEBUG_LOG("vk_phy_dev_destroy_dev\n");
-    PyObject *dev = NULL;
 
-    PyArg_Parse(args, "O", &dev);
+    PyObject *dev_obj = NULL;
+
+    PyArg_Parse(args, "O", &dev_obj);
     if (PyErr_Occurred())
     {
         return NULL;
     }
 
-    if (((vk_dev *)dev)->device != VK_NULL_HANDLE)
+    vk_dev *dev = (vk_dev *)dev_obj;
+
+    if (dev->device != VK_NULL_HANDLE)
     {
         DEBUG_LOG("destroying device\n");
-        vkDestroyDevice(((vk_dev *)dev)->device, NULL);
+        vkDestroyDevice(dev->device, NULL);
     }
 
     Py_XDECREF(dev);
@@ -551,9 +553,11 @@ PyObject *vk_phy_dev_destroy_dev(PyObject *self, PyObject *args)
     return Py_None;
 }
 
-PyObject *vk_phy_dev_get_q_fly_props(vk_phy_dev *self)
+PyObject *vk_phy_dev_get_q_fly_props(PyObject *self_obj)
 {
     DEBUG_LOG("vk_phy_dev_get_q_fly_props\n");
+
+    vk_phy_dev *self = (vk_phy_dev *)self_obj;
 
     uint32_t q_fly_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(self->phy_dev, &q_fly_count, NULL);
@@ -577,7 +581,7 @@ PyObject *vk_phy_dev_get_q_fly_props(vk_phy_dev *self)
 
         prop->min_image_xfer_grains = gran_obj;
 
-        PyList_SetItem(q_fly_props_obj, q_fly_idx, prop);
+        PyList_SetItem(q_fly_props_obj, q_fly_idx, (PyObject *)prop);
     }
 
     free(q_fly_props);

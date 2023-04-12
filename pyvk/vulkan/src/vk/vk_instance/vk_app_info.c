@@ -12,9 +12,11 @@ PyMemberDef vk_app_info_members[] = {
     {NULL},
 };
 
-void vk_app_info_dealloc(vk_app_info *self)
+void vk_app_info_dealloc(PyObject *self_obj)
 {
     DEBUG_LOG("vk_app_info_dealloc\n");
+
+    vk_app_info *self = (vk_app_info *)self_obj;
 
     if (self->app_info.pApplicationName)
     {
@@ -37,19 +39,9 @@ void vk_app_info_dealloc(vk_app_info *self)
         Py_XDECREF(self->p_next);
     }
 
-    if (self->app_name != Py_None)
-    {
-        Py_XDECREF(self->app_name);
-    }
-
     if (self->app_ver != Py_None)
     {
         Py_XDECREF(self->app_ver);
-    }
-
-    if (self->engine_name != Py_None)
-    {
-        Py_XDECREF(self->engine_name);
     }
 
     if (self->engine_ver != Py_None)
@@ -71,7 +63,7 @@ char *get_string_from_obj(PyObject *obj)
 
     uint32_t bytes_count = 0;
     char *bytes = NULL;
-    PyBytes_AsStringAndSize(ascii, &bytes, &bytes_count);
+    PyBytes_AsStringAndSize(ascii, &bytes, (Py_ssize_t *)&bytes_count);
 
     char *str = (char *)malloc(sizeof(char) * (bytes_count + 1));
     memcpy(str, bytes, sizeof(char) * (bytes_count + 1));
@@ -81,35 +73,39 @@ char *get_string_from_obj(PyObject *obj)
     return str;
 }
 
-void init_app_info_from_obj(vk_app_info *app_info_obj)
+void init_app_info_from_obj(PyObject *obj_obj)
 {
     DEBUG_LOG("init_app_info_from_obj\n");
 
-    app_info_obj->app_info.sType = app_info_obj->s_type;
-    app_info_obj->app_info.pNext = NULL;
+    vk_app_info *obj = (vk_app_info *)obj_obj;
 
-    uint32_t variant = PyLong_AsLong(PyTuple_GetItem(app_info_obj->app_ver, 0));
-    uint32_t major = PyLong_AsLong(PyTuple_GetItem(app_info_obj->app_ver, 1));
-    uint32_t minor = PyLong_AsLong(PyTuple_GetItem(app_info_obj->app_ver, 2));
-    uint32_t patch = PyLong_AsLong(PyTuple_GetItem(app_info_obj->app_ver, 3));
-    app_info_obj->app_info.applicationVersion = VK_MAKE_API_VERSION(variant, major, minor, patch);
+    obj->app_info.sType = obj->s_type;
+    obj->app_info.pNext = NULL;
 
-    variant = PyLong_AsLong(PyTuple_GetItem(app_info_obj->engine_ver, 0));
-    major = PyLong_AsLong(PyTuple_GetItem(app_info_obj->engine_ver, 1));
-    minor = PyLong_AsLong(PyTuple_GetItem(app_info_obj->engine_ver, 2));
-    patch = PyLong_AsLong(PyTuple_GetItem(app_info_obj->engine_ver, 3));
-    app_info_obj->app_info.engineVersion = VK_MAKE_API_VERSION(variant, major, minor, patch);
+    uint32_t variant = PyLong_AsLong(PyTuple_GetItem(obj->app_ver, 0));
+    uint32_t major = PyLong_AsLong(PyTuple_GetItem(obj->app_ver, 1));
+    uint32_t minor = PyLong_AsLong(PyTuple_GetItem(obj->app_ver, 2));
+    uint32_t patch = PyLong_AsLong(PyTuple_GetItem(obj->app_ver, 3));
+    obj->app_info.applicationVersion = VK_MAKE_API_VERSION(variant, major, minor, patch);
 
-    variant = PyLong_AsLong(PyTuple_GetItem(app_info_obj->api_ver, 0));
-    major = PyLong_AsLong(PyTuple_GetItem(app_info_obj->api_ver, 1));
-    minor = PyLong_AsLong(PyTuple_GetItem(app_info_obj->api_ver, 2));
-    patch = PyLong_AsLong(PyTuple_GetItem(app_info_obj->api_ver, 3));
-    app_info_obj->app_info.apiVersion = VK_MAKE_API_VERSION(variant, major, minor, patch);
+    variant = PyLong_AsLong(PyTuple_GetItem(obj->engine_ver, 0));
+    major = PyLong_AsLong(PyTuple_GetItem(obj->engine_ver, 1));
+    minor = PyLong_AsLong(PyTuple_GetItem(obj->engine_ver, 2));
+    patch = PyLong_AsLong(PyTuple_GetItem(obj->engine_ver, 3));
+    obj->app_info.engineVersion = VK_MAKE_API_VERSION(variant, major, minor, patch);
+
+    variant = PyLong_AsLong(PyTuple_GetItem(obj->api_ver, 0));
+    major = PyLong_AsLong(PyTuple_GetItem(obj->api_ver, 1));
+    minor = PyLong_AsLong(PyTuple_GetItem(obj->api_ver, 2));
+    patch = PyLong_AsLong(PyTuple_GetItem(obj->api_ver, 3));
+    obj->app_info.apiVersion = VK_MAKE_API_VERSION(variant, major, minor, patch);
 }
 
-int vk_app_info_init(vk_app_info *self, PyObject *args, PyObject *kwds)
+int vk_app_info_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_app_info_init\n");
+
+    vk_app_info *self = (vk_app_info *)self_obj;
 
     PyObject *p_next = NULL;
     PyObject *app_ver = NULL;
@@ -178,7 +174,7 @@ int vk_app_info_init(vk_app_info *self, PyObject *args, PyObject *kwds)
     }
     DEBUG_LOG("app_info parsed api_ver\n");
 
-    init_app_info_from_obj(self);
+    init_app_info_from_obj(self_obj);
     if (PyErr_Occurred())
     {
         return -1;

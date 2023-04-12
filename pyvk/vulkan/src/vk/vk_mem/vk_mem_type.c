@@ -1,5 +1,7 @@
 #include "vk_mem_type.h"
 
+#include "log.h"
+
 PyMemberDef vk_mem_type_members[] = {
     {"property_flags", T_UINT, offsetof(vk_mem_type, property_flags), 1, "Property flags for this memory type"},
     {"heap_index", T_UINT, offsetof(vk_mem_type, heap_index), 1, "Heap index of the memory type"},

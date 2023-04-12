@@ -1,5 +1,7 @@
 #include "vk_swapchain.h"
 
+#include "log.h"
+
 PyTypeObject vk_swapchain_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "vulkan.swapchain",

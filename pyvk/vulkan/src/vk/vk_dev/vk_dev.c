@@ -4,11 +4,16 @@
 #include "vk_swapchain_ci.h"
 #include "vk_swapchain.h"
 
+#include "vk_cmd_pool_ci.h"
+#include "vk_cmd_pool.h"
+
 #include "log.h"
 
-PyObject *vk_dev_get_queue(vk_dev *self, PyObject *args, PyObject *kwds)
+PyObject *vk_dev_get_queue(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_dev_get_queue\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
 
     uint32_t q_flx_idx = 0;
     uint32_t q_idx = 0;
@@ -25,14 +30,16 @@ PyObject *vk_dev_get_queue(vk_dev *self, PyObject *args, PyObject *kwds)
     VkQueue q;
     vkGetDeviceQueue(self->device, q_flx_idx, q_idx, &q);
 
-    PyObject *q_obj = PyObject_NEW(vk_queue, &vk_queue_type);
+    vk_queue *q_obj = PyObject_NEW(vk_queue, &vk_queue_type);
 
-    return q_obj;
+    return (PyObject *)q_obj;
 }
 
-PyObject *vk_dev_create_swapchain(vk_dev *self, PyObject *args)
+PyObject *vk_dev_create_swapchain(PyObject *self_obj, PyObject *args)
 {
     DEBUG_LOG("vk_dev_create_swapchain\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
 
     PyObject *sc_ci = NULL;
 
@@ -54,9 +61,11 @@ PyObject *vk_dev_create_swapchain(vk_dev *self, PyObject *args)
     return return_obj;
 }
 
-PyObject *vk_dev_destroy_swapchain(vk_dev *self, PyObject *args)
+PyObject *vk_dev_destroy_swapchain(PyObject *self_obj, PyObject *args)
 {
     DEBUG_LOG("vk_dev_destroy_swapchain\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
 
     PyObject *swapchain = NULL;
     PyArg_Parse(args, "O", &swapchain);
@@ -77,14 +86,55 @@ PyObject *vk_dev_destroy_swapchain(vk_dev *self, PyObject *args)
     return Py_None;
 }
 
-PyObject *vk_dev_create_cmd_pool(vk_dev *self, PyObject *args)
+PyObject *vk_dev_create_cmd_pool(PyObject *self_obj, PyObject *args)
 {
     DEBUG_LOG("vk_dev_create_cmd_pool\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *cmd_pool_ci_obj = NULL;
+
+    PyArg_Parse(args, "O", &cmd_pool_ci_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_cmd_pool_ci *ci_obj = (vk_cmd_pool_ci *)cmd_pool_ci_obj;
+    vk_cmd_pool *cmd_pool = PyObject_NEW(vk_cmd_pool, &vk_cmd_pool_type);
+
+    VkResult result = vkCreateCommandPool(self->device, &ci_obj->ci, NULL, &cmd_pool->command_pool);
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, (PyObject *)cmd_pool);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
 }
 
-PyObject *vk_dev_destroy_cmd_pool(vk_dev* self, PyObject *args)
+PyObject *vk_dev_destroy_cmd_pool(PyObject *self_obj, PyObject *args)
 {
     DEBUG_LOG("vk_dev_destroy_cmd_pool\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *cmd_pool_obj = NULL;
+    PyArg_Parse(args, "O", &cmd_pool_obj);
+
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_cmd_pool* cmd_pool = (vk_cmd_pool*) cmd_pool_obj;
+
+    if (cmd_pool->command_pool != VK_NULL_HANDLE)
+    {
+        DEBUG_LOG("destroying cmd_pool\n");
+        vkDestroyCommandPool(self->device, cmd_pool->command_pool, NULL);
+    }
+
+    Py_XDECREF(cmd_pool);
 
     return Py_None;
 }

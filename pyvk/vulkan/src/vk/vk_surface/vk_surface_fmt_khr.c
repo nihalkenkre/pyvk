@@ -2,6 +2,8 @@
 
 #include <structmember.h>
 
+#include "log.h"
+
 PyMemberDef vk_surface_fmt_khr_members[] = {
     {"format", T_LONG, offsetof(vk_surface_fmt_khr, format), 1, "Format compatible with the surface"},
     {"color_space", T_LONG, offsetof(vk_surface_fmt_khr, color_space), 1, "Color space compatible with the surface"},

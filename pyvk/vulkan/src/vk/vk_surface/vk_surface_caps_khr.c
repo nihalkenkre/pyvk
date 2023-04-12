@@ -18,9 +18,11 @@ PyMemberDef vk_surface_caps_khr_members[] = {
     {NULL},
 };
 
-void vk_surface_caps_khr_dealloc(vk_surface_caps_khr *self)
+void vk_surface_caps_khr_dealloc(PyObject* self_obj)
 {
     DEBUG_LOG("vk_surface_caps_khr_dealloc\n");
+
+    vk_surface_caps_khr *self = (vk_surface_caps_khr *)self_obj;
 
     Py_XDECREF(self->current_extent);
     Py_XDECREF(self->min_image_extent);

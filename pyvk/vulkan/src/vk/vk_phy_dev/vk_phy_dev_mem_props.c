@@ -1,5 +1,7 @@
 #include "vk_phy_dev_mem_props.h"
 
+#include "log.h"
+
 PyMemberDef vk_phy_dev_mem_props_members[] = {
     {"types", T_OBJECT_EX, offsetof(vk_phy_dev_mem_props, types), 1, "List of memory types of the physical device"},
     {"heaps", T_OBJECT_EX, offsetof(vk_phy_dev_mem_props, heaps), 1, "List of memory heaps of the physical device"},

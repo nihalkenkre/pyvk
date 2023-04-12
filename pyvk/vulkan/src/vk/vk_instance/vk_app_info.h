@@ -22,7 +22,6 @@ typedef struct vk_app_info
 
 PyObject *add_vk_app_info_to_module(PyObject *mod);
 
-PyMemberDef vk_app_info_members[];
 PyTypeObject vk_app_info_type;
 
 #endif // VK_APP_INFO

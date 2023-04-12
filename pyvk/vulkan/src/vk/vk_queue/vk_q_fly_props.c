@@ -12,9 +12,11 @@ PyMemberDef vk_q_fly_props_members[] = {
     {NULL},
 };
 
-void vk_q_fly_props_dealloc(vk_q_fly_props *self)
+void vk_q_fly_props_dealloc(PyObject *self_obj)
 {
     DEBUG_LOG("vk_q_fly_props_dealloc\n");
+
+    vk_q_fly_props *self = (vk_q_fly_props *)self_obj;
 
     if (self->min_image_xfer_grains != Py_None)
     {
@@ -59,4 +61,3 @@ shutdown:
 
     return NULL;
 }
-

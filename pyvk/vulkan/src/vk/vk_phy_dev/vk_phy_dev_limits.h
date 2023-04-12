@@ -155,7 +155,6 @@ typedef struct vk_phy_dev_limits
     VkPhysicalDeviceLimits limits;
 } vk_phy_dev_limits;
 
-PyMemberDef vk_phy_dev_limits_members[];
 PyTypeObject vk_phy_dev_limits_type;
 
 PyObject *add_vk_phy_dev_limits_to_module(PyObject *mod);

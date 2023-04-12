@@ -1,10 +1,13 @@
 #include "vk_cmd_pool.h"
 
+#include "log.h"
+
 PyTypeObject vk_cmd_pool_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "vulkan.command_pool",
     .tp_basicsize = sizeof(vk_cmd_pool),
     .tp_doc = PyDoc_STR("Vulkan Command Pool Docs"),
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
 };
 
 PyObject *add_vk_cmd_pool_to_module(PyObject *mod)

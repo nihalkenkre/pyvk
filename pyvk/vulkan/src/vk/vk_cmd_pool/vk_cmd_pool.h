@@ -14,6 +14,6 @@ typedef struct vk_cmd_pool
 
 PyTypeObject vk_cmd_pool_type;
 
-PyObject* vk_add_cmd_pool_to_module(PyObject* mod);
+PyObject *add_vk_cmd_pool_to_module(PyObject *mod);
 
 #endif

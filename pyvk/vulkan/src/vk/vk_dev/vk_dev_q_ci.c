@@ -1,6 +1,7 @@
 #include "vk_dev_q_ci.h"
 
 #include "log.h"
+#include "utils.h"
 
 PyMemberDef vk_dev_q_ci_members[] = {
     {"s_type", T_UINT, offsetof(vk_dev_q_ci, s_type), 0, "Pass the vulkan.STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO"},
@@ -12,9 +13,11 @@ PyMemberDef vk_dev_q_ci_members[] = {
     {NULL},
 };
 
-void vk_dev_q_ci_dealloc(vk_dev_q_ci *self)
+void vk_dev_q_ci_dealloc(PyObject *self_obj)
 {
     DEBUG_LOG("vk_dev_q_ci_dealloc\n");
+
+    vk_dev_q_ci *self = (vk_dev_q_ci *)self_obj;
 
     if (self->ci.pQueuePriorities)
     {
@@ -34,9 +37,11 @@ void vk_dev_q_ci_dealloc(vk_dev_q_ci *self)
     Py_TYPE((PyObject *)self)->tp_free((PyObject *)self);
 }
 
-void init_dev_q_ci_from_obj(vk_dev_q_ci *obj)
+void init_dev_q_ci_from_obj(PyObject *obj_obj)
 {
     DEBUG_LOG("init_dev_q_ci_from_obj\n");
+
+    vk_dev_q_ci *obj = (vk_dev_q_ci *)obj_obj;
 
     obj->ci.sType = obj->s_type;
     obj->ci.pNext = NULL;
@@ -47,9 +52,11 @@ void init_dev_q_ci_from_obj(vk_dev_q_ci *obj)
     get_floats_from_list(obj->priorities, &obj->ci.pQueuePriorities);
 }
 
-int vk_dev_q_ci_init(vk_dev_q_ci *self, PyObject *args, PyObject *kwds)
+int vk_dev_q_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_dev_q_ci_init\n");
+
+    vk_dev_q_ci *self = (vk_dev_q_ci *)self_obj;
 
     PyObject *p_next = NULL;
     PyObject *priorities = NULL;
@@ -88,7 +95,7 @@ int vk_dev_q_ci_init(vk_dev_q_ci *self, PyObject *args, PyObject *kwds)
     }
     DEBUG_LOG("dev_q_ci parsed priorities\n");
 
-    init_dev_q_ci_from_obj(self);
+    init_dev_q_ci_from_obj(self_obj);
     if (PyErr_Occurred())
     {
         return -1;

@@ -9,13 +9,11 @@
 typedef struct vk_phy_dev
 {
     PyObject_HEAD
-    VkPhysicalDevice phy_dev;
+        VkPhysicalDevice phy_dev;
 } vk_phy_dev;
-
-PyMethodDef vk_phy_dev_methods[];
 
 PyTypeObject vk_phy_dev_type;
 
-PyObject* add_vk_phy_dev_to_module(PyObject* mod);
+PyObject *add_vk_phy_dev_to_module(PyObject *mod);
 
 #endif // VK_PHY_DEV

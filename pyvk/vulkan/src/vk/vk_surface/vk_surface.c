@@ -1,5 +1,7 @@
 #include "vk_surface.h"
 
+#include "log.h"
+
 PyTypeObject vk_surface_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "vulkan.surface",

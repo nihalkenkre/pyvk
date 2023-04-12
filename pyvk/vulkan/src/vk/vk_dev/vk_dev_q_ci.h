@@ -19,7 +19,6 @@ typedef struct vk_dev_q_ci
     VkDeviceQueueCreateInfo ci;
 } vk_dev_q_ci;
 
-PyMemberDef vk_dev_q_ci_members[];
 PyTypeObject vk_dev_q_ci_type;
 
 PyObject *add_vk_dev_q_ci_to_module(PyObject *mod);

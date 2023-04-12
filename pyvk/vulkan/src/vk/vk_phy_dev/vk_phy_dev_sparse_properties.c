@@ -1,5 +1,7 @@
 #include "vk_phy_dev_sparse_properties.h"
 
+#include "log.h"
+
 PyMemberDef vk_phy_dev_sparse_props_members[] = {
     {"residency_standard_2d_block_shape", T_BOOL, offsetof(vk_phy_dev_sparse_props, residency_standard_2d_block_shape), 1, "Residency Standard 2D Block Shape"},
     {"residency_standard_2d_multisample_block_shape", T_BOOL, offsetof(vk_phy_dev_sparse_props, residency_standard_2d_multisample_block_shape), 1, "Residency Standard 2D Multisample Block Shape"},

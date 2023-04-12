@@ -81,7 +81,6 @@ typedef struct vk_phy_dev_features
     VkPhysicalDeviceFeatures features;
 } vk_phy_dev_features;
 
-PyMemberDef vk_phy_dev_features_members[];
 PyTypeObject vk_phy_dev_features_type;
 
 PyObject *add_vk_phy_dev_features_to_module(PyObject *mod);

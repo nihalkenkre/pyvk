@@ -16,9 +16,11 @@ PyMemberDef vk_dev_ci_members[] = {
     {NULL},
 };
 
-void vk_dev_ci_dealloc(vk_dev_ci *self)
+void vk_dev_ci_dealloc(PyObject *self_obj)
 {
     DEBUG_LOG("vk_dev_ci_dealloc\n");
+
+    vk_dev_ci *self = (vk_dev_ci *)self_obj;
 
     if (self->ci.ppEnabledLayerNames)
     {
@@ -80,7 +82,7 @@ void get_queue_cis_from_list(PyObject *obj, VkDeviceQueueCreateInfo **q_cis, uin
 
     if (PyList_Check(obj) == 1)
     {
-        *q_ci_count = PyList_Size(obj);
+        *q_ci_count = (uint32_t)PyList_Size(obj);
 
         *q_cis = (VkDeviceQueueCreateInfo *)malloc(sizeof(VkDeviceQueueCreateInfo) * *q_ci_count);
 
@@ -91,9 +93,11 @@ void get_queue_cis_from_list(PyObject *obj, VkDeviceQueueCreateInfo **q_cis, uin
     }
 }
 
-void init_device_ci_from_obj(vk_dev_ci *obj)
+void init_device_ci_from_obj(PyObject *obj_obj)
 {
     DEBUG_LOG("init_device_ci_from_obj\n");
+
+    vk_dev_ci *obj = (vk_dev_ci *)obj_obj;
 
     obj->ci.sType = obj->s_type;
     obj->ci.pNext = NULL;
@@ -123,9 +127,11 @@ void init_device_ci_from_obj(vk_dev_ci *obj)
     obj->ci.pEnabledFeatures = &((vk_phy_dev_features *)obj->enabled_features)->features;
 }
 
-int vk_dev_ci_init(vk_dev_ci *self, PyObject *args, PyObject *kwds)
+int vk_dev_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_dev_ci_init\n");
+
+    vk_dev_ci *self = (vk_dev_ci *)self_obj;
 
     PyObject *p_next = NULL;
     PyObject *queue_create_infos = NULL;
@@ -210,7 +216,7 @@ int vk_dev_ci_init(vk_dev_ci *self, PyObject *args, PyObject *kwds)
     }
     DEBUG_LOG("dev_ci parsed enabled_features\n");
 
-    init_device_ci_from_obj(self);
+    init_device_ci_from_obj(self_obj);
     if (PyErr_Occurred())
     {
         return -1;

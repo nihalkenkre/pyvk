@@ -12,9 +12,11 @@ PyMemberDef vk_cmd_pool_ci_members[] = {
     {NULL},
 };
 
-void vk_cmd_pool_ci_dealloc(vk_cmd_pool_ci *self)
+void vk_cmd_pool_ci_dealloc(PyObject *self_obj)
 {
     DEBUG_LOG("vk_cmd_pool_ci_dealloc\n");
+
+    vk_cmd_pool_ci *self = (vk_cmd_pool_ci *)self_obj;
 
     if (self->p_next != Py_None)
     {
@@ -24,14 +26,23 @@ void vk_cmd_pool_ci_dealloc(vk_cmd_pool_ci *self)
     Py_TYPE((PyObject *)self)->tp_free((PyObject *)self);
 }
 
-void init_cmd_pool_ci_from_obj(vk_cmd_pool_ci *obj)
+void init_cmd_pool_ci_from_obj(PyObject *obj_obj)
 {
     DEBUG_LOG("init_cmd_pool_ci_from_oj\n");
+
+    vk_cmd_pool_ci* obj = (vk_cmd_pool_ci*) obj_obj;
+
+    obj->ci.sType = obj->s_type;
+    obj->ci.pNext = obj->p_next;
+    obj->ci.flags = obj->flags;
+    obj->ci.queueFamilyIndex = obj->q_fly_idx;
 }
 
-int vk_cmd_pool_ci_init(vk_cmd_pool_ci *self, PyObject *args, PyObject *kwds)
+int vk_cmd_pool_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_cmd_pool_ci_init\n");
+
+    vk_cmd_pool_ci *self = (vk_cmd_pool_ci *)self_obj;
 
     PyObject *p_next = NULL;
     PyObject *tmp = NULL;
@@ -57,7 +68,7 @@ int vk_cmd_pool_ci_init(vk_cmd_pool_ci *self, PyObject *args, PyObject *kwds)
     }
     DEBUG_LOG("vk_cmd_pool_ci parsed p_next\n");
 
-    init_cmd_pool_ci_from_obj(self);
+    init_cmd_pool_ci_from_obj(self_obj);
     if (PyErr_Occurred())
     {
         return -1;

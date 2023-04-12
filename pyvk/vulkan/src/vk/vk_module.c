@@ -231,6 +231,13 @@ PyMODINIT_FUNC PyInit_vulkan(void)
         goto shutdown;
     }
 
+    mod = add_vk_queue_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
     mod = add_vk_swapchain_ci_to_module(mod);
 
     if (mod == NULL)
@@ -246,13 +253,6 @@ PyMODINIT_FUNC PyInit_vulkan(void)
     }
 
     mod = add_vk_q_fly_props_to_module(mod);
-
-    if (mod == NULL)
-    {
-        goto shutdown;
-    }
-
-    mod = add_vk_queue_to_module(mod);
 
     if (mod == NULL)
     {
