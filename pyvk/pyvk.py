@@ -508,6 +508,11 @@ class CommandPoolCreateFlagBits(Enum):
     PROTECTED_BIT = 0x00000004
 
 
+class CommandBufferLevel(Enum):
+    PRIMARY = 0
+    SECONDARY = 1
+
+
 class ApplicationInfo(vk.application_info):
     def __init__(self, s_type=StructureType, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
@@ -646,6 +651,15 @@ class CommandPoolCreateInfo(vk.command_pool_create_info):
             s_type_value, p_next, flags_value, queue_family_index)
 
 
+class CommandBufferAllocateInfo(vk.command_buffer_allocate_info):
+    def __init__(self, command_pool=vk.command_pool, level=CommandBufferLevel.PRIMARY, command_buffer_count=1):
+        level_value = level.value if isinstance(
+            level, CommandBufferLevel) else level
+
+        super(CommandBufferAllocateInfo, self).__init__(
+            command_pool, level_value, command_buffer_count)
+
+
 class Device(object):
     def __init__(self, device=vk.device):
         self._d = device
@@ -672,6 +686,17 @@ class Device(object):
 
     def destroy_command_pool(self, command_pool=vk.command_pool):
         self._d.destroy_command_pool(command_pool)
+
+    def allocate_command_buffers(self, command_buffer_allocate_info=CommandBufferAllocateInfo):
+        cmd_bufs, result = self._d.allocate_command_buffers(
+            command_buffer_allocate_info)
+
+        for r in Result:
+            if result == r.value:
+                return cmd_bufs, r
+
+    def free_command_buffers(self, command_pool=vk.command_pool, command_buffers=()):
+        self._d.free_command_buffers(command_pool, command_buffers)
 
 
 class PhysicalDevice(object):

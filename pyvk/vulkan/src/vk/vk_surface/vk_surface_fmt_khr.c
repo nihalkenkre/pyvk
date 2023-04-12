@@ -20,7 +20,7 @@ PyTypeObject vk_surface_fmt_khr_type = {
 
 PyObject *add_vk_surface_fmt_khr_to_module(PyObject *mod)
 {
-    DEBUG_LOG("add_vk_surface_fmt_khr_to_module\n");
+    DEBUG_LOG("adding surface_format_khr object\n");
 
     if (PyType_Ready(&vk_surface_fmt_khr_type) < 0)
     {

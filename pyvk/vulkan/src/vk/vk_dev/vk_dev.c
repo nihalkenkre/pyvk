@@ -7,6 +7,9 @@
 #include "vk_cmd_pool_ci.h"
 #include "vk_cmd_pool.h"
 
+#include "vk_cmd_buf_ai.h"
+#include "vk_cmd_buf.h"
+
 #include "log.h"
 
 PyObject *vk_dev_get_queue(PyObject *self_obj, PyObject *args, PyObject *kwds)
@@ -126,7 +129,7 @@ PyObject *vk_dev_destroy_cmd_pool(PyObject *self_obj, PyObject *args)
         return NULL;
     }
 
-    vk_cmd_pool* cmd_pool = (vk_cmd_pool*) cmd_pool_obj;
+    vk_cmd_pool *cmd_pool = (vk_cmd_pool *)cmd_pool_obj;
 
     if (cmd_pool->command_pool != VK_NULL_HANDLE)
     {
@@ -139,12 +142,85 @@ PyObject *vk_dev_destroy_cmd_pool(PyObject *self_obj, PyObject *args)
     return Py_None;
 }
 
+PyObject *vk_dev_alloc_cmd_bufs(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_alloc_cmd_bufs\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *ai_obj = NULL;
+    PyArg_Parse(args, "O", &ai_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_cmd_buf_ai *ai = (vk_cmd_buf_ai *)ai_obj;
+
+    VkCommandBuffer *cmd_bufs = (VkCommandBuffer *)malloc(sizeof(VkCommandBuffer) * ai->ai.commandBufferCount);
+    VkResult result = vkAllocateCommandBuffers(self->device, &ai->ai, cmd_bufs);
+
+    PyObject *cmd_bufs_obj = PyTuple_New(ai->ai.commandBufferCount);
+
+    for (uint32_t cb_idx = 0; cb_idx < ai->ai.commandBufferCount; ++cb_idx)
+    {
+        vk_cmd_buf *cmd_buf_obj = PyObject_NEW(vk_cmd_buf, &vk_cmd_buf_type);
+
+        cmd_buf_obj->command_buffer = cmd_bufs[cb_idx];
+        PyTuple_SetItem(cmd_bufs_obj, cb_idx, (PyObject *)cmd_buf_obj);
+    }
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, cmd_bufs_obj);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    free(cmd_bufs);
+
+    return return_obj;
+}
+
+PyObject *vk_dev_free_cmd_bufs(PyObject *self_obj, PyObject *args, PyObject *kwds)
+{
+    DEBUG_LOG("vk_dev_free_cmd_bufs\n");
+
+    PyObject *cmd_pool_obj = NULL;
+    PyObject *cmd_bufs_obj = NULL;
+
+    PyObject *tmp = NULL;
+
+    char *kwlist[] = {"command_pool", "command_buffers", NULL};
+
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kwlist, &cmd_pool_obj, &cmd_bufs_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    uint32_t cmd_buf_count = (uint32_t)PyTuple_Size(cmd_bufs_obj);
+    VkCommandBuffer *cmd_bufs = (VkCommandBuffer *)malloc(sizeof(VkCommandBuffer) * cmd_buf_count);
+
+    for (uint32_t cb_idx = 0; cb_idx < cmd_buf_count; ++cb_idx)
+    {
+        *(cmd_bufs + cb_idx) = ((vk_cmd_buf *)PyTuple_GetItem(cmd_bufs_obj, cb_idx))->command_buffer;
+    }
+
+    vkFreeCommandBuffers(self->device, ((vk_cmd_pool *)cmd_pool_obj)->command_pool, cmd_buf_count, cmd_bufs);
+
+    free(cmd_bufs);
+
+    return Py_None;
+}
+
 PyMethodDef vk_dev_methods[] = {
     {"get_queue", (PyCFunction)vk_dev_get_queue, METH_VARARGS | METH_KEYWORDS, NULL},
     {"create_swapchain", (PyCFunction)vk_dev_create_swapchain, METH_O, NULL},
     {"destroy_swapchain", (PyCFunction)vk_dev_destroy_swapchain, METH_O, NULL},
     {"create_command_pool", (PyCFunction)vk_dev_create_cmd_pool, METH_O, NULL},
     {"destroy_command_pool", (PyCFunction)vk_dev_destroy_cmd_pool, METH_O, NULL},
+    {"allocate_command_buffers", (PyCFunction)vk_dev_alloc_cmd_bufs, METH_O, NULL},
+    {"free_command_buffers", (PyCFunction)vk_dev_free_cmd_bufs, METH_VARARGS | METH_KEYWORDS, NULL},
     {NULL},
 };
 

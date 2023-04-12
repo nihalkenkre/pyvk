@@ -34,7 +34,7 @@ void vk_dev_q_ci_dealloc(PyObject *self_obj)
         Py_XDECREF(self->priorities);
     }
 
-    Py_TYPE((PyObject *)self)->tp_free((PyObject *)self);
+    Py_TYPE(self_obj)->tp_free(self_obj);
 }
 
 void init_dev_q_ci_from_obj(PyObject *obj_obj)
