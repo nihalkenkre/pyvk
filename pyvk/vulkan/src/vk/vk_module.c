@@ -35,6 +35,8 @@
 #include "vk_cmd_buf/vk_cmd_buf.h"
 #include "vk_sem/vk_sem_ci.h"
 #include "vk_sem/vk_sem.h"
+#include "vk_fence/vk_fence_ci.h"
+#include "vk_fence/vk_fence.h"
 
 PyObject *vk_create_instance(PyObject *self, PyObject *args, PyObject *kwds)
 {
@@ -299,6 +301,20 @@ PyMODINIT_FUNC PyInit_vulkan(void)
     }
 
     mod = add_vk_sem_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_fence_ci_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_fence_to_module(mod);
 
     if (mod == NULL)
     {

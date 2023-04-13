@@ -665,6 +665,14 @@ class SemaphoreCreateInfo(vk.semaphore_create_info):
         super(SemaphoreCreateInfo, self).__init__(p_next, flags_value)
 
 
+class FenceCreateInfo(vk.semaphore_create_info):
+    def __init__(self, p_next=None, flags=FenceCreateFlagBits.NONE):
+        flags_value = flags.value if isinstance(
+            flags, FenceCreateFlagBits) else flags
+
+        super(FenceCreateInfo, self).__init__(p_next, flags_value)
+
+
 class Device(object):
     def __init__(self, device=vk.device):
         self._d = device
@@ -712,6 +720,16 @@ class Device(object):
 
     def destroy_semaphore(self, semaphore=vk.semaphore):
         self._d.destroy_semaphore(semaphore)
+
+    def create_fence(self, fence_create_info=FenceCreateInfo):
+        sem, result = self._d.create_fence(fence_create_info)
+
+        for r in Result:
+            if result == r.value:
+                return sem, r
+
+    def destroy_fence(self, fence=vk.fence):
+        self._d.destroy_fence(fence)
 
 
 class PhysicalDevice(object):

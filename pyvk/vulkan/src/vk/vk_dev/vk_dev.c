@@ -13,6 +13,9 @@
 #include "vk_sem_ci.h"
 #include "vk_sem.h"
 
+#include "vk_fence_ci.h"
+#include "vk_fence.h"
+
 #include "log.h"
 
 PyObject *vk_dev_get_queue(PyObject *self_obj, PyObject *args, PyObject *kwds)
@@ -272,6 +275,60 @@ PyObject *vk_dev_destroy_sem(PyObject *self_obj, PyObject *args)
     return Py_None;
 }
 
+PyObject *vk_dev_create_fence(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_create_fence\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *ci_obj = NULL;
+
+    PyArg_Parse(args, "O", &ci_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_fence_ci *ci = (vk_fence_ci *)ci_obj;
+
+    vk_fence *fence = PyObject_NEW(vk_fence, &vk_fence_type);
+
+    VkResult result = vkCreateFence(self->device, &ci->ci, NULL, &fence->fence);
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, (PyObject *)fence);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
+}
+
+PyObject *vk_dev_destroy_fence(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_destroy_fence\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *fence_obj = NULL;
+
+    PyArg_Parse(args, "O", &fence_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_fence *fence = (vk_fence *)fence_obj;
+
+    if (fence->fence != VK_NULL_HANDLE)
+    {
+        DEBUG_LOG("destroying fence\n");
+        vkDestroyFence(self->device, fence->fence, NULL);
+    }
+
+    Py_XDECREF(fence_obj);
+
+    return Py_None;
+}
+
 PyMethodDef vk_dev_methods[] = {
     {"get_queue", (PyCFunction)vk_dev_get_queue, METH_VARARGS | METH_KEYWORDS, NULL},
     {"create_swapchain", (PyCFunction)vk_dev_create_swapchain, METH_O, NULL},
@@ -282,6 +339,8 @@ PyMethodDef vk_dev_methods[] = {
     {"free_command_buffers", (PyCFunction)vk_dev_free_cmd_bufs, METH_VARARGS | METH_KEYWORDS, NULL},
     {"create_semaphore", (PyCFunction)vk_dev_create_sem, METH_O, NULL},
     {"destroy_semaphore", (PyCFunction)vk_dev_destroy_sem, METH_O, NULL},
+    {"create_fence", (PyCFunction)vk_dev_create_fence, METH_O, NULL},
+    {"destroy_fence", (PyCFunction)vk_dev_destroy_fence, METH_O, NULL},
     {NULL},
 };
 
