@@ -41,6 +41,8 @@ class Result(Enum):
     ERROR_SURFACE_LOST_KHR = -1000000000
     ERROR_NATIVE_WINDOW_IN_USE_KHR = -1000000001
     ERROR_COMPRESSION_EXHAUSTED_EXT = -1000338000
+    ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS = -1000257000
+    ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS_KHR = ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS
 
 
 class MemoryPropertyFlagBits(Enum):
@@ -91,6 +93,7 @@ class CompositeAlphFlagBitsKHR(Enum):
 
 
 class ImageUsageFlagBits(Enum):
+    NONE = 0x00000000
     VK_IMAGE_USAGE_TRANSFER_SRC_BIT = 0x00000001
     VK_IMAGE_USAGE_TRANSFER_DST_BIT = 0x00000002
     VK_IMAGE_USAGE_SAMPLED_BIT = 0x00000004
@@ -512,6 +515,94 @@ class CommandBufferLevel(Enum):
     SECONDARY = 1
 
 
+class ImageCreateFlagBits(Enum):
+    NONE = 0x00000000
+    SPARSE_BINDING_BIT = 0x00000001
+    SPARSE_RESIDENCY_BIT = 0x00000002
+    SPARSE_ALIASED_BIT = 0x00000004
+    MUTABLE_FORMAT_BIT = 0x00000008
+    CUBE_COMPATIBLE_BIT = 0x00000010
+    ALIAS_BIT = 0x00000400
+    SPLIT_INSTANCE_BIND_REGIONS_BIT = 0x00000040
+    TWO_2D_ARRAY_COMPATIBLE_BIT = 0x00000020
+    BLOCK_TEXEL_VIEW_COMPATIBLE_BIT = 0x00000080
+    EXTENDED_USAGE_BIT = 0x00000100
+    PROTECTED_BIT = 0x00000800
+    DISJOINT_BIT = 0x00000200
+    CORNER_SAMPLED_BIT_NV = 0x00002000
+    SAMPLE_LOCATIONS_COMPATIBLE_DEPTH_BIT_EXT = 0x00001000
+    SUBSAMPLED_BIT_EXT = 0x00004000
+    DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT = 0x00010000
+    MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT = 0x00040000
+    TWO_2D_VIEW_COMPATIBLE_BIT_EXT = 0x00020000
+    FRAGMENT_DENSITY_MAP_OFFSET_BIT_QCOM = 0x00008000
+    SPLIT_INSTANCE_BIND_REGIONS_BIT_KHR = SPLIT_INSTANCE_BIND_REGIONS_BIT
+    TWO_2D_ARRAY_COMPATIBLE_BIT_KHR = TWO_2D_ARRAY_COMPATIBLE_BIT
+    BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR = BLOCK_TEXEL_VIEW_COMPATIBLE_BIT
+    EXTENDED_USAGE_BIT_KHR = EXTENDED_USAGE_BIT
+    DISJOINT_BIT_KHR = DISJOINT_BIT
+    ALIAS_BIT_KHR = ALIAS_BIT
+
+
+class ImageType(Enum):
+    ONE_1D = 0
+    TWO_2D = 1
+    THREE_3D = 2
+
+
+class ImageTiling(Enum):
+    OPTIMAL = 0
+    LINEAR = 1
+    DRM_FORMAT_MODIFIER_EXT = 1000158000
+
+
+class ImageLayout(Enum):
+    NONE = 0
+    UNDEFINED = 0
+    GENERAL = 1
+    COLOR_ATTACHMENT_OPTIMAL = 2
+    DEPTH_STENCIL_ATTACHMENT_OPTIMAL = 3
+    DEPTH_STENCIL_READ_ONLY_OPTIMAL = 4
+    SHADER_READ_ONLY_OPTIMAL = 5
+    TRANSFER_SRC_OPTIMAL = 6
+    TRANSFER_DST_OPTIMAL = 7
+    PREINITIALIZED = 8
+    DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL = 1000117000
+    DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL = 1000117001
+    DEPTH_ATTACHMENT_OPTIMAL = 1000241000
+    DEPTH_READ_ONLY_OPTIMAL = 1000241001
+    STENCIL_ATTACHMENT_OPTIMAL = 1000241002
+    STENCIL_READ_ONLY_OPTIMAL = 1000241003
+    READ_ONLY_OPTIMAL = 1000314000
+    ATTACHMENT_OPTIMAL = 1000314001
+    PRESENT_SRC_KHR = 1000001002
+    VIDEO_DECODE_DST_KHR = 1000024000
+    VIDEO_DECODE_SRC_KHR = 1000024001
+    VIDEO_DECODE_DPB_KHR = 1000024002
+    SHARED_PRESENT_KHR = 1000111000
+    FRAGMENT_DENSITY_MAP_OPTIMAL_EXT = 1000218000
+    FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR = 1000164003
+# ifdef VK_ENABLE_BETA_EXTENSIONS
+    VK_IMAGE_LAYOUT_VIDEO_ENCODE_DST_KHR = 1000299000
+# endif
+# ifdef VK_ENABLE_BETA_EXTENSIONS
+    VK_IMAGE_LAYOUT_VIDEO_ENCODE_SRC_KHR = 1000299001
+# endif
+# ifdef VK_ENABLE_BETA_EXTENSIONS
+    VK_IMAGE_LAYOUT_VIDEO_ENCODE_DPB_KHR = 1000299002
+# endif
+    VK_IMAGE_LAYOUT_ATTACHMENT_FEEDBACK_LOOP_OPTIMAL_EXT = 1000339000
+    VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL_KHR = DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL
+    VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL_KHR = DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL
+    VK_IMAGE_LAYOUT_SHADING_RATE_OPTIMAL_NV = FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR
+    VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL_KHR = DEPTH_ATTACHMENT_OPTIMAL
+    VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL_KHR = DEPTH_READ_ONLY_OPTIMAL
+    VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL_KHR = STENCIL_ATTACHMENT_OPTIMAL
+    VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL_KHR = STENCIL_READ_ONLY_OPTIMAL
+    VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL_KHR = READ_ONLY_OPTIMAL
+    VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR = ATTACHMENT_OPTIMAL
+
+
 class ApplicationInfo(vk.application_info):
     def __init__(self, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
@@ -667,10 +758,42 @@ class SemaphoreCreateInfo(vk.semaphore_create_info):
 
 class FenceCreateInfo(vk.semaphore_create_info):
     def __init__(self, p_next=None, flags=FenceCreateFlagBits.NONE):
+
         flags_value = flags.value if isinstance(
             flags, FenceCreateFlagBits) else flags
 
         super(FenceCreateInfo, self).__init__(p_next, flags_value)
+
+
+class ImageCreateInfo(vk.image_create_info):
+    def __init__(self, p_next=None, flags=ImageCreateFlagBits.NONE, image_type=ImageType.TWO_2D,
+                 format=Format.UNDEFINED, extent=(), mip_levels=1, array_layers=1, samples=SampleCountFlagBits.COUNT_1_BIT,
+                 tiling=ImageTiling.OPTIMAL, usage=ImageUsageFlagBits.NONE, sharing_mode=SharingMode.EXCLUSIVE,
+                 queue_family_indices=[0], initial_layout=ImageLayout.NONE):
+
+        flags_value = flags.value if isinstance(
+            flags, ImageCreateFlagBits) else flags
+        image_type_value = image_type.value if isinstance(
+            image_type, ImageType) else image_type
+        format_value = format.value if isinstance(format, Format) else format
+        samples_value = samples.value if isinstance(
+            samples, SampleCountFlagBits) else samples
+        tiling_value = tiling.value if isinstance(
+            tiling, ImageTiling) else tiling
+        usage_value = usage.value if isinstance(
+            usage, ImageUsageFlagBits) else usage
+        sharing_mode_value = sharing_mode.value if isinstance(
+            sharing_mode, SharingMode) else sharing_mode
+        initial_layout_value = initial_layout.value if isinstance(
+            initial_layout, ImageLayout) else initial_layout
+
+        if len(extent) != 3:
+            raise ValueError(
+                "Please pass a tuple with 3 values for extent in pyvk.ImageCreateInfo")
+
+        super(ImageCreateInfo, self).__init__(p_next, flags_value, image_type_value, format_value, extent, mip_levels, array_layers,
+                                              samples_value, tiling_value, usage_value, sharing_mode_value, queue_family_indices,
+                                              initial_layout_value)
 
 
 class Device(object):
@@ -722,11 +845,11 @@ class Device(object):
         self._d.destroy_semaphore(semaphore)
 
     def create_fence(self, fence_create_info=FenceCreateInfo):
-        sem, result = self._d.create_fence(fence_create_info)
+        fence, result = self._d.create_fence(fence_create_info)
 
         for r in Result:
             if result == r.value:
-                return sem, r
+                return fence, r
 
     def destroy_fence(self, fence=vk.fence):
         self._d.destroy_fence(fence)

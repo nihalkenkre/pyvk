@@ -64,22 +64,22 @@ void get_floats_from_list(PyObject *obj, float **values)
     }
 }
 
-void get_uint32s_from_list(PyObject *obj, uint32_t **values)
+void get_uint32s_from_list(PyObject *obj, uint32_t **values, uint32_t *values_count)
 {
     DEBUG_LOG("get_floats_from_list\n");
 
     if (PyList_Check(obj))
     {
-        uint32_t values_count = (uint32_t)PyList_Size(obj);
+        *values_count = (uint32_t)PyList_Size(obj);
 
-        if (values_count == 0)
+        if (*values_count == 0)
         {
             return;
         }
 
-        *values = (uint32_t *)malloc(sizeof(uint32_t) * values_count);
+        *values = (uint32_t *)malloc(sizeof(uint32_t) * *values_count);
 
-        for (uint32_t v_idx = 0; v_idx < values_count; ++v_idx)
+        for (uint32_t v_idx = 0; v_idx < *values_count; ++v_idx)
         {
             PyObject *value_obj = PyList_GetItem(obj, v_idx);
 

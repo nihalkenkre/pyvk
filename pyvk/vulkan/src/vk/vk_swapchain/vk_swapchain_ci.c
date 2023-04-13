@@ -85,8 +85,8 @@ void init_swapchain_ci_from_obj(PyObject *obj_obj)
     obj->ci.imageUsage = obj->image_usage_flags;
 
     obj->ci.imageSharingMode = obj->image_sharing_mode;
-    obj->ci.queueFamilyIndexCount = (uint32_t)PyList_Size(obj->queue_family_indices);
-    get_uint32s_from_list(obj->queue_family_indices, &obj->ci.pQueueFamilyIndices);
+
+    get_uint32s_from_list(obj->queue_family_indices, &obj->ci.pQueueFamilyIndices, &obj->ci.queueFamilyIndexCount);
 
     obj->ci.preTransform = obj->pre_transform;
     obj->ci.compositeAlpha = obj->composite_alpha;
