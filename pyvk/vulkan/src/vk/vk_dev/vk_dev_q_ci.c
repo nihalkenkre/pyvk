@@ -4,7 +4,6 @@
 #include "utils.h"
 
 PyMemberDef vk_dev_q_ci_members[] = {
-    {"s_type", T_UINT, offsetof(vk_dev_q_ci, s_type), 0, "Pass the vulkan.STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO"},
     {"p_next", T_OBJECT_EX, offsetof(vk_dev_q_ci, p_next), 0, "TODO: Pass None for now"},
     {"flags", T_UINT, offsetof(vk_dev_q_ci, flags), 0, "Device Queue Create Info Creation Flags"},
     {"queue_family_index", T_UINT, offsetof(vk_dev_q_ci, q_fly_idx), 0, "The queue family index"},
@@ -43,7 +42,7 @@ void init_dev_q_ci_from_obj(PyObject *obj_obj)
 
     vk_dev_q_ci *obj = (vk_dev_q_ci *)obj_obj;
 
-    obj->ci.sType = obj->s_type;
+    obj->ci.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     obj->ci.pNext = NULL;
     obj->ci.flags = obj->flags;
     obj->ci.queueFamilyIndex = obj->q_fly_idx;
@@ -62,8 +61,8 @@ int vk_dev_q_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     PyObject *priorities = NULL;
     PyObject *tmp = NULL;
 
-    char *kwlist[] = {"s_type", "p_next", "flags", "queue_family_index", "queue_count", "priorities", NULL};
-    PyArg_ParseTupleAndKeywords(args, kwds, "|IOIIIO", kwlist, &self->s_type, &p_next, &self->flags, &self->q_fly_idx, &self->q_count, &priorities);
+    char *kwlist[] = {"p_next", "flags", "queue_family_index", "queue_count", "priorities", NULL};
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OIIIO", kwlist, &p_next, &self->flags, &self->q_fly_idx, &self->q_count, &priorities);
     if (PyErr_Occurred())
     {
         return -1;

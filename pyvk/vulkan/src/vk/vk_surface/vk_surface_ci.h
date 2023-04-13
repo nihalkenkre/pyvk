@@ -10,7 +10,6 @@
 typedef struct vk_surface_ci
 {
     PyObject_HEAD
-        uint32_t s_type;
     PyObject *p_next;
     uint32_t flags;
     long h_wnd;

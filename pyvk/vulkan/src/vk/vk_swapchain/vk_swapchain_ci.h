@@ -11,8 +11,7 @@
 typedef struct vk_swapchain_ci
 {
     PyObject_HEAD
-        uint32_t s_type;
-    PyObject *p_next;
+        PyObject *p_next;
     uint32_t flags;
     PyObject *surface;
     uint32_t min_image_count;

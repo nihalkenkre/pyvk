@@ -9,7 +9,6 @@
 typedef struct vk_app_info
 {
     PyObject_HEAD
-        unsigned long s_type;
     PyObject *p_next;
     const char *app_name;
     PyObject *app_ver;

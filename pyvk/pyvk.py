@@ -3,16 +3,6 @@ import pyvk.vulkan as vk
 from enum import Enum
 
 
-class StructureType(Enum):
-    APPLICATION_INFO = 0
-    INSTANCE_CREATE_INFO = 1
-    DEVICE_QUEUE_CREATE_INFO = 2
-    DEVICE_CREATE_INFO = 3
-    COMMAND_POOL_CREATE_INFO = 39
-    WIN32_SURFACE_CREATE_INFO_KHR = 1000009000
-    SWAPCHAIN_CREATE_INFO_KHR = 1000001000
-
-
 class InstanceLayerNames(Enum):
     pass
 
@@ -514,15 +504,15 @@ class CommandBufferLevel(Enum):
 
 
 class ApplicationInfo(vk.application_info):
-    def __init__(self, s_type=StructureType, p_next=None,
+    def __init__(self, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
                  engine_name='', engine_ver=(1, 0, 0, 0), api_ver=(1, 0, 0, 0)):
-        super(ApplicationInfo, self).__init__(s_type=s_type.value, p_next=p_next, app_name=app_name, app_ver=app_ver,
+        super(ApplicationInfo, self).__init__(p_next=p_next, app_name=app_name, app_ver=app_ver,
                                               engine_name=engine_name, engine_ver=engine_ver, api_ver=api_ver)
 
 
 class InstanceCreateInfo(vk.instance_create_info):
-    def __init__(self, s_type=StructureType, p_next=None,
+    def __init__(self, p_next=None,
                  flags=InstanceCreateFlagBits.NONE, app_info=None,
                  enabled_layers=[], enabled_extensions=[]):
 
@@ -536,17 +526,17 @@ class InstanceCreateInfo(vk.instance_create_info):
         for ext in enabled_extensions:
             enabled_extensions_str.append(ext.value)
 
-        super(InstanceCreateInfo, self).__init__(s_type.value, p_next,
+        super(InstanceCreateInfo, self).__init__(p_next,
                                                  flags.value, app_info,
                                                  enabled_layers=enabled_layers_str,
                                                  enabled_extensions=enabled_extensions_str)
 
 
 class Win32SurfaceCreateInfo(vk.surface_create_info):
-    def __init__(self, s_type=StructureType, p_next=None,
+    def __init__(self, p_next=None,
                  flags=Win32SurfaceCreateFlagsKHR.NONE, h_wnd=int):
 
-        super(Win32SurfaceCreateInfo, self).__init__(s_type.value, p_next,
+        super(Win32SurfaceCreateInfo, self).__init__(p_next,
                                                      flags.value, h_wnd)
 
 
@@ -574,16 +564,16 @@ class Instance(object):
 
 
 class DeviceQueueCreateInfo(vk.device_queue_create_info):
-    def __init__(self, s_type=StructureType, p_next=None,
+    def __init__(self, p_next=None,
                  flags=DeviceQueueCreateFlagBits.NONE, q_family_index=int,
                  q_count=1, priorities=[]):
 
-        super(DeviceQueueCreateInfo, self).__init__(s_type.value, p_next, flags.value, q_family_index,
+        super(DeviceQueueCreateInfo, self).__init__(p_next, flags.value, q_family_index,
                                                     q_count, priorities)
 
 
 class DeviceCreateInfo(vk.device_create_info):
-    def __init__(self, s_type=StructureType, p_next=None,
+    def __init__(self, p_next=None,
                  flags=DeviceCreateFlags.NONE, queue_create_infos=[],
                  enabled_layers=[], enabled_extensions=[],
                  enabled_features=vk.physical_device_features):
@@ -598,14 +588,14 @@ class DeviceCreateInfo(vk.device_create_info):
         for ext in enabled_extensions:
             enabled_extensions_str.append(ext.value)
 
-        super(DeviceCreateInfo, self).__init__(s_type.value, p_next, flags.value,
+        super(DeviceCreateInfo, self).__init__(p_next, flags.value,
                                                queue_create_infos, enabled_layers=enabled_layers_str,
                                                enabled_extensions=enabled_extensions_str,
                                                enabled_features=enabled_features)
 
 
 class SwapchainCreateInfoKHR(vk.swapchain_create_info):
-    def __init__(self, s_type=StructureType, p_next=None, flags=SwapchainCreateFlagBitsKHR.NONE,
+    def __init__(self, p_next=None, flags=SwapchainCreateFlagBitsKHR.NONE,
                  surface=vk.surface, min_image_count=1, image_format=Format, image_color_space=ColorSpace,
                  image_extent=None, image_array_layers=1, image_usage_flags=ImageUsageFlagBits, image_sharing_mode=SharingMode,
                  queue_family_indices=[
@@ -632,23 +622,21 @@ class SwapchainCreateInfoKHR(vk.swapchain_create_info):
         present_mode_value = present_mode.value if isinstance(
             present_mode, PresentModeKHR) else present_mode
 
-        super(SwapchainCreateInfoKHR, self).__init__(s_type.value, p_next, flags_value, surface, min_image_count,
+        super(SwapchainCreateInfoKHR, self).__init__(p_next, flags_value, surface, min_image_count,
                                                      image_format_value, image_color_space_value, image_extent, image_array_layers,
                                                      image_usage_flags, image_sharing_mode_value, queue_family_indices, pre_transform_value,
                                                      composite_alpha_value, present_mode_value, clipped, old_swapchain)
 
 
 class CommandPoolCreateInfo(vk.command_pool_create_info):
-    def __init__(self, s_type=StructureType, p_next=None, flags=CommandPoolCreateFlagBits.NONE,
+    def __init__(self, p_next=None, flags=CommandPoolCreateFlagBits.NONE,
                  queue_family_index=0):
 
-        s_type_value = s_type.value if isinstance(
-            s_type, StructureType) else s_type
         flags_value = flags.value if isinstance(
             flags, CommandPoolCreateFlagBits) else flags
 
         super(CommandPoolCreateInfo, self).__init__(
-            s_type_value, p_next, flags_value, queue_family_index)
+            p_next, flags_value, queue_family_index)
 
 
 class CommandBufferAllocateInfo(vk.command_buffer_allocate_info):

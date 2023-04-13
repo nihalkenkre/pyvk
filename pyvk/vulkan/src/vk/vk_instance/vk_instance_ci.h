@@ -9,7 +9,6 @@
 typedef struct vk_instance_ci
 {
     PyObject_HEAD
-        unsigned long s_type;
     PyObject *p_next;
     uint32_t flags;
     PyObject *app_info;

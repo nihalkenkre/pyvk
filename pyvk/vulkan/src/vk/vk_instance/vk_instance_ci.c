@@ -5,7 +5,6 @@
 #include "utils.h"
 
 PyMemberDef vk_instance_ci_members[] = {
-    {"s_type", T_ULONG, offsetof(vk_instance_ci, s_type), 0, "Pass the vulkan.STRUCTURE_TYPE_INSTANCE_CREATE_INFO enum"},
     {"p_next", T_OBJECT_EX, offsetof(vk_instance_ci, p_next), 0, "TODO: Pass None for now"},
     {"flags", T_UINT, offsetof(vk_instance_ci, flags), 0, "Instance Creation Flags"},
     {"app_info", T_OBJECT_EX, offsetof(vk_instance_ci, app_info), 0, "Application Info object"},
@@ -75,7 +74,7 @@ void init_instance_ci_from_obj(PyObject *obj_obj)
 
     vk_instance_ci *obj = (vk_instance_ci *)obj_obj;
 
-    obj->ci.sType = obj->s_type;
+    obj->ci.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     obj->ci.pNext = NULL;
     obj->ci.flags = obj->flags;
     obj->ci.pApplicationInfo = &((vk_app_info *)obj->app_info)->app_info;
@@ -108,9 +107,9 @@ int vk_instance_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     PyObject *tmp = NULL;
 
-    char *kwlist[] = {"s_type", "p_next", "flags", "app_info", "enabled_layers", "enabled_extensions", NULL};
+    char *kwlist[] = { "p_next", "flags", "app_info", "enabled_layers", "enabled_extensions", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|kOIOOO", kwlist, &self->s_type, &p_next, &self->flags, &app_info,
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OIOOO", kwlist, &p_next, &self->flags, &app_info,
                                 &enabled_layers, &enabled_extensions);
     if (PyErr_Occurred())
     {

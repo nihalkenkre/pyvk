@@ -6,7 +6,6 @@
 #include "utils.h"
 
 PyMemberDef vk_dev_ci_members[] = {
-    {"s_type", T_UINT, offsetof(vk_dev_ci, s_type), 0, "Pass the vulkan.STRUCTURE_TYPE_DEVICE_CREATE_INFO"},
     {"p_next", T_OBJECT_EX, offsetof(vk_dev_ci, p_next), 0, "TODO: Pass None for now"},
     {"flags", T_UINT, offsetof(vk_dev_ci, flags), 0, "Device Create Info Creation Flags"},
     {"queue_create_infos", T_OBJECT_EX, offsetof(vk_dev_ci, queue_create_infos), 0, "List of vulkan.device_queue_create_info objects"},
@@ -99,7 +98,7 @@ void init_device_ci_from_obj(PyObject *obj_obj)
 
     vk_dev_ci *obj = (vk_dev_ci *)obj_obj;
 
-    obj->ci.sType = obj->s_type;
+    obj->ci.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     obj->ci.pNext = NULL;
     obj->ci.flags = obj->flags;
 
@@ -141,9 +140,9 @@ int vk_dev_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     PyObject *tmp = NULL;
 
-    char *kwlist[] = {"s_type", "p_next", "flags", "queue_create_infos", "enabled_layers", "enabled_extensions", "enabled_features", NULL};
+    char *kwlist[] = {"p_next", "flags", "queue_create_infos", "enabled_layers", "enabled_extensions", "enabled_features", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|IOIOOOO", kwlist, &self->s_type, &p_next, &self->flags, &queue_create_infos, &enabled_layers, &enabled_extensions, &enabled_features);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OIOOOO", kwlist, &p_next, &self->flags, &queue_create_infos, &enabled_layers, &enabled_extensions, &enabled_features);
     if (PyErr_Occurred())
     {
         return -1;

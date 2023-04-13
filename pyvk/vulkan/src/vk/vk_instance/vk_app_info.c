@@ -2,7 +2,6 @@
 #include "log.h"
 
 PyMemberDef vk_app_info_members[] = {
-    {"s_type", T_ULONG, offsetof(vk_app_info, s_type), 0, "The vulkan.STRUCTURE_TYPE_APPLICATION_INFO enum"},
     {"p_next", T_OBJECT_EX, offsetof(vk_app_info, p_next), 0, "TODO: Pass None for now"},
     {"app_name", T_STRING, offsetof(vk_app_info, app_name), 0, "The application name (str)"},
     {"app_ver", T_OBJECT_EX, offsetof(vk_app_info, app_ver), 0, "A tuple of (variant, major, minor, patch) versions"},
@@ -79,7 +78,7 @@ void init_app_info_from_obj(PyObject *obj_obj)
 
     vk_app_info *obj = (vk_app_info *)obj_obj;
 
-    obj->app_info.sType = obj->s_type;
+    obj->app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     obj->app_info.pNext = NULL;
 
     uint32_t variant = PyLong_AsLong(PyTuple_GetItem(obj->app_ver, 0));
@@ -114,9 +113,9 @@ int vk_app_info_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     PyObject *tmp = NULL;
 
-    char *kwlist[] = {"s_type", "p_next", "app_name", "app_ver", "engine_name", "engine_ver", "api_ver", NULL};
+    char *kwlist[] = { "p_next", "app_name", "app_ver", "engine_name", "engine_ver", "api_ver", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|kOsOsOO", kwlist, &self->s_type, &p_next, &self->app_name, &app_ver, &self->engine_name, &engine_ver, &api_ver);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OsOsOO", kwlist, &p_next, &self->app_name, &app_ver, &self->engine_name, &engine_ver, &api_ver);
     if (PyErr_Occurred())
     {
         return -1;

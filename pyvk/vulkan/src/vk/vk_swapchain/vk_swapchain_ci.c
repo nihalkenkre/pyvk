@@ -6,7 +6,6 @@
 #include "utils.h"
 
 PyMemberDef vk_swapchain_ci_members[] = {
-    {"s_type", T_LONG, offsetof(vk_swapchain_ci, s_type), 0, "Pass the vulkan.STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR"},
     {"p_next", T_OBJECT_EX, offsetof(vk_swapchain_ci, p_next), 0, "TODO: Pass None for now"},
     {"flags", T_UINT, offsetof(vk_swapchain_ci, flags), 0, "Swapchain creation flags"},
     {"surface", T_OBJECT_EX, offsetof(vk_swapchain_ci, surface), 0, "Pass the surface for which the swapchain is to be created"},
@@ -71,7 +70,7 @@ void init_swapchain_ci_from_obj(PyObject *obj_obj)
 
     vk_swapchain_ci *obj = (vk_swapchain_ci *)obj_obj;
 
-    obj->ci.sType = obj->s_type;
+    obj->ci.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     obj->ci.pNext = NULL;
     obj->ci.flags = obj->flags;
     obj->ci.surface = ((vk_surface *)obj->surface)->surface;
@@ -118,12 +117,12 @@ int vk_swapchain_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     PyObject *tmp = NULL;
 
-    char *kwlist[] = {"s_type", "p_next", "flags", "surface", "min_image_count", "image_format",
+    char *kwlist[] = {"p_next", "flags", "surface", "min_image_count", "image_format",
                       "image_color_space", "image_extent", "image_array_layers",
                       "image_usage_flags", "image_sharing_mode", "queue_family_indices",
                       "pre_transform", "composite_alpha", "present_mode", "clipped", "old_swapchain", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|kOIOIkkOIkkOkkkpO", kwlist, &self->s_type, &p_next, &self->flags,
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OIOIkkOIkkOkkkpO", kwlist, &p_next, &self->flags,
                                 &surface, &self->min_image_count, &self->image_format, &self->image_color_space, &image_extent, &self->image_array_layers,
                                 &self->image_usage_flags, &self->image_sharing_mode, &q_fly_idx, &self->pre_transform, &self->composite_alpha,
                                 &self->present_mode, &self->clipped, &old_swapchain);

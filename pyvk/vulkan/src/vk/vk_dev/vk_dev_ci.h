@@ -9,8 +9,7 @@
 typedef struct vk_dev_ci
 {
     PyObject_HEAD
-        uint32_t s_type;
-    PyObject *p_next;
+        PyObject *p_next;
     uint32_t flags;
     PyObject *queue_create_infos;
     PyObject *enabled_layers;

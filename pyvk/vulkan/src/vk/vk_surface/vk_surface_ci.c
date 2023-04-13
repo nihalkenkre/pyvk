@@ -5,7 +5,6 @@
 #include "log.h"
 
 PyMemberDef vk_surface_ci_members[] = {
-    {"s_type", T_UINT, offsetof(vk_surface_ci, s_type), 0, "Pass the vulkan.STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR"},
     {"p_next", T_OBJECT_EX, offsetof(vk_surface_ci, p_next), 0, "TODO: Pass None for now"},
     {"flags", T_UINT, offsetof(vk_surface_ci, flags), 0, "Surface Creation Flags"},
     {"h_wnd", T_LONG, offsetof(vk_surface_ci, h_wnd), 0, "The handle of the window"},
@@ -32,7 +31,7 @@ void init_surface_ci_from_obj(PyObject *obj_obj)
 
     vk_surface_ci *obj = (vk_surface_ci *)obj_obj;
 
-    obj->ci.sType = obj->s_type;
+    obj->ci.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
     obj->ci.pNext = NULL;
     obj->ci.flags = obj->flags;
     obj->ci.hwnd = (HWND)obj->h_wnd;
@@ -48,9 +47,9 @@ int vk_surface_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     PyObject *p_next = NULL;
     PyObject *tmp = NULL;
 
-    char *kwlist[] = {"s_type", "p_next", "flags", "h_wnd", NULL};
+    char *kwlist[] = {"p_next", "flags", "h_wnd", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|IOIk", kwlist, &self->s_type, &p_next, &self->flags, &self->h_wnd);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OIk", kwlist, &p_next, &self->flags, &self->h_wnd);
     if (PyErr_Occurred())
     {
         return -1;

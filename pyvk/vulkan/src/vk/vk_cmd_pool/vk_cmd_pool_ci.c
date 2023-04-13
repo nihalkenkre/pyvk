@@ -5,7 +5,6 @@
 #include "log.h"
 
 PyMemberDef vk_cmd_pool_ci_members[] = {
-    {"s_type", T_ULONG, offsetof(vk_cmd_pool_ci, s_type), 0, "Pass the vulkan.COMMAND_POOL_CREATE_INFO"},
     {"p_next", T_OBJECT_EX, offsetof(vk_cmd_pool_ci, p_next), 0, "TODO: Pass None for now"},
     {"flags", T_UINT, offsetof(vk_cmd_pool_ci, flags), 0, "Command Pool Create Info Creation flags"},
     {"queue_family_index", T_UINT, offsetof(vk_cmd_pool_ci, q_fly_idx), 0, "The index of the queue family where the command buffers created from this pool must be submitted"},
@@ -32,7 +31,7 @@ void init_cmd_pool_ci_from_obj(PyObject *obj_obj)
 
     vk_cmd_pool_ci* obj = (vk_cmd_pool_ci*) obj_obj;
 
-    obj->ci.sType = obj->s_type;
+    obj->ci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     obj->ci.pNext = obj->p_next;
     obj->ci.flags = obj->flags;
     obj->ci.queueFamilyIndex = obj->q_fly_idx;
@@ -47,9 +46,9 @@ int vk_cmd_pool_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     PyObject *p_next = NULL;
     PyObject *tmp = NULL;
 
-    char *kwlist[] = {"s_type", "p_next", "flags", "queue_family_index", NULL};
+    char *kwlist[] = {"p_next", "flags", "queue_family_index", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|KOII", kwlist, &self->s_type, &p_next, &self->flags, &self->q_fly_idx);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OII", kwlist, &p_next, &self->flags, &self->q_fly_idx);
     if (PyErr_Occurred())
     {
         return -1;

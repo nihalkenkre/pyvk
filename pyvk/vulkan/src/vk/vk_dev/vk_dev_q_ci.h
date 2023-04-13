@@ -9,8 +9,7 @@
 typedef struct vk_dev_q_ci
 {
     PyObject_HEAD
-        uint32_t s_type;
-    PyObject *p_next;
+        PyObject *p_next;
     uint32_t flags;
     uint32_t q_fly_idx;
     uint32_t q_count;
@@ -22,6 +21,5 @@ typedef struct vk_dev_q_ci
 PyTypeObject vk_dev_q_ci_type;
 
 PyObject *add_vk_dev_q_ci_to_module(PyObject *mod);
-
 
 #endif
