@@ -10,6 +10,9 @@
 #include "vk_cmd_buf_ai.h"
 #include "vk_cmd_buf.h"
 
+#include "vk_sem_ci.h"
+#include "vk_sem.h"
+
 #include "log.h"
 
 PyObject *vk_dev_get_queue(PyObject *self_obj, PyObject *args, PyObject *kwds)
@@ -210,6 +213,62 @@ PyObject *vk_dev_free_cmd_bufs(PyObject *self_obj, PyObject *args, PyObject *kwd
 
     free(cmd_bufs);
 
+    Py_XDECREF(cmd_bufs_obj);
+
+    return Py_None;
+}
+
+PyObject *vk_dev_create_sem(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_create_sem\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *ci_obj = NULL;
+
+    PyArg_Parse(args, "O", &ci_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_sem_ci *ci = (vk_sem_ci *)ci_obj;
+
+    vk_sem *sem = PyObject_NEW(vk_sem, &vk_sem_type);
+
+    VkResult result = vkCreateSemaphore(self->device, &ci->ci, NULL, &sem->semaphore);
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, (PyObject *)sem);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
+}
+
+PyObject *vk_dev_destroy_sem(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_destroy_sem\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *sem_obj = NULL;
+
+    PyArg_Parse(args, "O", &sem_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_sem *sem = (vk_sem *)sem_obj;
+
+    if (sem->semaphore != VK_NULL_HANDLE)
+    {
+        DEBUG_LOG("destroying semaphore\n");
+        vkDestroySemaphore(self->device, sem->semaphore, NULL);
+    }
+
+    Py_XDECREF(sem_obj);
+
     return Py_None;
 }
 
@@ -221,6 +280,8 @@ PyMethodDef vk_dev_methods[] = {
     {"destroy_command_pool", (PyCFunction)vk_dev_destroy_cmd_pool, METH_O, NULL},
     {"allocate_command_buffers", (PyCFunction)vk_dev_alloc_cmd_bufs, METH_O, NULL},
     {"free_command_buffers", (PyCFunction)vk_dev_free_cmd_bufs, METH_VARARGS | METH_KEYWORDS, NULL},
+    {"create_semaphore", (PyCFunction)vk_dev_create_sem, METH_O, NULL},
+    {"destroy_semaphore", (PyCFunction)vk_dev_destroy_sem, METH_O, NULL},
     {NULL},
 };
 

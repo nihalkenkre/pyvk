@@ -33,6 +33,8 @@
 #include "vk_cmd_pool/vk_cmd_pool.h"
 #include "vk_cmd_buf/vk_cmd_buf_ai.h"
 #include "vk_cmd_buf/vk_cmd_buf.h"
+#include "vk_sem/vk_sem_ci.h"
+#include "vk_sem/vk_sem.h"
 
 PyObject *vk_create_instance(PyObject *self, PyObject *args, PyObject *kwds)
 {
@@ -283,6 +285,20 @@ PyMODINIT_FUNC PyInit_vulkan(void)
     }
 
     mod = add_vk_cmd_buf_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_sem_ci_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_sem_to_module(mod);
 
     if (mod == NULL)
     {

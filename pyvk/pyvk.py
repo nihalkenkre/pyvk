@@ -478,6 +478,15 @@ class DeviceCreateFlags(Enum):
     NONE = 0x00000000
 
 
+class SemaphoreCreateFlags(Enum):
+    NONE = 0x00000000
+
+
+class FenceCreateFlagBits(Enum):
+    NONE = 0x00000000
+    SIGNALED_BIT = 0x00000001
+
+
 class SharingMode(Enum):
     EXCLUSIVE = 0
     CONCURRENT = 1
@@ -648,6 +657,14 @@ class CommandBufferAllocateInfo(vk.command_buffer_allocate_info):
             command_pool, level_value, command_buffer_count)
 
 
+class SemaphoreCreateInfo(vk.semaphore_create_info):
+    def __init__(self, p_next=None, flags=SemaphoreCreateFlags.NONE):
+        flags_value = flags.value if isinstance(
+            flags, SemaphoreCreateFlags) else flags
+
+        super(SemaphoreCreateInfo, self).__init__(p_next, flags_value)
+
+
 class Device(object):
     def __init__(self, device=vk.device):
         self._d = device
@@ -685,6 +702,16 @@ class Device(object):
 
     def free_command_buffers(self, command_pool=vk.command_pool, command_buffers=()):
         self._d.free_command_buffers(command_pool, command_buffers)
+
+    def create_semaphore(self, semaphore_create_info=SemaphoreCreateInfo):
+        sem, result = self._d.create_semaphore(semaphore_create_info)
+
+        for r in Result:
+            if result == r.value:
+                return sem, r
+
+    def destroy_semaphore(self, semaphore=vk.semaphore):
+        self._d.destroy_semaphore(semaphore)
 
 
 class PhysicalDevice(object):
