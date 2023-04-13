@@ -16,6 +16,9 @@
 #include "vk_fence_ci.h"
 #include "vk_fence.h"
 
+#include "vk_img_ci.h"
+#include "vk_img.h"
+
 #include "log.h"
 
 PyObject *vk_dev_get_queue(PyObject *self_obj, PyObject *args, PyObject *kwds)
@@ -329,6 +332,60 @@ PyObject *vk_dev_destroy_fence(PyObject *self_obj, PyObject *args)
     return Py_None;
 }
 
+PyObject *vk_dev_create_image(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_create_image\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *ci_obj = NULL;
+
+    PyArg_Parse(args, "O", &ci_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_img_ci *ci = (vk_img_ci *)ci_obj;
+
+    vk_img *image = PyObject_NEW(vk_img, &vk_img_type);
+
+    VkResult result = vkCreateImage(self->device, &ci->ci, NULL, &image->image);
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, (PyObject *)image);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
+}
+
+PyObject *vk_dev_destroy_image(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_destroy_image\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *image_obj = NULL;
+
+    PyArg_Parse(args, "O", &image_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_img *image = (vk_img *)image_obj;
+
+    if (image->image != VK_NULL_HANDLE)
+    {
+        DEBUG_LOG("destroying image\n");
+        vkDestroyImage(self->device, image->image, NULL);
+    }
+
+    Py_XDECREF(image_obj);
+
+    return Py_None;
+}
+
 PyMethodDef vk_dev_methods[] = {
     {"get_queue", (PyCFunction)vk_dev_get_queue, METH_VARARGS | METH_KEYWORDS, NULL},
     {"create_swapchain", (PyCFunction)vk_dev_create_swapchain, METH_O, NULL},
@@ -341,6 +398,8 @@ PyMethodDef vk_dev_methods[] = {
     {"destroy_semaphore", (PyCFunction)vk_dev_destroy_sem, METH_O, NULL},
     {"create_fence", (PyCFunction)vk_dev_create_fence, METH_O, NULL},
     {"destroy_fence", (PyCFunction)vk_dev_destroy_fence, METH_O, NULL},
+    {"create_image", (PyCFunction)vk_dev_create_image, METH_O, NULL},
+    {"destroy_image", (PyCFunction)vk_dev_destroy_image, METH_O, NULL},
     {NULL},
 };
 

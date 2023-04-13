@@ -854,6 +854,16 @@ class Device(object):
     def destroy_fence(self, fence=vk.fence):
         self._d.destroy_fence(fence)
 
+    def create_image(self, image_create_info=ImageCreateInfo):
+        image, result = self._d.create_image(image_create_info)
+
+        for r in Result:
+            if result == r.value:
+                return image, r
+
+    def destroy_image(self, image=vk.image):
+        self._d.destroy_image(image)
+
 
 class PhysicalDevice(object):
     def __init__(self, pd=vk.physical_device):

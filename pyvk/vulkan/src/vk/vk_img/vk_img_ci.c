@@ -45,9 +45,9 @@ void vk_img_ci_dealloc(PyObject *self_obj)
     Py_TYPE(self_obj)->tp_free(self_obj);
 }
 
-void init_ci_from_obj(PyObject *obj_obj)
+void init_img_ci_from_obj(PyObject *obj_obj)
 {
-    DEBUG_LOG("init_ci_from_obj\n");
+    DEBUG_LOG("init_img_ci_from_obj\n");
 
     vk_img_ci *obj = (vk_img_ci *)obj_obj;
 
@@ -135,7 +135,7 @@ int vk_img_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     }
     DEBUG_LOG("img_ci parsed q_fly_idx\n");
 
-    init_ci_from_obj(self_obj);
+    init_img_ci_from_obj(self_obj);
     if (PyErr_Occurred())
     {
         return -1;
