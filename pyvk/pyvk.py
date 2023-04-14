@@ -37,6 +37,7 @@ class Result(Enum):
     ERROR_FEATURE_NOT_PRESENT = -8
     ERROR_INCOMPATIBLE_DRIVER = -9
     ERROR_TOO_MANY_OBJECTS = -10
+    ERROR_FORMAT_NOT_SUPPORTED = -11
     ERROR_UNKNOWN = -13
     ERROR_SURFACE_LOST_KHR = -1000000000
     ERROR_NATIVE_WINDOW_IN_USE_KHR = -1000000001
@@ -626,8 +627,10 @@ class InstanceCreateInfo(vk.instance_create_info):
         for ext in enabled_extensions:
             enabled_extensions_str.append(ext.value)
 
+        flags_value = flags.value if isinstance(flags, InstanceCreateFlagBits) else flags
+
         super(InstanceCreateInfo, self).__init__(p_next,
-                                                 flags.value, app_info,
+                                                 flags_value, app_info,
                                                  enabled_layers=enabled_layers_str,
                                                  enabled_extensions=enabled_extensions_str)
 
@@ -636,8 +639,10 @@ class Win32SurfaceCreateInfo(vk.surface_create_info):
     def __init__(self, p_next=None,
                  flags=Win32SurfaceCreateFlagsKHR.NONE, h_wnd=int):
 
+        flags_value = flags.value if isinstance(flags, Win32SurfaceCreateFlagsKHR) else flags
+
         super(Win32SurfaceCreateInfo, self).__init__(p_next,
-                                                     flags.value, h_wnd)
+                                                     flags_value, h_wnd)
 
 
 class Instance(object):
@@ -653,11 +658,15 @@ class Instance(object):
             if result == r.value:
                 return ret_pds, r
 
+        return ret_pds, result
+
     def create_surface(self, surface_create_info=Win32SurfaceCreateInfo):
         s, result = self._i.create_surface(surface_create_info)
         for r in Result:
             if result == r.value:
                 return s, r
+
+        return s, result
 
     def destroy_surface(self, surface=vk.surface):
         self._i.destroy_surface(surface)
@@ -665,11 +674,11 @@ class Instance(object):
 
 class DeviceQueueCreateInfo(vk.device_queue_create_info):
     def __init__(self, p_next=None,
-                 flags=DeviceQueueCreateFlagBits.NONE, q_family_index=int,
-                 q_count=1, priorities=[]):
+                 flags=DeviceQueueCreateFlagBits.NONE, queue_family_index=0,
+                 queue_count=1, priorities=[1.0]):
 
-        super(DeviceQueueCreateInfo, self).__init__(p_next, flags.value, q_family_index,
-                                                    q_count, priorities)
+        super(DeviceQueueCreateInfo, self).__init__(p_next, flags.value, queue_family_index,
+                                                    queue_count, priorities)
 
 
 class DeviceCreateInfo(vk.device_create_info):
@@ -696,11 +705,10 @@ class DeviceCreateInfo(vk.device_create_info):
 
 class SwapchainCreateInfoKHR(vk.swapchain_create_info):
     def __init__(self, p_next=None, flags=SwapchainCreateFlagBitsKHR.NONE,
-                 surface=vk.surface, min_image_count=1, image_format=Format, image_color_space=ColorSpace,
-                 image_extent=None, image_array_layers=1, image_usage_flags=ImageUsageFlagBits, image_sharing_mode=SharingMode,
-                 queue_family_indices=[
-                 ], pre_transform=SurfaceTransformFlagBits, composite_alpha=CompositeAlphFlagBitsKHR,
-                 present_mode=PresentModeKHR, clipped=True, old_swapchain=vk.swapchain):
+                 surface=vk.surface, min_image_count=1, image_format=Format.UNDEFINED, image_color_space=ColorSpace.SRGB_NONLINEAR_KHR,
+                 image_extent=None, image_array_layers=1, image_usage_flags=ImageUsageFlagBits.NONE, image_sharing_mode=SharingMode.EXCLUSIVE,
+                 queue_family_indices=[0], pre_transform=SurfaceTransformFlagBits.IDENTITY_BIT_KHR, composite_alpha=CompositeAlphFlagBitsKHR.OPAQUE_BIT_KHR,
+                 present_mode=PresentModeKHR.IMMEDIATE_KHR, clipped=True, old_swapchain=vk.swapchain):
 
         if image_extent is not None:
             if len(image_extent) != 2:
@@ -713,6 +721,8 @@ class SwapchainCreateInfoKHR(vk.swapchain_create_info):
             image_format, Format) else image_format
         image_color_space_value = image_color_space.value if isinstance(
             image_color_space, ColorSpace) else image_color_space
+        image_usage_flags_value = image_usage_flags.value if isinstance(
+            image_usage_flags, ImageUsageFlagBits) else image_usage_flags
         image_sharing_mode_value = image_sharing_mode.value if isinstance(
             image_sharing_mode, SharingMode) else image_sharing_mode
         pre_transform_value = pre_transform.value if isinstance(
@@ -724,7 +734,7 @@ class SwapchainCreateInfoKHR(vk.swapchain_create_info):
 
         super(SwapchainCreateInfoKHR, self).__init__(p_next, flags_value, surface, min_image_count,
                                                      image_format_value, image_color_space_value, image_extent, image_array_layers,
-                                                     image_usage_flags, image_sharing_mode_value, queue_family_indices, pre_transform_value,
+                                                     image_usage_flags_value, image_sharing_mode_value, queue_family_indices, pre_transform_value,
                                                      composite_alpha_value, present_mode_value, clipped, old_swapchain)
 
 
@@ -796,6 +806,11 @@ class ImageCreateInfo(vk.image_create_info):
                                               initial_layout_value)
 
 
+class MemoryAllocateInfo(vk.memory_allocate_info):
+    def __init__(self, p_next=None, allocation_size=int, memory_type_index=int):
+        super(MemoryAllocateInfo, self).__init__(p_next, allocation_size, memory_type_index)
+
+    
 class Device(object):
     def __init__(self, device=vk.device):
         self._d = device
@@ -810,6 +825,8 @@ class Device(object):
             if result == r.value:
                 return sc, r
 
+        return sc, result
+
     def destroy_swapchain(self, swapchain=vk.swapchain):
         self._d.destroy_swapchain(swapchain)
 
@@ -819,6 +836,8 @@ class Device(object):
         for r in Result:
             if result == r.value:
                 return cp, r
+
+        return cp, result
 
     def destroy_command_pool(self, command_pool=vk.command_pool):
         self._d.destroy_command_pool(command_pool)
@@ -831,6 +850,8 @@ class Device(object):
             if result == r.value:
                 return cmd_bufs, r
 
+        return cmd_bufs, result
+
     def free_command_buffers(self, command_pool=vk.command_pool, command_buffers=()):
         self._d.free_command_buffers(command_pool, command_buffers)
 
@@ -840,6 +861,8 @@ class Device(object):
         for r in Result:
             if result == r.value:
                 return sem, r
+
+        return sem, result
 
     def destroy_semaphore(self, semaphore=vk.semaphore):
         self._d.destroy_semaphore(semaphore)
@@ -851,6 +874,8 @@ class Device(object):
             if result == r.value:
                 return fence, r
 
+        return fence, result
+
     def destroy_fence(self, fence=vk.fence):
         self._d.destroy_fence(fence)
 
@@ -861,8 +886,23 @@ class Device(object):
             if result == r.value:
                 return image, r
 
+        return image, result
+
     def destroy_image(self, image=vk.image):
         self._d.destroy_image(image)
+
+
+    def allocate_memory(self, memory_allocate_info=MemoryAllocateInfo):
+        m, result = self._d.allocate_memory(memory_allocate_info)
+
+        for r in Result:
+            if result == r.value:
+                return m, r
+
+        return m, result
+    
+    def free_memory(self, memory=vk.device_memory):
+        self._d.free_memory(memory)
 
 
 class PhysicalDevice(object):
@@ -885,6 +925,8 @@ class PhysicalDevice(object):
             if result == r.value:
                 return caps, r
 
+        return caps, result
+
     def get_surface_formats_khr(self, surface=vk.surface):
         formats, result = self._pd.get_surface_formats_khr(surface)
 
@@ -892,12 +934,16 @@ class PhysicalDevice(object):
             if result == r.value:
                 return formats, r
 
+        return formats, result
+
     def get_surface_present_modes_khr(self, surface=vk.surface):
         present_modes, result = self._pd.get_surface_present_modes_khr(surface)
 
         for r in Result:
             if result == r.value:
                 return present_modes, r
+
+        return present_modes, result
 
     def get_queue_family_properties(self):
         return self._pd.get_queue_family_properties()
@@ -909,6 +955,8 @@ class PhysicalDevice(object):
             if result == r.value:
                 return Device(device), r
 
+        return Device(device), result
+
     def destroy_device(self, device=Device):
         self._pd.destroy_device(device._d)
 
@@ -919,6 +967,8 @@ def create_instance(instance_create_info=InstanceCreateInfo):
     for r in Result:
         if result == r.value:
             return Instance(i), r
+
+    return Instance(i), result
 
 
 def destroy_instance(instance=Instance):

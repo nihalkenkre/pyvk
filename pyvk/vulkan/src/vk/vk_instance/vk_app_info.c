@@ -174,10 +174,6 @@ int vk_app_info_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     DEBUG_LOG("app_info parsed api_ver\n");
 
     init_app_info_from_obj(self_obj);
-    if (PyErr_Occurred())
-    {
-        return -1;
-    }
 
     return 0;
 }

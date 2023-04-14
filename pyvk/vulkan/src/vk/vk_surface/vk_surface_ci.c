@@ -69,10 +69,6 @@ int vk_surface_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     DEBUG_LOG("surface_ci parsed p_next\n");
 
     init_surface_ci_from_obj(self_obj);
-    if (PyErr_Occurred())
-    {
-        return -1;
-    }
 
     return 0;
 }

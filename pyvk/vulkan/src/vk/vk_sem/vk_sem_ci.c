@@ -65,10 +65,6 @@ int vk_sem_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     }
 
     init_sem_ci_from_obj(self_obj);
-    if (PyErr_Occurred())
-    {
-        return -1;
-    }
 
     return 0;
 }

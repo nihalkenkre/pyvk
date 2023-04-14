@@ -170,10 +170,6 @@ int vk_instance_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     DEBUG_LOG("instance_ci parsed enabled_extensions\n");
 
     init_instance_ci_from_obj(self_obj);
-    if (PyErr_Occurred())
-    {
-        return -1;
-    }
 
     return 0;
 }

@@ -19,6 +19,10 @@
 #include "vk_img_ci.h"
 #include "vk_img.h"
 
+#include "vk_mem_ai.h"
+
+#include "vk_dev_mem.h"
+
 #include "log.h"
 
 PyObject *vk_dev_get_queue(PyObject *self_obj, PyObject *args, PyObject *kwds)
@@ -95,7 +99,7 @@ PyObject *vk_dev_destroy_swapchain(PyObject *self_obj, PyObject *args)
 
     Py_XDECREF(swapchain);
 
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyObject *vk_dev_create_cmd_pool(PyObject *self_obj, PyObject *args)
@@ -148,7 +152,7 @@ PyObject *vk_dev_destroy_cmd_pool(PyObject *self_obj, PyObject *args)
 
     Py_XDECREF(cmd_pool);
 
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyObject *vk_dev_alloc_cmd_bufs(PyObject *self_obj, PyObject *args)
@@ -221,7 +225,7 @@ PyObject *vk_dev_free_cmd_bufs(PyObject *self_obj, PyObject *args, PyObject *kwd
 
     Py_XDECREF(cmd_bufs_obj);
 
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyObject *vk_dev_create_sem(PyObject *self_obj, PyObject *args)
@@ -275,7 +279,7 @@ PyObject *vk_dev_destroy_sem(PyObject *self_obj, PyObject *args)
 
     Py_XDECREF(sem_obj);
 
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyObject *vk_dev_create_fence(PyObject *self_obj, PyObject *args)
@@ -329,7 +333,7 @@ PyObject *vk_dev_destroy_fence(PyObject *self_obj, PyObject *args)
 
     Py_XDECREF(fence_obj);
 
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyObject *vk_dev_create_image(PyObject *self_obj, PyObject *args)
@@ -383,7 +387,60 @@ PyObject *vk_dev_destroy_image(PyObject *self_obj, PyObject *args)
 
     Py_XDECREF(image_obj);
 
-    return Py_None;
+    Py_RETURN_NONE;
+}
+
+PyObject *vk_dev_allocate_memory(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_allocate_memory\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *ai_obj = NULL;
+
+    PyArg_Parse(args, "O", &ai_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_mem_ai *ai = (vk_mem_ai *)ai_obj;
+
+    vk_dev_mem *dev_mem = PyObject_NEW(vk_dev_mem, &vk_dev_mem_type);
+
+    VkResult result = vkAllocateMemory(self->device, &ai->ai, NULL, &dev_mem->device_memory);
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, (PyObject *)dev_mem);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
+}
+
+PyObject *vk_dev_free_memory(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_free_memory\n");
+
+    vk_dev *dev = (vk_dev *)self_obj;
+    PyObject *mem_obj = NULL;
+
+    PyArg_Parse(args, "O", &mem_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_dev_mem *mem = (vk_dev_mem *)mem_obj;
+
+    if (mem->device_memory != VK_NULL_HANDLE)
+    {
+        DEBUG_LOG("freeing device memory\n");
+        vkFreeMemory(dev->device, mem->device_memory, NULL);
+    }
+
+    Py_XDECREF(mem_obj);
+
+    Py_RETURN_NONE;
 }
 
 PyMethodDef vk_dev_methods[] = {
@@ -400,6 +457,9 @@ PyMethodDef vk_dev_methods[] = {
     {"destroy_fence", (PyCFunction)vk_dev_destroy_fence, METH_O, NULL},
     {"create_image", (PyCFunction)vk_dev_create_image, METH_O, NULL},
     {"destroy_image", (PyCFunction)vk_dev_destroy_image, METH_O, NULL},
+    {"allocate_memory", (PyCFunction)vk_dev_allocate_memory, METH_O, NULL},
+    {"free_memory", (PyCFunction)vk_dev_free_memory, METH_O, NULL},
+
     {NULL},
 };
 

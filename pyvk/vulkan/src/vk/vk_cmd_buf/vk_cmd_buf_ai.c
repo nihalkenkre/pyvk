@@ -70,10 +70,6 @@ int vk_cmd_buf_ai_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     DEBUG_LOG("cmd_buf_ai parsed command_pool\n");
 
     init_cmd_buf_ai_from_obj(self_obj);
-    if (PyErr_Occurred())
-    {
-        return -1;
-    }
 
     return 0;
 }

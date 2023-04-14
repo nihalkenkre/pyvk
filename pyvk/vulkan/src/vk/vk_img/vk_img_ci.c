@@ -136,10 +136,6 @@ int vk_img_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     DEBUG_LOG("img_ci parsed q_fly_idx\n");
 
     init_img_ci_from_obj(self_obj);
-    if (PyErr_Occurred())
-    {
-        return -1;
-    }
 
     return 0;
 }

@@ -22,6 +22,8 @@ setup(
                 './pyvk/vulkan/src/vk/vk_phy_dev/vk_phy_dev_sparse_properties.c',
                 './pyvk/vulkan/src/vk/vk_mem/vk_mem_type.c',
                 './pyvk/vulkan/src/vk/vk_mem/vk_mem_heap.c',
+                './pyvk/vulkan/src/vk/vk_mem/vk_mem_ai.c',
+                './pyvk/vulkan/src/vk/vk_dev/vk_dev_mem.c',
                 './pyvk/vulkan/src/vk/vk_dev/vk_dev_q_ci.c',
                 './pyvk/vulkan/src/vk/vk_dev/vk_dev_ci.c',
                 './pyvk/vulkan/src/vk/vk_dev/vk_dev.c',

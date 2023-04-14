@@ -198,10 +198,6 @@ int vk_swapchain_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     DEBUG_LOG("swapchain_ci parsed old_swapchain\n");
 
     init_swapchain_ci_from_obj(self_obj);
-    if (PyErr_Occurred())
-    {
-        return -1;
-    }
 
     return 0;
 }

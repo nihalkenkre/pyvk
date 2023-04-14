@@ -12,6 +12,7 @@
 #include "vk_instance/vk_instance.h"
 #include "vk_mem/vk_mem_type.h"
 #include "vk_mem/vk_mem_heap.h"
+#include "vk_mem/vk_mem_ai.h"
 #include "vk_phy_dev/vk_phy_dev_mem_props.h"
 #include "vk_phy_dev/vk_phy_dev_limits.h"
 #include "vk_phy_dev/vk_phy_dev_features.h"
@@ -25,6 +26,7 @@
 #include "vk_dev/vk_dev_q_ci.h"
 #include "vk_dev/vk_dev_ci.h"
 #include "vk_dev/vk_dev.h"
+#include "vk_dev/vk_dev_mem.h"
 #include "vk_queue/vk_q_fly_props.h"
 #include "vk_queue/vk_queue.h"
 #include "vk_swapchain/vk_swapchain_ci.h"
@@ -148,6 +150,13 @@ PyMODINIT_FUNC PyInit_vulkan(void)
         goto shutdown;
     }
 
+    mod = add_vk_mem_ai_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
     mod = add_vk_phy_dev_features_to_module(mod);
 
     if (mod == NULL)
@@ -212,6 +221,13 @@ PyMODINIT_FUNC PyInit_vulkan(void)
     }
 
     mod = add_vk_surface_fmt_khr_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_dev_mem_to_module(mod);
 
     if (mod == NULL)
     {
