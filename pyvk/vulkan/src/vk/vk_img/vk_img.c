@@ -1,5 +1,7 @@
 #include "vk_img.h"
 
+#include "log.h"
+
 PyTypeObject vk_img_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
         .tp_name = "vulkan.image",

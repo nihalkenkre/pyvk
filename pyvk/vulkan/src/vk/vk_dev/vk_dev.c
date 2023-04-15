@@ -173,6 +173,17 @@ PyObject *vk_dev_alloc_cmd_bufs(PyObject *self_obj, PyObject *args)
     VkCommandBuffer *cmd_bufs = (VkCommandBuffer *)malloc(sizeof(VkCommandBuffer) * ai->ai.commandBufferCount);
     VkResult result = vkAllocateCommandBuffers(self->device, &ai->ai, cmd_bufs);
 
+    if (result != VK_SUCCESS)
+    {
+        free(cmd_bufs);
+
+        PyObject *return_obj = PyTuple_New(2);
+        PyTuple_SetItem(return_obj, 0, Py_None);
+        PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+        return return_obj;
+    }
+
     PyObject *cmd_bufs_obj = PyTuple_New(ai->ai.commandBufferCount);
 
     for (uint32_t cb_idx = 0; cb_idx < ai->ai.commandBufferCount; ++cb_idx)
@@ -443,6 +454,104 @@ PyObject *vk_dev_free_memory(PyObject *self_obj, PyObject *args)
     Py_RETURN_NONE;
 }
 
+PyObject *vk_dev_bind_img_memory(PyObject *self_obj, PyObject *args, PyObject *kwds)
+{
+    DEBUG_LOG("vk_dev_bind_img_memory\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *img_obj = NULL;
+    PyObject *mem_obj = NULL;
+
+    long offset = 0;
+
+    char *kwlist[] = {"image", "device_memory", NULL};
+
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OOk", kwlist, &img_obj, &mem_obj, &offset);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_img *img = (vk_img *)img_obj;
+    vk_dev_mem *mem = (vk_dev_mem *)mem_obj;
+
+    VkResult result = vkBindImageMemory(self->device, img->image, mem->device_memory, (VkDeviceSize)offset);
+
+    return PyLong_FromLong(result);
+}
+
+PyObject *vk_dev_get_swapchain_images(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_get_swapchain_images\n");
+
+    PyObject *sc_obj = NULL;
+
+    PyArg_Parse(args, "O", &sc_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_dev *self = (vk_dev *)self_obj;
+    vk_swapchain *sc = (vk_swapchain *)sc_obj;
+
+    uint32_t image_count = 0;
+    VkResult result = vkGetSwapchainImagesKHR(self->device, sc->swapchain, &image_count, NULL);
+
+    if (result != VK_SUCCESS)
+    {
+        PyObject *return_obj = PyTuple_New(2);
+
+        PyTuple_SetItem(return_obj, 0, Py_None);
+        PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+        return return_obj;
+    }
+
+    VkImage *images = (VkImage *)malloc(sizeof(VkImage *) * image_count);
+    result = vkGetSwapchainImagesKHR(self->device, sc->swapchain, &image_count, images);
+
+    if (result != VK_SUCCESS)
+    {
+        free(images);
+
+        PyObject *return_obj = PyTuple_New(2);
+
+        PyTuple_SetItem(return_obj, 0, Py_None);
+        PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+        return return_obj;
+    }
+
+    printf("image_count: %u\n", image_count);
+
+    PyObject *imgs_obj = PyTuple_New(image_count);
+
+    for (uint32_t img_idx = 0; img_idx < image_count; ++img_idx)
+    {
+        if (*(images + img_idx) == VK_NULL_HANDLE)
+        {
+            printf("img at %d is NULL\n", img_idx);
+        }
+        // vk_img *sc_img = PyObject_NEW(vk_img, &vk_img_type);
+        // sc_img->image = *(images + img_idx);
+
+        // PyTuple_SetItem(imgs_obj, img_idx, Py_None);//(PyObject *)sc_img);
+
+        printf("idx: %u\n", img_idx);
+    }
+
+    free(images);
+
+    PyObject *return_obj = PyTuple_New(2);
+
+    PyTuple_SetItem(return_obj, 0, imgs_obj);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
+}
+
 PyMethodDef vk_dev_methods[] = {
     {"get_queue", (PyCFunction)vk_dev_get_queue, METH_VARARGS | METH_KEYWORDS, NULL},
     {"create_swapchain", (PyCFunction)vk_dev_create_swapchain, METH_O, NULL},
@@ -459,7 +568,8 @@ PyMethodDef vk_dev_methods[] = {
     {"destroy_image", (PyCFunction)vk_dev_destroy_image, METH_O, NULL},
     {"allocate_memory", (PyCFunction)vk_dev_allocate_memory, METH_O, NULL},
     {"free_memory", (PyCFunction)vk_dev_free_memory, METH_O, NULL},
-
+    {"bind_image_memory", (PyCFunction)vk_dev_bind_img_memory, METH_VARARGS | METH_KEYWORDS, NULL},
+    {"get_swapchain_images", (PyCFunction)vk_dev_get_swapchain_images, METH_O, NULL},
     {NULL},
 };
 
