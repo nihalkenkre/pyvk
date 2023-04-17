@@ -509,12 +509,12 @@ PyObject *vk_dev_get_swapchain_images(PyObject *self_obj, PyObject *args)
         return return_obj;
     }
 
-    VkImage *images = (VkImage *)malloc(sizeof(VkImage *) * image_count);
+    VkImage *images = (VkImage *)PyMem_MALLOC(sizeof(VkImage *) * image_count);
     result = vkGetSwapchainImagesKHR(self->device, sc->swapchain, &image_count, images);
 
     if (result != VK_SUCCESS)
     {
-        free(images);
+        PyMem_FREE(images);
 
         PyObject *return_obj = PyTuple_New(2);
 
@@ -524,25 +524,17 @@ PyObject *vk_dev_get_swapchain_images(PyObject *self_obj, PyObject *args)
         return return_obj;
     }
 
-    printf("image_count: %u\n", image_count);
-
     PyObject *imgs_obj = PyTuple_New(image_count);
 
     for (uint32_t img_idx = 0; img_idx < image_count; ++img_idx)
     {
-        if (*(images + img_idx) == VK_NULL_HANDLE)
-        {
-            printf("img at %d is NULL\n", img_idx);
-        }
-        // vk_img *sc_img = PyObject_NEW(vk_img, &vk_img_type);
-        // sc_img->image = *(images + img_idx);
+        vk_img *sc_img = PyObject_NEW(vk_img, &vk_img_type);
+        sc_img->image = *(images + img_idx);
 
-        // PyTuple_SetItem(imgs_obj, img_idx, Py_None);//(PyObject *)sc_img);
-
-        printf("idx: %u\n", img_idx);
+        PyTuple_SetItem(imgs_obj, img_idx, (PyObject *)sc_img);
     }
 
-    free(images);
+    PyMem_FREE(images);
 
     PyObject *return_obj = PyTuple_New(2);
 

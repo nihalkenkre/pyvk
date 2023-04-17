@@ -834,8 +834,9 @@ class ImageCreateInfo(vk.image_create_info):
             raise ValueError(
                 "Please pass a tuple with 3 values for extent in pyvk.ImageCreateInfo")
 
-        super(ImageCreateInfo, self).__init__(p_next, flags_value, image_type_value, format_value, extent, mip_levels, array_layers,
-                                              samples_value, tiling_value, usage_value, sharing_mode_value, queue_family_indices,
+        super(ImageCreateInfo, self).__init__(p_next, flags_value, image_type_value, format_value, extent, 
+                                              mip_levels, array_layers, samples_value, tiling_value, usage_value, 
+                                              sharing_mode_value, queue_family_indices,
                                               initial_layout_value)
 
 
@@ -847,6 +848,11 @@ class MemoryAllocateInfo(vk.memory_allocate_info):
 
         super(MemoryAllocateInfo, self).__init__(p_next, allocation_size, memory_type_index)
 
+
+class SubmitInfo(vk.submit_info):
+    def __init__(self, p_next=None, wait_semaphores=[], wait_dst_stage_masks=[], command_buffers=[], signal_semaphores=[]):
+        super(SubmitInfo, self).__init__(p_next, wait_semaphores, wait_dst_stage_masks, command_buffers, signal_semaphores)
+        
     
 class Device(object):
     def __init__(self, device=vk.device):

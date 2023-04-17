@@ -27,11 +27,11 @@ void vk_dev_ci_dealloc(PyObject *self_obj)
         {
             if (strcmp(self->ci.ppEnabledLayerNames[l_idx], "") != 0)
             {
-                free(self->ci.ppEnabledLayerNames[l_idx]);
+                free((void *)self->ci.ppEnabledLayerNames[l_idx]);
             }
         }
 
-        free(self->ci.ppEnabledLayerNames);
+        free((void *)self->ci.ppEnabledLayerNames);
     }
 
     if (self->ci.ppEnabledExtensionNames)
@@ -40,11 +40,11 @@ void vk_dev_ci_dealloc(PyObject *self_obj)
         {
             if (strcmp(self->ci.ppEnabledExtensionNames[e_idx], "") != 0)
             {
-                free(self->ci.ppEnabledExtensionNames[e_idx]);
+                free((void *)self->ci.ppEnabledExtensionNames[e_idx]);
             }
         }
 
-        free(self->ci.ppEnabledExtensionNames);
+        free((void *)self->ci.ppEnabledExtensionNames);
     }
 
     if (self->p_next != Py_None)
@@ -79,16 +79,13 @@ void get_queue_cis_from_list(PyObject *obj, VkDeviceQueueCreateInfo **q_cis, uin
 {
     DEBUG_LOG("get_queue_cis_from_obj\n");
 
-    if (PyList_Check(obj) == 1)
+    *q_ci_count = (uint32_t)PyList_Size(obj);
+
+    *q_cis = (VkDeviceQueueCreateInfo *)malloc(sizeof(VkDeviceQueueCreateInfo) * *q_ci_count);
+
+    for (Py_ssize_t idx = 0; idx < *q_ci_count; ++idx)
     {
-        *q_ci_count = (uint32_t)PyList_Size(obj);
-
-        *q_cis = (VkDeviceQueueCreateInfo *)malloc(sizeof(VkDeviceQueueCreateInfo) * *q_ci_count);
-
-        for (Py_ssize_t idx = 0; idx < *q_ci_count; ++idx)
-        {
-            *(*q_cis + idx) = ((vk_dev_q_ci *)PyList_GetItem(obj, idx))->ci;
-        }
+        *(*q_cis + idx) = ((vk_dev_q_ci *)PyList_GetItem(obj, idx))->ci;
     }
 }
 

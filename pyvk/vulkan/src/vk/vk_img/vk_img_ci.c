@@ -44,7 +44,7 @@ void vk_img_ci_dealloc(PyObject *self_obj)
 
     if (self->ci.pQueueFamilyIndices != NULL)
     {
-        free(self->ci.pQueueFamilyIndices);
+        free((void *)self->ci.pQueueFamilyIndices);
     }
 
     Py_TYPE(self_obj)->tp_free(self_obj);

@@ -25,11 +25,11 @@ void vk_instance_ci_dealloc(PyObject *self_obj)
         {
             if (strcmp(self->ci.ppEnabledLayerNames[l_idx], "") != 0)
             {
-                free(self->ci.ppEnabledLayerNames[l_idx]);
+                free((void *)self->ci.ppEnabledLayerNames[l_idx]);
             }
         }
 
-        free(self->ci.ppEnabledLayerNames);
+        free((void *)self->ci.ppEnabledLayerNames);
     }
 
     if (self->ci.ppEnabledExtensionNames)
@@ -38,11 +38,11 @@ void vk_instance_ci_dealloc(PyObject *self_obj)
         {
             if (strcmp(self->ci.ppEnabledExtensionNames[e_idx], "") != 0)
             {
-                free(self->ci.ppEnabledExtensionNames[e_idx]);
+                free((void *)self->ci.ppEnabledExtensionNames[e_idx]);
             }
         }
 
-        free(self->ci.ppEnabledExtensionNames);
+        free((void *)self->ci.ppEnabledExtensionNames);
     }
 
     if (self->p_next != Py_None)
@@ -107,7 +107,7 @@ int vk_instance_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     PyObject *tmp = NULL;
 
-    char *kwlist[] = { "p_next", "flags", "app_info", "enabled_layers", "enabled_extensions", NULL};
+    char *kwlist[] = {"p_next", "flags", "app_info", "enabled_layers", "enabled_extensions", NULL};
 
     PyArg_ParseTupleAndKeywords(args, kwds, "|OIOOO", kwlist, &p_next, &self->flags, &app_info,
                                 &enabled_layers, &enabled_extensions);

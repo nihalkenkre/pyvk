@@ -20,7 +20,7 @@ void vk_dev_q_ci_dealloc(PyObject *self_obj)
 
     if (self->ci.pQueuePriorities)
     {
-        free(self->ci.pQueuePriorities);
+        free((void *)self->ci.pQueuePriorities);
     }
 
     if (self->p_next != Py_None)

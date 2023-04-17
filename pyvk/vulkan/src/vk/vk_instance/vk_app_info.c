@@ -21,7 +21,7 @@ void vk_app_info_dealloc(PyObject *self_obj)
     {
         if (strcmp(self->app_info.pApplicationName, "") != 0)
         {
-            free(self->app_info.pApplicationName);
+            free((void *)self->app_info.pApplicationName);
         }
     }
 
@@ -29,7 +29,7 @@ void vk_app_info_dealloc(PyObject *self_obj)
     {
         if (strcmp(self->app_info.pEngineName, "") != 0)
         {
-            free(self->app_info.pEngineName);
+            free((void *)self->app_info.pEngineName);
         }
     }
 
@@ -113,7 +113,7 @@ int vk_app_info_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     PyObject *tmp = NULL;
 
-    char *kwlist[] = { "p_next", "app_name", "app_ver", "engine_name", "engine_ver", "api_ver", NULL};
+    char *kwlist[] = {"p_next", "app_name", "app_ver", "engine_name", "engine_ver", "api_ver", NULL};
 
     PyArg_ParseTupleAndKeywords(args, kwds, "|OsOsOO", kwlist, &p_next, &self->app_name, &app_ver, &self->engine_name, &engine_ver, &api_ver);
     if (PyErr_Occurred())
