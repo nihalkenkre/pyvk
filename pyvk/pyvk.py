@@ -655,6 +655,42 @@ class ImageAspectFlagBits(Enum):
     NONE_KHR = NONE
 
 
+class AccessFlagBits(Enum):
+    INDIRECT_COMMAND_READ_BIT = 0x00000001
+    INDEX_READ_BIT = 0x00000002
+    VERTEX_ATTRIBUTE_READ_BIT = 0x00000004
+    UNIFORM_READ_BIT = 0x00000008
+    INPUT_ATTACHMENT_READ_BIT = 0x00000010
+    SHADER_READ_BIT = 0x00000020
+    SHADER_WRITE_BIT = 0x00000040
+    COLOR_ATTACHMENT_READ_BIT = 0x00000080
+    COLOR_ATTACHMENT_WRITE_BIT = 0x00000100
+    DEPTH_STENCIL_ATTACHMENT_READ_BIT = 0x00000200
+    DEPTH_STENCIL_ATTACHMENT_WRITE_BIT = 0x00000400
+    TRANSFER_READ_BIT = 0x00000800
+    TRANSFER_WRITE_BIT = 0x00001000
+    HOST_READ_BIT = 0x00002000
+    HOST_WRITE_BIT = 0x00004000
+    MEMORY_READ_BIT = 0x00008000
+    MEMORY_WRITE_BIT = 0x00010000
+    NONE = 0
+    TRANSFORM_FEEDBACK_WRITE_BIT_EXT = 0x02000000
+    TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT = 0x04000000
+    TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT = 0x08000000
+    CONDITIONAL_RENDERING_READ_BIT_EXT = 0x00100000
+    COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT = 0x00080000
+    ACCELERATION_STRUCTURE_READ_BIT_KHR = 0x00200000
+    ACCELERATION_STRUCTURE_WRITE_BIT_KHR = 0x00400000
+    FRAGMENT_DENSITY_MAP_READ_BIT_EXT = 0x01000000
+    FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR = 0x00800000
+    COMMAND_PREPROCESS_READ_BIT_NV = 0x00020000
+    COMMAND_PREPROCESS_WRITE_BIT_NV = 0x00040000
+    SHADING_RATE_IMAGE_READ_BIT_NV = FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR
+    ACCELERATION_STRUCTURE_READ_BIT_NV = ACCELERATION_STRUCTURE_READ_BIT_KHR
+    ACCELERATION_STRUCTURE_WRITE_BIT_NV = ACCELERATION_STRUCTURE_WRITE_BIT_KHR
+    NONE_KHR = NONE
+
+
 class ApplicationInfo(vk.application_info):
     def __init__(self, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
@@ -827,23 +863,45 @@ class FenceCreateInfo(vk.semaphore_create_info):
 
 
 class ImageSubresourceLayers(vk.image_subresource_layers):
-    def __init__(self, aspect_mask=ImageAspectFlagBits.COLOR_BIT, mip_level=0, base_array_layer=0, layer_count=1):
+    def __init__(self, aspect_mask=ImageAspectFlagBits.COLOR_BIT, mip_level=0, 
+                 base_array_layer=0, layer_count=1):
 
-        aspect_mask_value = aspect_mask.value if isinstance(aspect_mask, ImageAspectFlagBits) else aspect_mask
-        super(ImageSubresourceLayers, self).__init__(aspect_mask_value, mip_level, base_array_layer, layer_count)
+        aspect_mask_value = aspect_mask.value if isinstance(
+            aspect_mask, ImageAspectFlagBits) else aspect_mask
+        super(ImageSubresourceLayers, self).__init__(aspect_mask_value, mip_level, 
+                                                     base_array_layer, layer_count)
 
 
 class ImageSubresourceRange(vk.image_subresource_range):
-    def __init__(self, aspect_mask=ImageAspectFlagBits.COLOR_BIT, base_mip_level=0, level_count=1, base_array_layer=0, layer_count=1):
+    def __init__(self, aspect_mask=ImageAspectFlagBits.COLOR_BIT, base_mip_level=0, 
+                 level_count=1, base_array_layer=0, layer_count=1):
 
-        aspect_mask_value = aspect_mask.value if isinstance(aspect_mask, ImageAspectFlagBits) else aspect_mask
-        super(ImageSubresourceRange, self).__init__(aspect_mask_value, base_mip_level, level_count, base_array_layer, layer_count)
+        aspect_mask_value = aspect_mask.value if isinstance(
+            aspect_mask, ImageAspectFlagBits) else aspect_mask
+        super(ImageSubresourceRange, self).__init__(aspect_mask_value, base_mip_level, 
+                                                    level_count, base_array_layer, layer_count)
+
+
+class ImageMemoryBarrier(vk.image_memory_barrier):
+    def __init__(self, p_next=None, src_access_mask=AccessFlagBits.NONE, dst_access_mask=AccessFlagBits.NONE,
+                 old_layout=ImageLayout.UNDEFINED, new_layout=ImageLayout.UNDEFINED, src_queue_family_index=0,
+                 dst_queue_family_index=0, image=vk.image, subresource_range=ImageSubresourceRange):
+        
+        src_access_mask_value = src_access_mask.value if isinstance(src_access_mask, AccessFlagBits) else src_access_mask
+        dst_access_mask_value = dst_access_mask.value if isinstance(dst_access_mask, AccessFlagBits) else dst_access_mask
+        old_layout_value = old_layout.value if isinstance(old_layout, ImageLayout) else old_layout
+        new_layout_value = new_layout.value if isinstance(new_layout, ImageLayout) else new_layout
+
+        super(ImageMemoryBarrier, self).__init__(p_next, src_access_mask_value, dst_access_mask_value, old_layout_value, new_layout_value, src_queue_family_index, 
+                                                 dst_queue_family_index, image, subresource_range)
+
 
 
 class ImageCreateInfo(vk.image_create_info):
     def __init__(self, p_next=None, flags=ImageCreateFlagBits.NONE, image_type=ImageType.TWO_2D,
-                 format=Format.UNDEFINED, extent=(), mip_levels=1, array_layers=1, samples=SampleCountFlagBits.COUNT_1_BIT,
-                 tiling=ImageTiling.OPTIMAL, usage=ImageUsageFlagBits.NONE, sharing_mode=SharingMode.EXCLUSIVE,
+                 format=Format.UNDEFINED, extent=(), mip_levels=1, array_layers=1, 
+                 samples=SampleCountFlagBits.COUNT_1_BIT, tiling=ImageTiling.OPTIMAL, 
+                 usage=ImageUsageFlagBits.NONE, sharing_mode=SharingMode.EXCLUSIVE,
                  queue_family_indices=[0], initial_layout=ImageLayout.UNDEFINED):
 
         flags_value = flags.value if isinstance(
@@ -866,8 +924,9 @@ class ImageCreateInfo(vk.image_create_info):
             raise ValueError(
                 "Please pass a tuple with 3 values for extent in pyvk.ImageCreateInfo")
 
-        super(ImageCreateInfo, self).__init__(p_next, flags_value, image_type_value, format_value, extent, 
-                                              mip_levels, array_layers, samples_value, tiling_value, usage_value, 
+        super(ImageCreateInfo, self).__init__(p_next, flags_value, image_type_value, 
+                                              format_value, extent, mip_levels, array_layers, 
+                                              samples_value, tiling_value, usage_value, 
                                               sharing_mode_value, queue_family_indices,
                                               initial_layout_value)
 
@@ -882,8 +941,10 @@ class MemoryAllocateInfo(vk.memory_allocate_info):
 
 
 class SubmitInfo(vk.submit_info):
-    def __init__(self, p_next=None, wait_semaphores=[], wait_dst_stage_masks=[], command_buffers=[], signal_semaphores=[]):
-        super(SubmitInfo, self).__init__(p_next, wait_semaphores, wait_dst_stage_masks, command_buffers, signal_semaphores)
+    def __init__(self, p_next=None, wait_semaphores=[], wait_dst_stage_masks=[], 
+                 command_buffers=[], signal_semaphores=[]):
+        super(SubmitInfo, self).__init__(p_next, wait_semaphores, wait_dst_stage_masks, 
+                                         command_buffers, signal_semaphores)
         
     
 class Device(object):
@@ -989,7 +1050,7 @@ class Device(object):
         self._d.free_memory(memory)
 
 
-    def bind_image_memory(self, image=vk.image, memory=vk.device_memory, offset=int):
+    def bind_image_memory(self, image=vk.image, memory=vk.device_memory, offset=0):
         
         if offset < 0:
             raise ValueError('Please pass a positive value for offset in pyvk.Device.bind_image_memory')

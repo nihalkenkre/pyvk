@@ -40,6 +40,7 @@
 #include "vk_sem/vk_sem.h"
 #include "vk_fence/vk_fence_ci.h"
 #include "vk_fence/vk_fence.h"
+#include "vk_img/vk_img_mem_bar.h"
 #include "vk_img/vk_img_srl.h"
 #include "vk_img/vk_img_srr.h"
 #include "vk_img/vk_img_ci.h"
@@ -377,7 +378,14 @@ PyMODINIT_FUNC PyInit_vulkan(void)
         goto shutdown;
     }
 
-  return mod;
+    mod = add_vk_img_mem_bar_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    return mod;
 
 shutdown:
     Py_XDECREF(mod);

@@ -16,7 +16,7 @@ typedef struct vk_img_mem_bar
     uint32_t src_q_fly_idx;
     uint32_t dst_q_fly_idx;
     PyObject *img;
-    PyObject *srl;
+    PyObject *srr;
 
     VkImageMemoryBarrier memory_barrier;
 } vk_img_mem_bar;

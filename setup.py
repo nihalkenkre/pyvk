@@ -44,6 +44,7 @@ setup(
                 './pyvk/vulkan/src/vk/vk_sem/vk_sem.c',
                 './pyvk/vulkan/src/vk/vk_fence/vk_fence_ci.c',
                 './pyvk/vulkan/src/vk/vk_fence/vk_fence.c',
+                './pyvk/vulkan/src/vk/vk_img/vk_img_mem_bar.c',
                 './pyvk/vulkan/src/vk/vk_img/vk_img_srl.c',
                 './pyvk/vulkan/src/vk/vk_img/vk_img_srr.c',
                 './pyvk/vulkan/src/vk/vk_img/vk_img_ci.c',

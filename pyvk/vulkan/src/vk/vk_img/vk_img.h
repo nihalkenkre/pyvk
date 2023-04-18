@@ -9,11 +9,11 @@ typedef struct vk_img
 {
     PyObject_HEAD
 
-    VkImage image;
+        VkImage image;
 } vk_img;
 
 PyTypeObject vk_img_type;
 
-PyObject* add_vk_img_to_module(PyObject* mod);
+PyObject *add_vk_img_to_module(PyObject *mod);
 
 #endif
