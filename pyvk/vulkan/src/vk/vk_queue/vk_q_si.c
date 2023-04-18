@@ -201,6 +201,8 @@ int vk_q_si_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     }
     DEBUG_LOG("q_si parsed sig_sems\n");
 
+    init_q_si_from_obj(self_obj);
+
     return 0;
 }
 

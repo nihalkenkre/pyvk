@@ -27,8 +27,8 @@
 #include "vk_dev/vk_dev_ci.h"
 #include "vk_dev/vk_dev.h"
 #include "vk_dev/vk_dev_mem.h"
-#include "vk_queue/vk_q_fly_props.h"
-#include "vk_queue/vk_queue.h"
+#include "vk_queue//vk_q_fly_props.h"
+#include "vk_queue/vk_q.h"
 #include "vk_queue/vk_q_si.h"
 #include "vk_swapchain/vk_swapchain_ci.h"
 #include "vk_swapchain/vk_swapchain.h"
@@ -40,6 +40,8 @@
 #include "vk_sem/vk_sem.h"
 #include "vk_fence/vk_fence_ci.h"
 #include "vk_fence/vk_fence.h"
+#include "vk_img/vk_img_srl.h"
+#include "vk_img/vk_img_srr.h"
 #include "vk_img/vk_img_ci.h"
 #include "vk_img/vk_img.h"
 
@@ -256,7 +258,7 @@ PyMODINIT_FUNC PyInit_vulkan(void)
         goto shutdown;
     }
 
-    mod = add_vk_queue_to_module(mod);
+    mod = add_vk_q_to_module(mod);
 
     if (mod == NULL)
     {
@@ -361,7 +363,21 @@ PyMODINIT_FUNC PyInit_vulkan(void)
         goto shutdown;
     }
 
-    return mod;
+    mod = add_vk_img_srl_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_img_srr_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+  return mod;
 
 shutdown:
     Py_XDECREF(mod);

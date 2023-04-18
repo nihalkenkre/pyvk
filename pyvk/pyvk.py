@@ -636,6 +636,24 @@ class ImageLayout(Enum):
     READ_ONLY_OPTIMAL_KHR = READ_ONLY_OPTIMAL
     ATTACHMENT_OPTIMAL_KHR = ATTACHMENT_OPTIMAL
 
+class ImageAspectFlagBits(Enum):
+    COLOR_BIT = 0x00000001
+    DEPTH_BIT = 0x00000002
+    STENCIL_BIT = 0x00000004
+    METADATA_BIT = 0x00000008
+    PLANE_0_BIT = 0x00000010
+    PLANE_1_BIT = 0x00000020
+    PLANE_2_BIT = 0x00000040
+    NONE = 0
+    MEMORY_PLANE_0_BIT_EXT = 0x00000080
+    MEMORY_PLANE_1_BIT_EXT = 0x00000100
+    MEMORY_PLANE_2_BIT_EXT = 0x00000200
+    MEMORY_PLANE_3_BIT_EXT = 0x00000400
+    PLANE_0_BIT_KHR = PLANE_0_BIT
+    PLANE_1_BIT_KHR = PLANE_1_BIT
+    PLANE_2_BIT_KHR = PLANE_2_BIT
+    NONE_KHR = NONE
+
 
 class ApplicationInfo(vk.application_info):
     def __init__(self, p_next=None,
@@ -806,6 +824,20 @@ class FenceCreateInfo(vk.semaphore_create_info):
             flags, FenceCreateFlagBits) else flags
 
         super(FenceCreateInfo, self).__init__(p_next, flags_value)
+
+
+class ImageSubresourceLayers(vk.image_subresource_layers):
+    def __init__(self, aspect_mask=ImageAspectFlagBits.COLOR_BIT, mip_level=0, base_array_layer=0, layer_count=1):
+
+        aspect_mask_value = aspect_mask.value if isinstance(aspect_mask, ImageAspectFlagBits) else aspect_mask
+        super(ImageSubresourceLayers, self).__init__(aspect_mask_value, mip_level, base_array_layer, layer_count)
+
+
+class ImageSubresourceRange(vk.image_subresource_range):
+    def __init__(self, aspect_mask=ImageAspectFlagBits.COLOR_BIT, base_mip_level=0, level_count=1, base_array_layer=0, layer_count=1):
+
+        aspect_mask_value = aspect_mask.value if isinstance(aspect_mask, ImageAspectFlagBits) else aspect_mask
+        super(ImageSubresourceRange, self).__init__(aspect_mask_value, base_mip_level, level_count, base_array_layer, layer_count)
 
 
 class ImageCreateInfo(vk.image_create_info):

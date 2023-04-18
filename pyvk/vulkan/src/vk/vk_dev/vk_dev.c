@@ -1,5 +1,5 @@
 #include "vk_dev.h"
-#include "vk_queue.h"
+#include "vk_q.h"
 
 #include "vk_swapchain_ci.h"
 #include "vk_swapchain.h"
@@ -46,7 +46,7 @@ PyObject *vk_dev_get_queue(PyObject *self_obj, PyObject *args, PyObject *kwds)
     VkQueue q;
     vkGetDeviceQueue(self->device, q_flx_idx, q_idx, &q);
 
-    vk_queue *q_obj = PyObject_NEW(vk_queue, &vk_queue_type);
+    vk_q *q_obj = PyObject_NEW(vk_q, &vk_q_type);
 
     return (PyObject *)q_obj;
 }
