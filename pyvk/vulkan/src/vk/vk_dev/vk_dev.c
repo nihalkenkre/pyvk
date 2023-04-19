@@ -47,6 +47,7 @@ PyObject *vk_dev_get_queue(PyObject *self_obj, PyObject *args, PyObject *kwds)
     vkGetDeviceQueue(self->device, q_flx_idx, q_idx, &q);
 
     vk_q *q_obj = PyObject_NEW(vk_q, &vk_q_type);
+    q_obj->queue = q;
 
     return (PyObject *)q_obj;
 }
@@ -547,6 +548,29 @@ PyObject *vk_dev_get_swapchain_images(PyObject *self_obj, PyObject *args)
     return return_obj;
 }
 
+PyObject *vk_dev_acquire_next_image(PyObject *self_obj, PyObject *args, PyObject *kwds)
+{
+    DEBUG_LOG("vk_dev_acquire_next_image\n");
+
+    PyObject *sc_obj = NULL;
+    PyObject *sem_obj = NULL;
+    PyObject *fence_obj = NULL;
+
+    vk_dev *self = (vk_dev *)self_obj;
+    vk_swapchain *sc = (vk_swapchain *)sc_obj;
+    vk_sem *sem = (vk_sem *)sem_obj;
+    vk_fence *fence = (vk_fence *)fence_obj;
+
+    uint32_t image_index = 0;
+    VkResult result = vkAcquireNextImageKHR(self->device, sc->swapchain, UINT64_MAX, sem->semaphore, fence->fence, &image_index);
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, PyLong_FromLong(image_index));
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
+}
+
 PyMethodDef vk_dev_methods[] = {
     {"get_queue", (PyCFunction)vk_dev_get_queue, METH_VARARGS | METH_KEYWORDS, NULL},
     {"create_swapchain", (PyCFunction)vk_dev_create_swapchain, METH_O, NULL},
@@ -565,6 +589,7 @@ PyMethodDef vk_dev_methods[] = {
     {"free_memory", (PyCFunction)vk_dev_free_memory, METH_O, NULL},
     {"bind_image_memory", (PyCFunction)vk_dev_bind_img_memory, METH_VARARGS | METH_KEYWORDS, NULL},
     {"get_swapchain_images", (PyCFunction)vk_dev_get_swapchain_images, METH_O, NULL},
+    {"acquire_next_image", (PyCFunction)vk_dev_acquire_next_image, METH_VARARGS | METH_KEYWORDS, NULL},
     {NULL},
 };
 

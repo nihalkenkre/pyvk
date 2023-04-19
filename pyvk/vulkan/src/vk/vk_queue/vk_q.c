@@ -31,14 +31,27 @@ PyObject *vk_q_submit(PyObject *self_obj, PyObject *args, PyObject *kwds)
     {
         return NULL;
     }
+
     VkSubmitInfo *submit_infos = NULL;
     uint32_t submit_info_count = 0;
 
-    get_si_from_obj((vk_q_si *)submit_infos_obj, &submit_infos, &submit_info_count);
+    get_si_from_obj(submit_infos_obj, &submit_infos, &submit_info_count);
 
-    VkResult result = vkQueueSubmit(((vk_q *)self_obj)->queue, submit_info_count, submit_infos, ((vk_fence *)fence_obj)->fence);
+    VkQueue queue = ((vk_q *)self_obj)->queue;
+    printf("queue %u\n", queue);
+    VkFence fence = ((vk_fence *)fence_obj)->fence;
+    printf("fence %u\n", fence);
 
-    if(submit_infos)
+    printf("submit_info_count: %u\n", submit_info_count);
+
+    printf("wait sem: %u\n", submit_infos[0].pWaitSemaphores[0]);
+    printf("sig sem1: %u\n", submit_infos[0].pSignalSemaphores[0]);
+    printf("sig sem2: %u\n", submit_infos[0].pSignalSemaphores[1]);
+
+    VkResult result = vkQueueSubmit(queue, submit_info_count, submit_infos, fence);
+    printf("submit result: %d\n", result);
+
+    if (submit_infos != NULL)
     {
         free(submit_infos);
     }
@@ -53,10 +66,9 @@ PyMethodDef vk_q_methods[] = {
 
 PyTypeObject vk_q_type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-        .tp_name = "vulkan.q",
+        .tp_name = "vulkan.queue",
     .tp_basicsize = sizeof(vk_q),
     .tp_doc = PyDoc_STR("Vulkan Queue Docs"),
-    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_methods = vk_q_methods,
 };
 

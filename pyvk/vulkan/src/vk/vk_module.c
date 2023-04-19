@@ -316,7 +316,6 @@ PyMODINIT_FUNC PyInit_vulkan(void)
         goto shutdown;
     }
 
-
     mod = add_vk_cmd_buf_to_module(mod);
 
     if (mod == NULL)

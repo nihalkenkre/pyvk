@@ -699,6 +699,42 @@ class CommandBufferUsageFlagBits(Enum):
     SIMULTANEOUS_USE_BIT = 0x00000004
 
 
+class PipelineStageFlagBits(Enum):
+    TOP_OF_PIPE_BIT = 0x00000001
+    DRAW_INDIRECT_BIT = 0x00000002
+    VERTEX_INPUT_BIT = 0x00000004
+    VERTEX_SHADER_BIT = 0x00000008
+    TESSELLATION_CONTROL_SHADER_BIT = 0x00000010
+    TESSELLATION_EVALUATION_SHADER_BIT = 0x00000020
+    GEOMETRY_SHADER_BIT = 0x00000040
+    FRAGMENT_SHADER_BIT = 0x00000080
+    EARLY_FRAGMENT_TESTS_BIT = 0x00000100
+    LATE_FRAGMENT_TESTS_BIT = 0x00000200
+    COLOR_ATTACHMENT_OUTPUT_BIT = 0x00000400
+    COMPUTE_SHADER_BIT = 0x00000800
+    TRANSFER_BIT = 0x00001000
+    BOTTOM_OF_PIPE_BIT = 0x00002000
+    HOST_BIT = 0x00004000
+    ALL_GRAPHICS_BIT = 0x00008000
+    ALL_COMMANDS_BIT = 0x00010000
+    NONE = 0
+    TRANSFORM_FEEDBACK_BIT_EXT = 0x01000000
+    CONDITIONAL_RENDERING_BIT_EXT = 0x00040000
+    ACCELERATION_STRUCTURE_BUILD_BIT_KHR = 0x02000000
+    RAY_TRACING_SHADER_BIT_KHR = 0x00200000
+    FRAGMENT_DENSITY_PROCESS_BIT_EXT = 0x00800000
+    FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR = 0x00400000
+    COMMAND_PREPROCESS_BIT_NV = 0x00020000
+    TASK_SHADER_BIT_EXT = 0x00080000
+    MESH_SHADER_BIT_EXT = 0x00100000
+    SHADING_RATE_IMAGE_BIT_NV = FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR
+    RAY_TRACING_SHADER_BIT_NV = RAY_TRACING_SHADER_BIT_KHR
+    ACCELERATION_STRUCTURE_BUILD_BIT_NV = ACCELERATION_STRUCTURE_BUILD_BIT_KHR
+    TASK_SHADER_BIT_NV = TASK_SHADER_BIT_EXT
+    MESH_SHADER_BIT_NV = MESH_SHADER_BIT_EXT
+    NONE_KHR = NONE
+
+
 class ApplicationInfo(vk.application_info):
     def __init__(self, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
@@ -951,6 +987,9 @@ class MemoryAllocateInfo(vk.memory_allocate_info):
 class SubmitInfo(vk.submit_info):
     def __init__(self, p_next=None, wait_semaphores=[], wait_dst_stage_masks=[], 
                  command_buffers=[], signal_semaphores=[]):
+
+        wait_dst_stage_masks = [msk.value for msk in wait_dst_stage_masks]
+
         super(SubmitInfo, self).__init__(p_next, wait_semaphores, wait_dst_stage_masks, 
                                          command_buffers, signal_semaphores)
         
@@ -1165,8 +1204,14 @@ class Queue(object):
     def __init__(self, queue):
         self._q = queue
 
-    def submit(self, submit_info, fence):
-        self._q.submit(submit_info, fence)
+    def submit(self, submit_infos, fence):
+        result = self._q.submit(submit_infos, fence)
+
+        for r in Result:
+            if r.value == result:
+                return r
+            
+        return result
 
 
 def create_instance(instance_create_info=InstanceCreateInfo):
