@@ -16,14 +16,25 @@ PyObject *vk_instance_get_phy_devs(PyObject *self)
     VkResult result = vkEnumeratePhysicalDevices(inst->instance, &phy_dev_count, NULL);
     if (result != VK_SUCCESS)
     {
-        goto shutdown;
+        PyObject *return_obj = PyTuple_New(2);
+        PyTuple_SetItem(return_obj, 0, Py_None);
+        PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
     }
     VkPhysicalDevice *phy_devs = (VkPhysicalDevice *)malloc(sizeof(VkPhysicalDevice) * phy_dev_count);
 
     result = vkEnumeratePhysicalDevices(inst->instance, &phy_dev_count, phy_devs);
     if (result != VK_SUCCESS)
     {
-        goto shutdown;
+        if (phy_devs != NULL)
+        {
+            free(phy_devs);
+        }
+
+        PyObject *return_obj = PyTuple_New(2);
+        PyTuple_SetItem(return_obj, 0, Py_None);
+        PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+        return return_obj;
     }
 
     PyObject *phy_dev_list = PyList_New(phy_dev_count);
@@ -36,24 +47,16 @@ PyObject *vk_instance_get_phy_devs(PyObject *self)
         PyList_SetItem(phy_dev_list, phy_dev_idx, (PyObject *)phy_dev);
     }
 
-    free(phy_devs);
+    if (phy_devs != NULL)
     {
-        PyObject *return_obj = PyTuple_New(2);
-        PyTuple_SetItem(return_obj, 0, phy_dev_list);
-        PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
-
-        return return_obj;
+        free(phy_devs);
     }
 
-shutdown:
-    free(phy_devs);
-    {
-        PyObject *return_obj = PyTuple_New(2);
-        PyTuple_SetItem(return_obj, 0, Py_None);
-        PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, phy_dev_list);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
 
-        return return_obj;
-    }
+    return return_obj;
 }
 
 PyObject *vk_instance_create_surface(PyObject *self, PyObject *args)

@@ -1,4 +1,6 @@
 #include "vk_cmd_buf.h"
+#include "vk_cmd_buf_bi.h"
+
 #include "vk_img.h"
 #include "vk_img_cpy.h"
 
@@ -16,9 +18,28 @@ void get_regions_from_list(PyObject *obj, VkImageCopy **regions, uint32_t *regio
     }
 }
 
+PyObject *vk_cmd_buf_begin(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_cmd_buf_begin\n");
+
+    PyObject *cmd_buf_bi_obj = NULL;
+
+    PyArg_Parse(args, "O", &cmd_buf_bi_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_cmd_buf *self = (vk_cmd_buf *)self_obj;
+
+    VkResult result = vkBeginCommandBuffer(self->command_buffer, &((vk_cmd_buf_bi *)cmd_buf_bi_obj)->bi);
+
+    return PyLong_FromLong(result);
+}
+
 PyObject *vk_cmd_buf_cpy_img(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
-    DEBUG_LOG("vk_cmd_buf_cpy_img");
+    DEBUG_LOG("vk_cmd_buf_cpy_img\n");
 
     PyObject *src_img_obj = NULL;
     long src_img_layout = 0;
@@ -41,13 +62,26 @@ PyObject *vk_cmd_buf_cpy_img(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     get_regions_from_list(regions_obj, &regions, &regions_count);
 
-    vkCmdCopyImage(self->command_buffer, ((vk_img *)src_img_obj)->image, src_img_layout, ((vk_img *)dst_img_obj)->image, dst_img_layout, regions_count, regions);
+    vkCmdCopyImage(self->command_buffer, ((vk_img *)src_img_obj)->image, src_img_layout,
+
+                   ((vk_img *)dst_img_obj)->image, dst_img_layout, regions_count, regions);
 
     Py_RETURN_NONE;
 }
 
+PyObject *vk_cmd_buf_end(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_cmd_buf_end\n");
+
+    VkResult result = vkEndCommandBuffer(((vk_cmd_buf *)self_obj)->command_buffer);
+
+    return PyLong_FromLong(result);
+}
+
 PyMethodDef vk_cmd_buf_methods[] = {
+    {"begin", (PyCFunction)vk_cmd_buf_begin, METH_O, NULL},
     {"copy_image", (PyCFunction)vk_cmd_buf_cpy_img, METH_VARARGS | METH_KEYWORDS, NULL},
+    {"end", (PyCFunction)vk_cmd_buf_end, METH_NOARGS, NULL},
     {NULL},
 };
 

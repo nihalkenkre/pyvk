@@ -39,6 +39,7 @@ setup(
                 './pyvk/vulkan/src/vk/vk_cmd_pool/vk_cmd_pool_ci.c',
                 './pyvk/vulkan/src/vk/vk_cmd_pool/vk_cmd_pool.c',
                 './pyvk/vulkan/src/vk/vk_cmd_buf/vk_cmd_buf_ai.c',
+                './pyvk/vulkan/src/vk/vk_cmd_buf/vk_cmd_buf_bi.c',
                 './pyvk/vulkan/src/vk/vk_cmd_buf/vk_cmd_buf.c',
                 './pyvk/vulkan/src/vk/vk_sem/vk_sem_ci.c',
                 './pyvk/vulkan/src/vk/vk_sem/vk_sem.c',

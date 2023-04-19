@@ -636,6 +636,7 @@ class ImageLayout(Enum):
     READ_ONLY_OPTIMAL_KHR = READ_ONLY_OPTIMAL
     ATTACHMENT_OPTIMAL_KHR = ATTACHMENT_OPTIMAL
 
+
 class ImageAspectFlagBits(Enum):
     COLOR_BIT = 0x00000001
     DEPTH_BIT = 0x00000002
@@ -689,6 +690,13 @@ class AccessFlagBits(Enum):
     ACCELERATION_STRUCTURE_READ_BIT_NV = ACCELERATION_STRUCTURE_READ_BIT_KHR
     ACCELERATION_STRUCTURE_WRITE_BIT_NV = ACCELERATION_STRUCTURE_WRITE_BIT_KHR
     NONE_KHR = NONE
+
+
+class CommandBufferUsageFlagBits(Enum):
+    NONE = 0x00000000
+    ONE_TIME_SUBMIT_BIT = 0x00000001
+    RENDER_PASS_CONTINUE_BIT = 0x00000002
+    SIMULTANEOUS_USE_BIT = 0x00000004
 
 
 class ApplicationInfo(vk.application_info):
@@ -946,13 +954,21 @@ class SubmitInfo(vk.submit_info):
         super(SubmitInfo, self).__init__(p_next, wait_semaphores, wait_dst_stage_masks, 
                                          command_buffers, signal_semaphores)
         
+
+class CommandBufferBeginInfo(vk.command_buffer_begin_info):
+    def __init__(self, flags=CommandBufferUsageFlagBits.NONE):
+        
+        flags_value = flags.value if isinstance(flags, CommandBufferUsageFlagBits) else flags
+
+        super(CommandBufferBeginInfo, self).__init__(flags_value)
+
     
 class Device(object):
     def __init__(self, device=vk.device):
         self._d = device
 
     def get_queue(self, queue_family_index=0, queue_index=0):
-        return self._d.get_queue(queue_family_index=queue_family_index, queue_index=queue_index)
+        return Queue(self._d.get_queue(queue_family_index=queue_family_index, queue_index=queue_index))
 
     def create_swapchain(self, swapchain_create_info=SwapchainCreateInfoKHR):
         sc, result = self._d.create_swapchain(swapchain_create_info)
@@ -990,6 +1006,8 @@ class Device(object):
     def allocate_command_buffers(self, command_buffer_allocate_info=CommandBufferAllocateInfo):
         cmd_bufs, result = self._d.allocate_command_buffers(
             command_buffer_allocate_info)
+
+        cmd_bufs = [CommandBuffer(cb) for cb in cmd_bufs]
 
         for r in Result:
             if result == r.value:
@@ -1118,6 +1136,37 @@ class PhysicalDevice(object):
 
     def destroy_device(self, device=Device):
         self._pd.destroy_device(device._d)
+
+
+class CommandBuffer(object):
+    def __init__(self, command_buffer):
+        self._cb = command_buffer
+
+    def begin(self, command_buffer_begin_info=CommandBufferBeginInfo):
+        result = self._cb.begin(command_buffer_begin_info)
+
+        for r in Result:
+            if result == r.value:
+                return r
+
+        return result
+
+    def end(self):
+        result = self._cb.end() 
+
+        for r in Result:
+            if result == r.value:
+                return r
+            
+        return result
+
+
+class Queue(object):
+    def __init__(self, queue):
+        self._q = queue
+
+    def submit(self, submit_info, fence):
+        self._q.submit(submit_info, fence)
 
 
 def create_instance(instance_create_info=InstanceCreateInfo):

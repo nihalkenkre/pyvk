@@ -35,6 +35,7 @@
 #include "vk_cmd_pool/vk_cmd_pool_ci.h"
 #include "vk_cmd_pool/vk_cmd_pool.h"
 #include "vk_cmd_buf/vk_cmd_buf_ai.h"
+#include "vk_cmd_buf/vk_cmd_buf_bi.h"
 #include "vk_cmd_buf/vk_cmd_buf.h"
 #include "vk_sem/vk_sem_ci.h"
 #include "vk_sem/vk_sem.h"
@@ -307,6 +308,14 @@ PyMODINIT_FUNC PyInit_vulkan(void)
     {
         goto shutdown;
     }
+
+    mod = add_vk_cmd_buf_bi_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
 
     mod = add_vk_cmd_buf_to_module(mod);
 
