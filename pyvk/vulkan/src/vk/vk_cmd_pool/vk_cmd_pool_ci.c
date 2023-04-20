@@ -32,7 +32,7 @@ void init_cmd_pool_ci_from_obj(PyObject *obj_obj)
     vk_cmd_pool_ci* obj = (vk_cmd_pool_ci*) obj_obj;
 
     obj->ci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    obj->ci.pNext = obj->p_next;
+    obj->ci.pNext = NULL;
     obj->ci.flags = obj->flags;
     obj->ci.queueFamilyIndex = obj->q_fly_idx;
 }

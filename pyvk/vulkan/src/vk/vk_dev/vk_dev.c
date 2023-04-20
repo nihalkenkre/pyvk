@@ -176,7 +176,10 @@ PyObject *vk_dev_alloc_cmd_bufs(PyObject *self_obj, PyObject *args)
 
     if (result != VK_SUCCESS)
     {
-        free(cmd_bufs);
+        if (cmd_bufs != NULL)
+        {
+            free(cmd_bufs);
+        }
 
         PyObject *return_obj = PyTuple_New(2);
         PyTuple_SetItem(return_obj, 0, Py_None);
@@ -192,6 +195,7 @@ PyObject *vk_dev_alloc_cmd_bufs(PyObject *self_obj, PyObject *args)
         vk_cmd_buf *cmd_buf_obj = PyObject_NEW(vk_cmd_buf, &vk_cmd_buf_type);
 
         cmd_buf_obj->command_buffer = cmd_bufs[cb_idx];
+
         PyTuple_SetItem(cmd_bufs_obj, cb_idx, (PyObject *)cmd_buf_obj);
     }
 
@@ -555,6 +559,14 @@ PyObject *vk_dev_acquire_next_image(PyObject *self_obj, PyObject *args, PyObject
     PyObject *sc_obj = NULL;
     PyObject *sem_obj = NULL;
     PyObject *fence_obj = NULL;
+
+    char *kwlist[] = {"swapchain", "wait_semaphore", "fence", NULL};
+
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OOO", kwlist, &sc_obj, &sem_obj, &fence_obj);
+    if(PyErr_Occurred())
+    {
+        return NULL;
+    }
 
     vk_dev *self = (vk_dev *)self_obj;
     vk_swapchain *sc = (vk_swapchain *)sc_obj;

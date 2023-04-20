@@ -9,7 +9,7 @@ typedef struct vk_fence_ci
 {
     PyObject_HEAD
         PyObject *p_next;
-    unsigned long flags;
+    long flags;
 
     VkFenceCreateInfo ci;
 } vk_fence_ci;

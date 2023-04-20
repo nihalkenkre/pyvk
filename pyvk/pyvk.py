@@ -27,7 +27,10 @@ class InstanceCreateFlagBits(Enum):
 
 class Result(Enum):
     SUCCESS = 0
+    NOT_READY = 1
+    TIMEOUT = 2
     INCOMPLETE = 5
+    SUBOPTIMAL_KHR = 1000001003
     ERROR_OUT_OF_HOST_MEMORY = -1
     ERROR_OUT_OF_DEVICE_MEMORY = -2
     ERROR_INITIALIZATION_FAILED = -3
@@ -41,9 +44,11 @@ class Result(Enum):
     ERROR_UNKNOWN = -13
     ERROR_SURFACE_LOST_KHR = -1000000000
     ERROR_NATIVE_WINDOW_IN_USE_KHR = -1000000001
+    ERROR_OUT_OF_DATE_KHR = -1000001004
     ERROR_VALIDATION_FAILED_EXT = -1000011001
-    ERROR_COMPRESSION_EXHAUSTED_EXT = -1000338000
+    ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT = -1000255000
     ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS = -1000257000
+    ERROR_COMPRESSION_EXHAUSTED_EXT = -1000338000
     ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS_KHR = ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS
 
 
@@ -738,9 +743,9 @@ class PipelineStageFlagBits(Enum):
 class ApplicationInfo(vk.application_info):
     def __init__(self, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
-                 engine_name='', engine_ver=(1, 0, 0, 0), api_ver=(1, 0, 0, 0)):
+                 engine_name='', engine_ver=(1, 0, 0, 0)):
         super(ApplicationInfo, self).__init__(p_next=p_next, app_name=app_name, app_ver=app_ver,
-                                              engine_name=engine_name, engine_ver=engine_ver, api_ver=api_ver)
+                                              engine_name=engine_name, engine_ver=engine_ver)
 
 
 class InstanceCreateInfo(vk.instance_create_info):
@@ -897,7 +902,7 @@ class SemaphoreCreateInfo(vk.semaphore_create_info):
         super(SemaphoreCreateInfo, self).__init__(p_next, flags_value)
 
 
-class FenceCreateInfo(vk.semaphore_create_info):
+class FenceCreateInfo(vk.fence_create_info):
     def __init__(self, p_next=None, flags=FenceCreateFlagBits.NONE):
 
         flags_value = flags.value if isinstance(
@@ -989,6 +994,7 @@ class SubmitInfo(vk.submit_info):
                  command_buffers=[], signal_semaphores=[]):
 
         wait_dst_stage_masks = [msk.value for msk in wait_dst_stage_masks]
+        command_buffers = [cmd_buf._cb for cmd_buf in command_buffers]
 
         super(SubmitInfo, self).__init__(p_next, wait_semaphores, wait_dst_stage_masks, 
                                          command_buffers, signal_semaphores)
@@ -1119,6 +1125,15 @@ class Device(object):
                 return r
 
         return result
+
+    def acquire_next_image(self, swapchain=vk.swapchain, semaphore=vk.semaphore, fence=vk.fence):
+        image_index, result = self._d.acquire_next_image(swapchain, semaphore, fence)
+
+        for r in Result:
+            if r.value == result:
+                return image_index, r
+            
+        return image_index, result
 
 
 class PhysicalDevice(object):

@@ -14,7 +14,6 @@ typedef struct vk_app_info
     PyObject *app_ver;
     const char *engine_name;
     PyObject *engine_ver;
-    PyObject *api_ver;
 
     VkApplicationInfo app_info;
 } vk_app_info;

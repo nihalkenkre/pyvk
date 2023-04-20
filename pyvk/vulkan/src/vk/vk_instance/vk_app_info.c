@@ -7,7 +7,6 @@ PyMemberDef vk_app_info_members[] = {
     {"app_ver", T_OBJECT_EX, offsetof(vk_app_info, app_ver), 0, "A tuple of (variant, major, minor, patch) versions"},
     {"engine_name", T_STRING, offsetof(vk_app_info, engine_name), 0, "Name of the engine (str)"},
     {"engine_ver", T_OBJECT_EX, offsetof(vk_app_info, engine_ver), 0, "A tuple of (variant, major, minor, patch) versions"},
-    {"api_ver", T_OBJECT_EX, offsetof(vk_app_info, api_ver), 0, "A tuple of (variant, major, minor, patch) versions"},
     {NULL},
 };
 
@@ -46,11 +45,6 @@ void vk_app_info_dealloc(PyObject *self_obj)
     if (self->engine_ver != Py_None)
     {
         Py_XDECREF(self->engine_ver);
-    }
-
-    if (self->api_ver != Py_None)
-    {
-        Py_XDECREF(self->api_ver);
     }
 
     Py_TYPE((PyObject *)self)->tp_free((PyObject *)self);
@@ -93,11 +87,7 @@ void init_app_info_from_obj(PyObject *obj_obj)
     patch = PyLong_AsLong(PyTuple_GetItem(obj->engine_ver, 3));
     obj->app_info.engineVersion = VK_MAKE_API_VERSION(variant, major, minor, patch);
 
-    variant = PyLong_AsLong(PyTuple_GetItem(obj->api_ver, 0));
-    major = PyLong_AsLong(PyTuple_GetItem(obj->api_ver, 1));
-    minor = PyLong_AsLong(PyTuple_GetItem(obj->api_ver, 2));
-    patch = PyLong_AsLong(PyTuple_GetItem(obj->api_ver, 3));
-    obj->app_info.apiVersion = VK_MAKE_API_VERSION(variant, major, minor, patch);
+    obj->app_info.apiVersion = VK_MAKE_API_VERSION(0, 1, 3, 0);
 }
 
 int vk_app_info_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
@@ -109,13 +99,12 @@ int vk_app_info_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     PyObject *p_next = NULL;
     PyObject *app_ver = NULL;
     PyObject *engine_ver = NULL;
-    PyObject *api_ver = NULL;
 
     PyObject *tmp = NULL;
 
-    char *kwlist[] = {"p_next", "app_name", "app_ver", "engine_name", "engine_ver", "api_ver", NULL};
+    char *kwlist[] = {"p_next", "app_name", "app_ver", "engine_name", "engine_ver", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|OsOsOO", kwlist, &p_next, &self->app_name, &app_ver, &self->engine_name, &engine_ver, &api_ver);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OsOsO", kwlist, &p_next, &self->app_name, &app_ver, &self->engine_name, &engine_ver);
     if (PyErr_Occurred())
     {
         return -1;
@@ -159,19 +148,6 @@ int vk_app_info_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
         self->engine_ver = Py_None;
     }
     DEBUG_LOG("app_info parsed engine_ver\n");
-
-    if (api_ver)
-    {
-        tmp = self->api_ver;
-        Py_INCREF(api_ver);
-        self->api_ver = api_ver;
-        Py_XDECREF(tmp);
-    }
-    else
-    {
-        self->api_ver = Py_None;
-    }
-    DEBUG_LOG("app_info parsed api_ver\n");
 
     init_app_info_from_obj(self_obj);
 

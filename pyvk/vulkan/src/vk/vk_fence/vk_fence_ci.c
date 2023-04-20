@@ -6,7 +6,7 @@
 
 PyMemberDef vk_fence_ci_members[] = {
     {"p_next", T_OBJECT_EX, offsetof(vk_fence_ci, p_next), 0, "TODO: Pass None for now"},
-    {"flags", T_ULONG, offsetof(vk_fence_ci, flags), 0, "Fence creation flags"},
+    {"flags", T_LONG, offsetof(vk_fence_ci, flags), 0, "Fence creation flags"},
     {NULL},
 };
 
@@ -46,7 +46,7 @@ int vk_fence_ci_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     char *kwlist[] = {"p_next", "flags", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|OK", kwlist, &p_next, &self->flags);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|Ok", kwlist, &p_next, &self->flags);
     if (PyErr_Occurred())
     {
         return -1;

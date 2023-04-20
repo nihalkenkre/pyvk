@@ -77,13 +77,9 @@ void get_semaphores_from_list(PyObject *obj, VkSemaphore **sems, uint32_t *sems_
     *sems_count = (uint32_t)PyList_Size(obj);
     *sems = (VkSemaphore *)malloc(sizeof(VkSemaphore) * *sems_count);
 
-    memset(*sems, 0, sizeof(VkSemaphore) * *sems_count);
-
     for (uint32_t idx = 0; idx < *sems_count; ++idx)
     {
-        printf("sem before assign: %u\n", *(*sems + idx));
         *(*sems + idx) = ((vk_sem *)PyList_GetItem(obj, idx))->semaphore;
-        printf("sem after assign: %u\n", *(*sems + idx));
     }
 }
 
@@ -109,13 +105,13 @@ void init_q_si_from_obj(PyObject *obj_obj)
     obj->si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     obj->si.pNext = NULL;
 
-    get_semaphores_from_list(obj->wait_sems, (VkSemaphore **)&obj->si.pWaitSemaphores, &obj->si.waitSemaphoreCount);
+    get_semaphores_from_list(obj->wait_sems, &obj->si.pWaitSemaphores, &obj->si.waitSemaphoreCount);
 
     uint32_t stg_count = 0;
     get_uint32s_from_list(obj->stg_msks, &obj->si.pWaitDstStageMask, &stg_count);
 
-    get_cmd_bufs_from_list(obj->cmd_bufs, (VkCommandBuffer **)&obj->si.pCommandBuffers, &obj->si.commandBufferCount);
-    get_semaphores_from_list(obj->sig_sems, (VkSemaphore **)&obj->si.pSignalSemaphores, &obj->si.signalSemaphoreCount);
+    get_cmd_bufs_from_list(obj->cmd_bufs, &obj->si.pCommandBuffers, &obj->si.commandBufferCount);
+    get_semaphores_from_list(obj->sig_sems, &obj->si.pSignalSemaphores, &obj->si.signalSemaphoreCount);
 }
 
 int vk_q_si_init(PyObject *self_obj, PyObject *args, PyObject *kwds)

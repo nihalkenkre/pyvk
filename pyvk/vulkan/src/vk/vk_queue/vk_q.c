@@ -38,18 +38,9 @@ PyObject *vk_q_submit(PyObject *self_obj, PyObject *args, PyObject *kwds)
     get_si_from_obj(submit_infos_obj, &submit_infos, &submit_info_count);
 
     VkQueue queue = ((vk_q *)self_obj)->queue;
-    printf("queue %u\n", queue);
     VkFence fence = ((vk_fence *)fence_obj)->fence;
-    printf("fence %u\n", fence);
-
-    printf("submit_info_count: %u\n", submit_info_count);
-
-    printf("wait sem: %u\n", submit_infos[0].pWaitSemaphores[0]);
-    printf("sig sem1: %u\n", submit_infos[0].pSignalSemaphores[0]);
-    printf("sig sem2: %u\n", submit_infos[0].pSignalSemaphores[1]);
 
     VkResult result = vkQueueSubmit(queue, submit_info_count, submit_infos, fence);
-    printf("submit result: %d\n", result);
 
     if (submit_infos != NULL)
     {
