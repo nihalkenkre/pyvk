@@ -1,5 +1,7 @@
 import pyvk.vulkan as vk
 
+import sys
+
 from enum import Enum
 
 
@@ -1060,7 +1062,9 @@ class Device(object):
 
         return cmd_bufs, result
 
-    def free_command_buffers(self, command_pool=vk.command_pool, command_buffers=()):
+    def free_command_buffers(self, command_pool=vk.command_pool, command_buffers=[]):
+        command_buffers = [cmd_buf._cb for cmd_buf in command_buffers]
+
         self._d.free_command_buffers(command_pool, command_buffers)
 
     def create_semaphore(self, semaphore_create_info=SemaphoreCreateInfo):
@@ -1126,14 +1130,23 @@ class Device(object):
 
         return result
 
-    def acquire_next_image(self, swapchain=vk.swapchain, semaphore=vk.semaphore, fence=vk.fence):
-        image_index, result = self._d.acquire_next_image(swapchain, semaphore, fence)
+    def acquire_next_image(self, swapchain=vk.swapchain, timeout=sys.maxsize, semaphore=vk.semaphore, fence=vk.fence):
+        image_index, result = self._d.acquire_next_image(swapchain, timeout, semaphore, fence)
 
         for r in Result:
             if r.value == result:
                 return image_index, r
             
         return image_index, result
+
+    def wait_for_fences(self, fences=[], wait_for_all=True, timeout=sys.maxsize):
+        result = self._d.wait_for_fences(fences=fences, wait_for_all=wait_for_all, timeout=timeout)
+
+        for r in Result:
+            if r.value == result:
+                return r
+
+        return result
 
 
 class PhysicalDevice(object):
@@ -1219,7 +1232,7 @@ class Queue(object):
     def __init__(self, queue):
         self._q = queue
 
-    def submit(self, submit_infos, fence):
+    def submit(self, submit_infos=list[SubmitInfo], fence=vk.fence):
         result = self._q.submit(submit_infos, fence)
 
         for r in Result:

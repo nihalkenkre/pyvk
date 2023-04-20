@@ -188,15 +188,14 @@ PyObject *vk_dev_alloc_cmd_bufs(PyObject *self_obj, PyObject *args)
         return return_obj;
     }
 
-    PyObject *cmd_bufs_obj = PyTuple_New(ai->ai.commandBufferCount);
+    PyObject *cmd_bufs_obj = PyList_New(ai->ai.commandBufferCount);
 
     for (uint32_t cb_idx = 0; cb_idx < ai->ai.commandBufferCount; ++cb_idx)
     {
         vk_cmd_buf *cmd_buf_obj = PyObject_NEW(vk_cmd_buf, &vk_cmd_buf_type);
 
         cmd_buf_obj->command_buffer = cmd_bufs[cb_idx];
-
-        PyTuple_SetItem(cmd_bufs_obj, cb_idx, (PyObject *)cmd_buf_obj);
+        PyList_SetItem(cmd_bufs_obj, cb_idx, (PyObject *)cmd_buf_obj);
     }
 
     PyObject *return_obj = PyTuple_New(2);
@@ -227,17 +226,20 @@ PyObject *vk_dev_free_cmd_bufs(PyObject *self_obj, PyObject *args, PyObject *kwd
 
     vk_dev *self = (vk_dev *)self_obj;
 
-    uint32_t cmd_buf_count = (uint32_t)PyTuple_Size(cmd_bufs_obj);
+    uint32_t cmd_buf_count = (uint32_t)PyList_Size(cmd_bufs_obj);
     VkCommandBuffer *cmd_bufs = (VkCommandBuffer *)malloc(sizeof(VkCommandBuffer) * cmd_buf_count);
 
     for (uint32_t cb_idx = 0; cb_idx < cmd_buf_count; ++cb_idx)
     {
-        *(cmd_bufs + cb_idx) = ((vk_cmd_buf *)PyTuple_GetItem(cmd_bufs_obj, cb_idx))->command_buffer;
+        cmd_bufs[cb_idx] = ((vk_cmd_buf *)PyList_GetItem(cmd_bufs_obj, cb_idx))->command_buffer;
     }
 
     vkFreeCommandBuffers(self->device, ((vk_cmd_pool *)cmd_pool_obj)->command_pool, cmd_buf_count, cmd_bufs);
 
-    free(cmd_bufs);
+    if (cmd_bufs != NULL)
+    {
+        free(cmd_bufs);
+    }
 
     Py_XDECREF(cmd_bufs_obj);
 
@@ -557,13 +559,14 @@ PyObject *vk_dev_acquire_next_image(PyObject *self_obj, PyObject *args, PyObject
     DEBUG_LOG("vk_dev_acquire_next_image\n");
 
     PyObject *sc_obj = NULL;
+    unsigned long timeout = 0;
     PyObject *sem_obj = NULL;
     PyObject *fence_obj = NULL;
 
-    char *kwlist[] = {"swapchain", "wait_semaphore", "fence", NULL};
+    char *kwlist[] = {"swapchain", "timeout", "wait_semaphore", "fence", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|OOO", kwlist, &sc_obj, &sem_obj, &fence_obj);
-    if(PyErr_Occurred())
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OKOO", kwlist, &sc_obj, &timeout, &sem_obj, &fence_obj);
+    if (PyErr_Occurred())
     {
         return NULL;
     }
@@ -574,13 +577,56 @@ PyObject *vk_dev_acquire_next_image(PyObject *self_obj, PyObject *args, PyObject
     vk_fence *fence = (vk_fence *)fence_obj;
 
     uint32_t image_index = 0;
-    VkResult result = vkAcquireNextImageKHR(self->device, sc->swapchain, UINT64_MAX, sem->semaphore, fence->fence, &image_index);
+    VkResult result = vkAcquireNextImageKHR(self->device, sc->swapchain, timeout, sem->semaphore, fence->fence, &image_index);
 
     PyObject *return_obj = PyTuple_New(2);
     PyTuple_SetItem(return_obj, 0, PyLong_FromLong(image_index));
     PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
 
     return return_obj;
+}
+
+void get_fences_from_obj(PyObject *obj, VkFence **fences, uint32_t *fences_count)
+{
+    DEBUG_LOG("get_fence_from_obj\n");
+
+    *fences_count = (uint32_t)PyList_Size(obj);
+    *fences = (VkFence *)malloc(sizeof(VkFence) * *fences_count);
+
+    for (uint32_t idx = 0; idx < *fences_count; ++idx)
+    {
+        *(*fences + idx) = ((vk_fence *)PyList_GetItem(obj, idx))->fence;
+    }
+}
+
+PyObject *vk_dev_wait_for_fences(PyObject *self_obj, PyObject *args, PyObject *kwds)
+{
+    DEBUG_LOG("vk_dev_wait_for_fences\n");
+
+    PyObject *fences_obj = NULL;
+    bool wait_for_all = false;
+    long timeout = 0;
+
+    char *kwlist[] = {"fences", "wait_for_all", "timeout", NULL};
+    PyArg_ParseTupleAndKeywords(args, kwds, "|Opk", kwlist, &fences_obj, &wait_for_all, &timeout);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    VkFence *fences = NULL;
+    uint32_t fences_count = 0;
+    get_fences_from_obj(fences_obj, &fences, &fences_count);
+
+    vk_dev *self = (vk_dev *)self_obj;
+    VkResult result = vkWaitForFences(self->device, fences_count, fences, wait_for_all, timeout);
+
+    if (fences != NULL)
+    {
+        free((void *)fences);
+    }
+
+    return PyLong_FromLong(result);
 }
 
 PyMethodDef vk_dev_methods[] = {
@@ -602,6 +648,7 @@ PyMethodDef vk_dev_methods[] = {
     {"bind_image_memory", (PyCFunction)vk_dev_bind_img_memory, METH_VARARGS | METH_KEYWORDS, NULL},
     {"get_swapchain_images", (PyCFunction)vk_dev_get_swapchain_images, METH_O, NULL},
     {"acquire_next_image", (PyCFunction)vk_dev_acquire_next_image, METH_VARARGS | METH_KEYWORDS, NULL},
+    {"wait_for_fences", (PyCFunction)vk_dev_wait_for_fences, METH_VARARGS | METH_KEYWORDS, NULL},
     {NULL},
 };
 
