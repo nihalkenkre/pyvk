@@ -4,6 +4,8 @@
 #include "vk_img.h"
 #include "vk_img_cpy.h"
 
+#include "vk_img_mem_bar.h"
+
 #include "log.h"
 
 void get_regions_from_list(PyObject *obj, VkImageCopy **regions, uint32_t *regions_count)
@@ -78,9 +80,56 @@ PyObject *vk_cmd_buf_end(PyObject *self_obj, PyObject *args)
     return PyLong_FromLong(result);
 }
 
+void get_img_mem_bars_from_list(PyObject *obj, VkImageMemoryBarrier **img_mem_bars, uint32_t *img_mem_bars_count)
+{
+    DEBUG_LOG("get_img_mem_bars_from_list\n");
+
+    *img_mem_bars_count = (uint32_t)PyList_Size(obj);
+    *img_mem_bars = (VkMemoryBarrier *)malloc(sizeof(VkMemoryBarrier) * *img_mem_bars_count);
+
+    for (uint32_t idx = 0; idx < *img_mem_bars_count; ++idx)
+    {
+        *(*img_mem_bars + idx) = ((vk_img_mem_bar *)PyList_GetItem(obj, idx))->memory_barrier;
+    }
+}
+
+PyObject *vk_cmd_buf_pipe_barrier(PyObject *self_obj, PyObject *args, PyObject *kwds)
+{
+    DEBUG_LOG("vk_cmd_bug_pipe_barrier\n");
+
+    long src_stg_msk;
+    long dst_stg_msk;
+    long dep_flags;
+    PyObject *mem_bars_obj = NULL;
+    PyObject *buf_mem_bars_obj = NULL;
+    PyObject *img_mem_bars_obj = NULL;
+
+    char *kwlist[] = {"src_stage_mask", "dst_stage_mask", "dependency_flags", "memory_barriers", "buffer_memory_barriers", "image_memory_barriers", NULL};
+
+    PyArg_ParseTupleAndKeywords(args, kwds, "|kkkOOO", kwlist, &src_stg_msk, &dst_stg_msk, &dep_flags, &mem_bars_obj, &buf_mem_bars_obj, &img_mem_bars_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_cmd_buf *self = (vk_cmd_buf *)self_obj;
+
+    // This function currently only functions for Image Memory Barriers
+
+    VkImageMemoryBarrier *img_mem_bars = NULL;
+    uint32_t img_mem_bars_count = 0;
+
+    get_img_mem_bars_from_list(img_mem_bars_obj, &img_mem_bars, &img_mem_bars_count);
+
+    vkCmdPipelineBarrier(self->command_buffer, src_stg_msk, dst_stg_msk, dep_flags, 0, NULL, 0, NULL, img_mem_bars_count, img_mem_bars);
+
+    Py_RETURN_NONE;
+}
+
 PyMethodDef vk_cmd_buf_methods[] = {
     {"begin", (PyCFunction)vk_cmd_buf_begin, METH_O, NULL},
     {"copy_image", (PyCFunction)vk_cmd_buf_cpy_img, METH_VARARGS | METH_KEYWORDS, NULL},
+    {"pipeline_barrier", (PyCFunction)vk_cmd_buf_pipe_barrier, METH_VARARGS | METH_KEYWORDS, NULL},
     {"end", (PyCFunction)vk_cmd_buf_end, METH_NOARGS, NULL},
     {NULL},
 };

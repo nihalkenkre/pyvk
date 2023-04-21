@@ -742,6 +742,15 @@ class PipelineStageFlagBits(Enum):
     NONE_KHR = NONE
 
 
+class DependencyFlagBits(Enum):
+    BY_REGION_BIT = 0x00000001
+    DEVICE_GROUP_BIT = 0x00000004
+    VIEW_LOCAL_BIT = 0x00000002
+    FEEDBACK_LOOP_BIT_EXT = 0x00000008
+    VIEW_LOCAL_BIT_KHR = VIEW_LOCAL_BIT
+    DEVICE_GROUP_BIT_KHR = DEVICE_GROUP_BIT
+
+
 class ApplicationInfo(vk.application_info):
     def __init__(self, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
@@ -943,8 +952,9 @@ class ImageMemoryBarrier(vk.image_memory_barrier):
         old_layout_value = old_layout.value if isinstance(old_layout, ImageLayout) else old_layout
         new_layout_value = new_layout.value if isinstance(new_layout, ImageLayout) else new_layout
 
-        super(ImageMemoryBarrier, self).__init__(p_next, src_access_mask_value, dst_access_mask_value, old_layout_value, new_layout_value, src_queue_family_index, 
-                                                 dst_queue_family_index, image, subresource_range)
+        super(ImageMemoryBarrier, self).__init__(p_next, src_access_mask_value, dst_access_mask_value, old_layout_value, 
+                                                new_layout_value, src_queue_family_index, dst_queue_family_index, image, 
+                                                subresource_range)
 
 
 
@@ -1008,6 +1018,11 @@ class CommandBufferBeginInfo(vk.command_buffer_begin_info):
         flags_value = flags.value if isinstance(flags, CommandBufferUsageFlagBits) else flags
 
         super(CommandBufferBeginInfo, self).__init__(flags_value)
+
+
+class PresentInfo(vk.present_info):
+    def __init__(self, wait_semaphores=list[vk.semaphore], swapchains=list[vk.swapchain], image_indices=list[int]):
+        super(PresentInfo, self).__init__(wait_semaphores, swapchains, image_indices)
 
     
 class Device(object):
@@ -1218,6 +1233,20 @@ class CommandBuffer(object):
 
         return result
 
+    def pipeline_barrier(self, src_stage_mask=PipelineStageFlagBits.NONE, 
+                        dst_stage_mask=PipelineStageFlagBits.NONE, 
+                        dependency_flags=DependencyFlagBits.DEVICE_GROUP_BIT, 
+                        memory_barriers=[], 
+                        buffer_memory_barriers=[],
+                        image_memory_barriers=[]):
+
+        src_stage_mask_value = src_stage_mask.value if isinstance(src_stage_mask, PipelineStageFlagBits) else src_stage_mask
+        dst_stage_mask_value = dst_stage_mask.value if isinstance(dst_stage_mask, PipelineStageFlagBits) else dst_stage_mask
+        dependency_flags_value = dependency_flags.value if isinstance(dependency_flags, DependencyFlagBits) else dependency_flags
+
+        self._cb.pipeline_barrier(src_stage_mask_value, dst_stage_mask_value, dependency_flags_value, memory_barriers,
+                                  buffer_memory_barriers, image_memory_barriers)                        
+
     def end(self):
         result = self._cb.end() 
 
@@ -1239,6 +1268,24 @@ class Queue(object):
             if r.value == result:
                 return r
             
+        return result
+
+    def wait_idle(self):
+        result = self._q.wait_idle()
+        
+        for r in Result:
+            if r.value == result:
+                return r
+            
+        return result
+
+    def present(self, present_info=PresentInfo):
+        result = self._q.present(present_info)
+
+        for r in Result:
+            if r.value == result:
+                return r
+        
         return result
 
 

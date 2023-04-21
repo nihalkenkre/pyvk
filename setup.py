@@ -36,6 +36,7 @@ setup(
                 './pyvk/vulkan/src/vk/vk_queue/vk_q.c',
                 './pyvk/vulkan/src/vk/vk_queue/vk_q_fly_props.c',
                 './pyvk/vulkan/src/vk/vk_queue/vk_q_si.c',
+                './pyvk/vulkan/src/vk/vk_queue/vk_q_pi.c',
                 './pyvk/vulkan/src/vk/vk_cmd_pool/vk_cmd_pool_ci.c',
                 './pyvk/vulkan/src/vk/vk_cmd_pool/vk_cmd_pool.c',
                 './pyvk/vulkan/src/vk/vk_cmd_buf/vk_cmd_buf_ai.c',
@@ -79,7 +80,7 @@ setup(
             define_macros=[
                 ('WIN32_LEAN_AND_MEAN', None),
                 ('PY_SSIZE_T_CLEAN', None),
-                # ('DEBUG', None),
+                ('DEBUG', None),
             ],
         )
     ]

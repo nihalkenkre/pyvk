@@ -1,5 +1,6 @@
 #include "vk_q.h"
 #include "vk_q_si.h"
+#include "vk_q_pi.h"
 #include "vk_fence.h"
 
 #include "log.h"
@@ -50,8 +51,37 @@ PyObject *vk_q_submit(PyObject *self_obj, PyObject *args, PyObject *kwds)
     return PyLong_FromLong(result);
 }
 
+PyObject *vk_q_present(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_q_present\n");
+
+    PyObject *pi = NULL;
+
+    PyArg_Parse(args, "O", &pi);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_q *self = (vk_q *)self_obj;
+    VkResult result = vkQueuePresentKHR(self->queue, &((vk_q_pi *)pi)->pi);
+
+    return PyLong_FromLong(result);
+}
+
+PyObject* vk_q_wait_idle(PyObject* self_obj)
+{
+    DEBUG_LOG("vk_q_wait_idle\n");
+
+    VkResult result = vkQueueWaitIdle(((vk_q*)self_obj)->queue);
+    
+    return PyLong_FromLong(result);
+}
+
 PyMethodDef vk_q_methods[] = {
     {"submit", (PyCFunction)vk_q_submit, METH_VARARGS | METH_KEYWORDS, NULL},
+    {"wait_idle", (PyCFunction)vk_q_wait_idle, METH_NOARGS, NULL},
+    {"present", (PyCFunction)vk_q_present, METH_O, NULL},
     {NULL},
 };
 
