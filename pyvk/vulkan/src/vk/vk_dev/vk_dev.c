@@ -20,8 +20,8 @@
 #include "vk_img.h"
 
 #include "vk_mem_ai.h"
-
 #include "vk_dev_mem.h"
+#include "vk_mem_req.h"
 
 #include "log.h"
 
@@ -472,7 +472,7 @@ PyObject *vk_dev_bind_img_memory(PyObject *self_obj, PyObject *args, PyObject *k
 
     long offset = 0;
 
-    char *kwlist[] = {"image", "device_memory", NULL};
+    char *kwlist[] = {"image", "device_memory", "offset", NULL};
 
     PyArg_ParseTupleAndKeywords(args, kwds, "|OOk", kwlist, &img_obj, &mem_obj, &offset);
     if (PyErr_Occurred())
@@ -486,6 +486,33 @@ PyObject *vk_dev_bind_img_memory(PyObject *self_obj, PyObject *args, PyObject *k
     VkResult result = vkBindImageMemory(self->device, img->image, mem->device_memory, (VkDeviceSize)offset);
 
     return PyLong_FromLong(result);
+}
+
+PyObject *vk_dev_get_img_mem_req(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_get_img_mem_req\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *img_obj = NULL;
+
+    PyArg_Parse(args, "O", &img_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_img *img = (vk_img *)img_obj;
+
+    VkMemoryRequirements mem_req;
+    vkGetImageMemoryRequirements(self->device, img->image, &mem_req);
+
+    vk_mem_req *mr_obj = PyObject_NEW(vk_mem_req, &vk_mem_req_type);
+    mr_obj->size = mem_req.size;
+    mr_obj->alignment = mem_req.alignment;
+    mr_obj->mem_type_bits = mem_req.memoryTypeBits;
+
+    return (PyObject *)mr_obj;
 }
 
 PyObject *vk_dev_get_swapchain_images(PyObject *self_obj, PyObject *args)
@@ -645,6 +672,7 @@ PyMethodDef vk_dev_methods[] = {
     {"destroy_image", (PyCFunction)vk_dev_destroy_image, METH_O, NULL},
     {"allocate_memory", (PyCFunction)vk_dev_allocate_memory, METH_O, NULL},
     {"free_memory", (PyCFunction)vk_dev_free_memory, METH_O, NULL},
+    {"get_image_memory_requirements", (PyCFunction)vk_dev_get_img_mem_req, METH_O, NULL},
     {"bind_image_memory", (PyCFunction)vk_dev_bind_img_memory, METH_VARARGS | METH_KEYWORDS, NULL},
     {"get_swapchain_images", (PyCFunction)vk_dev_get_swapchain_images, METH_O, NULL},
     {"acquire_next_image", (PyCFunction)vk_dev_acquire_next_image, METH_VARARGS | METH_KEYWORDS, NULL},

@@ -70,19 +70,6 @@ void vk_q_si_dealloc(PyObject *self_obj)
     Py_TYPE(self_obj)->tp_free(self_obj);
 }
 
-void get_semaphores_from_list(PyObject *obj, VkSemaphore **sems, uint32_t *sems_count)
-{
-    DEBUG_LOG("get_semaphores_from_list\n");
-
-    *sems_count = (uint32_t)PyList_Size(obj);
-    *sems = (VkSemaphore *)malloc(sizeof(VkSemaphore) * *sems_count);
-
-    for (uint32_t idx = 0; idx < *sems_count; ++idx)
-    {
-        *(*sems + idx) = ((vk_sem *)PyList_GetItem(obj, idx))->semaphore;
-    }
-}
-
 void get_cmd_bufs_from_list(PyObject *obj, VkCommandBuffer **cmd_bufs, uint32_t *cmd_bufs_count)
 {
     DEBUG_LOG("get_cmd_bufs_from_list\n");

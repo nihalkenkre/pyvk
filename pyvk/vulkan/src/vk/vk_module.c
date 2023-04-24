@@ -10,6 +10,7 @@
 #include "vk_instance/vk_app_info.h"
 #include "vk_instance/vk_instance_ci.h"
 #include "vk_instance/vk_instance.h"
+#include "vk_mem/vk_mem_req.h"
 #include "vk_mem/vk_mem_type.h"
 #include "vk_mem/vk_mem_heap.h"
 #include "vk_mem/vk_mem_ai.h"
@@ -46,6 +47,7 @@
 #include "vk_img/vk_img_srl.h"
 #include "vk_img/vk_img_srr.h"
 #include "vk_img/vk_img_ci.h"
+#include "vk_img/vk_img_cpy.h"
 #include "vk_img/vk_img.h"
 
 PyObject *vk_create_instance(PyObject *self, PyObject *args, PyObject *kwds)
@@ -395,6 +397,20 @@ PyMODINIT_FUNC PyInit_vulkan(void)
     }
 
     mod = add_vk_img_mem_bar_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_mem_req_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_img_cpy_to_module(mod);
 
     if (mod == NULL)
     {

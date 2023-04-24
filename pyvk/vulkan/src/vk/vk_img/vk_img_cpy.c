@@ -56,19 +56,19 @@ void init_img_cpy_from_obj(PyObject *obj_obj)
 
     obj->img_cpy.srcSubresource = ((vk_img_srl *)obj->src_subresource)->subresource;
 
-    obj->img_cpy.srcOffset.x = (int32_t)PyLong_asLong(PyTuple_GetItem(obj->src_offset, 0));
-    obj->img_cpy.srcOffset.y = (int32_t)PyLong_asLong(PyTuple_GetItem(obj->src_offset, 1));
-    obj->img_cpy.srcOffset.z = (int32_t)PyLong_asLong(PyTuple_GetItem(obj->src_offset, 2));
+    obj->img_cpy.srcOffset.x = (int32_t)PyLong_AsLong(PyTuple_GetItem(obj->src_offset, 0));
+    obj->img_cpy.srcOffset.y = (int32_t)PyLong_AsLong(PyTuple_GetItem(obj->src_offset, 1));
+    obj->img_cpy.srcOffset.z = (int32_t)PyLong_AsLong(PyTuple_GetItem(obj->src_offset, 2));
 
     obj->img_cpy.dstSubresource = ((vk_img_srl *)obj->dst_subresource)->subresource;
 
-    obj->img_cpy.dstOffset.x = PyLong_asLong(PyTuple_GetItem(obj->dst_offset, 0));
-    obj->img_cpy.dstOffset.y = PyLong_asLong(PyTuple_GetItem(obj->dst_offset, 1));
-    obj->img_cpy.dstOffset.z = PyLong_asLong(PyTuple_GetItem(obj->dst_offset, 2));
+    obj->img_cpy.dstOffset.x = PyLong_AsLong(PyTuple_GetItem(obj->dst_offset, 0));
+    obj->img_cpy.dstOffset.y = PyLong_AsLong(PyTuple_GetItem(obj->dst_offset, 1));
+    obj->img_cpy.dstOffset.z = PyLong_AsLong(PyTuple_GetItem(obj->dst_offset, 2));
 
-    obj->img_cpy.extent.width = (uint32_t)Pylong_asLong(PyTuple_GetItem(obj->extent, 0));
-    obj->img_cpy.extent.height = (uint32_t)Pylong_asLong(PyTuple_GetItem(obj->extent, 1));
-    obj->img_cpy.extent.depth = (uint32_t)Pylong_asLong(PyTuple_GetItem(obj->extent, 2));
+    obj->img_cpy.extent.width = (uint32_t)PyLong_AsLong(PyTuple_GetItem(obj->extent, 0));
+    obj->img_cpy.extent.height = (uint32_t)PyLong_AsLong(PyTuple_GetItem(obj->extent, 1));
+    obj->img_cpy.extent.depth = (uint32_t)PyLong_AsLong(PyTuple_GetItem(obj->extent, 2));
 }
 
 int vk_img_cpy_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
@@ -85,7 +85,7 @@ int vk_img_cpy_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     char *kwlist[] = {"src_subresource", "src_offset", "dst_subresource", "dst_offset", "extent", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|OOOO", kwlist, &src_sub_re, &src_offset, &dst_sub_re, &dst_offset, &extent);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OOOOO", kwlist, &src_sub_re, &src_offset, &dst_sub_re, &dst_offset, &extent);
     if (PyErr_Occurred())
     {
         return -1;
@@ -143,9 +143,61 @@ int vk_img_cpy_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     {
         self->dst_offset = Py_None;
     }
-    DEBUG_LOG("img_cpy parsed dst_subresource \n");
+    DEBUG_LOG("img_cpy parsed dst_offset\n");
+
+    if (extent)
+    {
+        tmp = self->extent;
+        Py_INCREF(extent);
+        self->extent = dst_offset;
+        Py_XDECREF(tmp);
+    }
+    else
+    {
+        self->extent = Py_None;
+    }
+    DEBUG_LOG("img_cpy parsed extent\n");
 
     init_img_cpy_from_obj(self_obj);
 
     return 0;
+}
+
+PyTypeObject vk_img_cpy_type = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+        .tp_name = "vulkan.image_copy",
+    .tp_basicsize = sizeof(vk_img_cpy),
+    .tp_doc = PyDoc_STR("Vulkan Image Copy"),
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    .tp_members = vk_img_cpy_members,
+    .tp_new = PyType_GenericNew,
+    .tp_init = vk_img_cpy_init,
+    .tp_dealloc = vk_img_cpy_dealloc,
+};
+
+PyObject *add_vk_img_cpy_to_module(PyObject *mod)
+{
+    DEBUG_LOG("add_vk_img_cpy_to_module\n");
+
+    if (PyType_Ready(&vk_img_cpy_type) < 0)
+    {
+        PyErr_SetString(PyExc_TypeError, "Could not ready img_cpy type");
+
+        goto shutdown;
+    }
+
+    Py_INCREF(&vk_img_cpy_type);
+
+    if (PyModule_AddObject(mod, "image_copy", (PyObject *)&vk_img_cpy_type) < 0)
+    {
+        PyErr_SetString(PyExc_TypeError, "Could not add img_cpy type to module");
+        goto shutdown;
+    }
+
+    return mod;
+
+shutdown:
+    Py_XDECREF(&vk_img_cpy_type);
+
+    return NULL;
 }

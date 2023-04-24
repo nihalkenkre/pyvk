@@ -123,6 +123,9 @@ PyObject *vk_cmd_buf_pipe_barrier(PyObject *self_obj, PyObject *args, PyObject *
 
     vkCmdPipelineBarrier(self->command_buffer, src_stg_msk, dst_stg_msk, dep_flags, 0, NULL, 0, NULL, img_mem_bars_count, img_mem_bars);
 
+    printf("src_stg_msk: %lu\n", src_stg_msk);
+    printf("dst_stg_msk: %lu\n", dst_stg_msk);
+
     Py_RETURN_NONE;
 }
 

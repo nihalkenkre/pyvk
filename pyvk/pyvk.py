@@ -853,12 +853,11 @@ class DeviceCreateInfo(vk.device_create_info):
 class SwapchainCreateInfoKHR(vk.swapchain_create_info):
     def __init__(self, p_next=None, flags=SwapchainCreateFlagBitsKHR.NONE,
                  surface=vk.surface, min_image_count=1, image_format=Format.UNDEFINED, image_color_space=ColorSpace.SRGB_NONLINEAR_KHR,
-                 image_extent=None, image_array_layers=1, image_usage_flags=ImageUsageFlagBits.NONE, image_sharing_mode=SharingMode.EXCLUSIVE,
+                 image_extent=(0, 0), image_array_layers=1, image_usage_flags=ImageUsageFlagBits.NONE, image_sharing_mode=SharingMode.EXCLUSIVE,
                  queue_family_indices=[0], pre_transform=SurfaceTransformFlagBits.IDENTITY_BIT_KHR, composite_alpha=CompositeAlphFlagBitsKHR.OPAQUE_BIT_KHR,
                  present_mode=PresentModeKHR.IMMEDIATE_KHR, clipped=True, old_swapchain=vk.swapchain):
 
-        if image_extent is not None:
-            if len(image_extent) != 2:
+        if len(image_extent) != 2:
                 raise ValueError(
                     'Please pass a tuple of size 2 for image_extent in pyvk.SwapchainCreateInfo')
 
@@ -960,7 +959,7 @@ class ImageMemoryBarrier(vk.image_memory_barrier):
 
 class ImageCreateInfo(vk.image_create_info):
     def __init__(self, p_next=None, flags=ImageCreateFlagBits.NONE, image_type=ImageType.TWO_2D,
-                 format=Format.UNDEFINED, extent=(), mip_levels=1, array_layers=1, 
+                 format=Format.UNDEFINED, extent=(0, 0, 0), mip_levels=1, array_layers=1, 
                  samples=SampleCountFlagBits.COUNT_1_BIT, tiling=ImageTiling.OPTIMAL, 
                  usage=ImageUsageFlagBits.NONE, sharing_mode=SharingMode.EXCLUSIVE,
                  queue_family_indices=[0], initial_layout=ImageLayout.UNDEFINED):
@@ -983,13 +982,30 @@ class ImageCreateInfo(vk.image_create_info):
 
         if len(extent) != 3:
             raise ValueError(
-                "Please pass a tuple with 3 values for extent in pyvk.ImageCreateInfo")
+                'Please pass a tuple with 3 values for extent in pyvk.ImageCreateInfo')
 
         super(ImageCreateInfo, self).__init__(p_next, flags_value, image_type_value, 
                                               format_value, extent, mip_levels, array_layers, 
                                               samples_value, tiling_value, usage_value, 
                                               sharing_mode_value, queue_family_indices,
                                               initial_layout_value)
+
+
+class ImageCopy(vk.image_copy):
+    def __init__(self, src_subresource_layers=vk.image_subresource_layers, src_offset=(0, 0, 0),
+                 dst_subresource_layers=vk.image_subresource_layers, dst_offset=(0, 0, 0), extent=(0, 0, 0)):
+        
+        if len(src_offset) != 3:
+            raise TypeError('Please pass a tuple of length 3 for src_offset in pyvk.ImageCopyr')
+
+        if len(dst_offset) != 3:
+            raise TypeError('Please pass a tuple of length 3 for dst_offset in pyvk.ImageCopy')
+
+        if len(extent) != 3:
+            raise TypeError('Please pass a tuple of length 3 for extent in pyvk.ImageCopy')
+
+        super(ImageCopy, self).__init__(src_subresource_layers, src_offset, dst_subresource_layers,
+                                         dst_offset, extent)
 
 
 class MemoryAllocateInfo(vk.memory_allocate_info):
@@ -1118,6 +1134,8 @@ class Device(object):
     def destroy_image(self, image=vk.image):
         self._d.destroy_image(image)
 
+    def get_image_memory_requirements(self, image=vk.image):
+        return self._d.get_image_memory_requirements(image)
 
     def allocate_memory(self, memory_allocate_info=MemoryAllocateInfo):
         m, result = self._d.allocate_memory(memory_allocate_info)
@@ -1246,6 +1264,12 @@ class CommandBuffer(object):
 
         self._cb.pipeline_barrier(src_stage_mask_value, dst_stage_mask_value, dependency_flags_value, memory_barriers,
                                   buffer_memory_barriers, image_memory_barriers)                        
+
+    def copy_image(self, src_image=vk.image, src_image_layout=ImageLayout, dst_image=vk.image, dst_image_layout=ImageLayout, regions=list[vk.image_copy]):
+        src_image_layout_value = src_image_layout.value if isinstance(src_image_layout, ImageLayout) else src_image_layout
+        dst_image_layout_value = dst_image_layout.value if isinstance(dst_image_layout, ImageLayout) else dst_image_layout
+
+        self._cb.copy_image(src_image, src_image_layout_value, dst_image, dst_image_layout_value, regions)
 
     def end(self):
         result = self._cb.end() 

@@ -1,5 +1,8 @@
 #include "utils.h"
 #include "log.h"
+#include "vk_sem.h"
+
+#include <vulkan/vulkan.h>
 
 void get_names_from_list(PyObject *obj, char ***names, uint32_t *names_count)
 {
@@ -73,5 +76,18 @@ void get_uint32s_from_list(PyObject *obj, uint32_t **values, uint32_t *values_co
         PyObject *value_obj = PyList_GetItem(obj, v_idx);
 
         *(*values + v_idx) = (uint32_t)PyLong_AsUnsignedLong(value_obj);
+    }
+}
+
+void get_semaphores_from_list(PyObject *obj, VkSemaphore **sems, uint32_t *sems_count)
+{
+    DEBUG_LOG("get_semaphores_from_list\n");
+
+    *sems_count = (uint32_t)PyList_Size(obj);
+    *sems = (VkSemaphore *)malloc(sizeof(VkSemaphore) * *sems_count);
+
+    for (uint32_t idx = 0; idx < *sems_count; ++idx)
+    {
+        *(*sems + idx) = ((vk_sem *)PyList_GetItem(obj, idx))->semaphore;
     }
 }
