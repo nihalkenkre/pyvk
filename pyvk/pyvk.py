@@ -37,6 +37,7 @@ class Result(Enum):
     ERROR_OUT_OF_DEVICE_MEMORY = -2
     ERROR_INITIALIZATION_FAILED = -3
     ERROR_DEVICE_LOST = -4
+    ERROR_MEMORY_MAP_FAILED = -5
     ERROR_LAYER_NOT_PRESENT = -6
     ERROR_EXTENSION_NOT_PRESENT = -7
     ERROR_FEATURE_NOT_PRESENT = -8
@@ -937,6 +938,7 @@ class ImageSubresourceRange(vk.image_subresource_range):
 
         aspect_mask_value = aspect_mask.value if isinstance(
             aspect_mask, ImageAspectFlagBits) else aspect_mask
+
         super(ImageSubresourceRange, self).__init__(aspect_mask_value, base_mip_level, 
                                                     level_count, base_array_layer, layer_count)
 
@@ -1037,7 +1039,7 @@ class CommandBufferBeginInfo(vk.command_buffer_begin_info):
 
 
 class PresentInfo(vk.present_info):
-    def __init__(self, wait_semaphores=list[vk.semaphore], swapchains=list[vk.swapchain], image_indices=list[int]):
+    def __init__(self, wait_semaphores=[], swapchains=[], image_indices=[]):
         super(PresentInfo, self).__init__(wait_semaphores, swapchains, image_indices)
 
     
@@ -1119,6 +1121,15 @@ class Device(object):
 
         return fence, result
 
+    def reset_fences(self, fences=[]):
+        result = self._d.reset_fences(fences)
+
+        for r in Result:
+            if result == r.value:
+                return r
+
+        return result
+
     def destroy_fence(self, fence=vk.fence):
         self._d.destroy_fence(fence)
 
@@ -1145,6 +1156,21 @@ class Device(object):
                 return m, r
 
         return m, result
+
+    def map_memory(self, memory=vk.device_memory, offset=0, size=1, flags=0):
+        if size == 0:
+            raise ValueError("Please pass a positive value for size in pyvk.Device.map_memory") 
+
+        mem_id, result = self._d.map_memory(memory, offset, size, flags)
+
+        for r in Result:
+            if result == r.value:
+                return mem_id, r
+            
+        return mem_id, result
+
+    def unmap_memory(self, memory=vk.device_memory):
+        self._d.unmap_memory(memory)
     
     def free_memory(self, memory=vk.device_memory):
         self._d.free_memory(memory)
@@ -1265,7 +1291,7 @@ class CommandBuffer(object):
         self._cb.pipeline_barrier(src_stage_mask_value, dst_stage_mask_value, dependency_flags_value, memory_barriers,
                                   buffer_memory_barriers, image_memory_barriers)                        
 
-    def copy_image(self, src_image=vk.image, src_image_layout=ImageLayout, dst_image=vk.image, dst_image_layout=ImageLayout, regions=list[vk.image_copy]):
+    def copy_image(self, src_image=vk.image, src_image_layout=ImageLayout, dst_image=vk.image, dst_image_layout=ImageLayout, regions=[]):
         src_image_layout_value = src_image_layout.value if isinstance(src_image_layout, ImageLayout) else src_image_layout
         dst_image_layout_value = dst_image_layout.value if isinstance(dst_image_layout, ImageLayout) else dst_image_layout
 

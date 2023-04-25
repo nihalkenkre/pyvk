@@ -13,6 +13,7 @@ void get_regions_from_list(PyObject *obj, VkImageCopy **regions, uint32_t *regio
     DEBUG_LOG("get_regions_from_list\n");
 
     *regions_count = (uint32_t)PyList_Size(obj);
+    *regions = (VkImageCopy *)malloc(sizeof(VkImageCopy) * *regions_count);
 
     for (uint32_t idx = 0; idx < *regions_count; ++idx)
     {
@@ -51,7 +52,7 @@ PyObject *vk_cmd_buf_cpy_img(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     char *kwlist[] = {"src_image", "src_image_layout", "dst_image", "dst_image_layout", "regions", NULL};
 
-    PyArg_ParseTupleAndKeywords(args, kwds, "|OkOkO", kwlist, &src_img_layout, &src_img_layout, &dst_img_obj, &dst_img_layout, &regions_obj);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OkOkO", kwlist, &src_img_obj, &src_img_layout, &dst_img_obj, &dst_img_layout, &regions_obj);
     if (PyErr_Occurred())
     {
         return NULL;
@@ -65,8 +66,12 @@ PyObject *vk_cmd_buf_cpy_img(PyObject *self_obj, PyObject *args, PyObject *kwds)
     get_regions_from_list(regions_obj, &regions, &regions_count);
 
     vkCmdCopyImage(self->command_buffer, ((vk_img *)src_img_obj)->image, src_img_layout,
-
                    ((vk_img *)dst_img_obj)->image, dst_img_layout, regions_count, regions);
+
+    if (regions != NULL)
+    {
+        free(regions);
+    }
 
     Py_RETURN_NONE;
 }
@@ -85,7 +90,7 @@ void get_img_mem_bars_from_list(PyObject *obj, VkImageMemoryBarrier **img_mem_ba
     DEBUG_LOG("get_img_mem_bars_from_list\n");
 
     *img_mem_bars_count = (uint32_t)PyList_Size(obj);
-    *img_mem_bars = (VkMemoryBarrier *)malloc(sizeof(VkMemoryBarrier) * *img_mem_bars_count);
+    *img_mem_bars = (VkImageMemoryBarrier *)malloc(sizeof(VkImageMemoryBarrier) * *img_mem_bars_count);
 
     for (uint32_t idx = 0; idx < *img_mem_bars_count; ++idx)
     {
@@ -123,9 +128,10 @@ PyObject *vk_cmd_buf_pipe_barrier(PyObject *self_obj, PyObject *args, PyObject *
 
     vkCmdPipelineBarrier(self->command_buffer, src_stg_msk, dst_stg_msk, dep_flags, 0, NULL, 0, NULL, img_mem_bars_count, img_mem_bars);
 
-    printf("src_stg_msk: %lu\n", src_stg_msk);
-    printf("dst_stg_msk: %lu\n", dst_stg_msk);
-
+    if (img_mem_bars != NULL)
+    {
+        free(img_mem_bars);
+    }
     Py_RETURN_NONE;
 }
 

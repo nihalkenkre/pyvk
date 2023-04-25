@@ -149,7 +149,7 @@ int vk_img_cpy_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     {
         tmp = self->extent;
         Py_INCREF(extent);
-        self->extent = dst_offset;
+        self->extent = extent;
         Py_XDECREF(tmp);
     }
     else
@@ -177,7 +177,7 @@ PyTypeObject vk_img_cpy_type = {
 
 PyObject *add_vk_img_cpy_to_module(PyObject *mod)
 {
-    DEBUG_LOG("add_vk_img_cpy_to_module\n");
+    DEBUG_LOG("adding img_cpy object\n");
 
     if (PyType_Ready(&vk_img_cpy_type) < 0)
     {

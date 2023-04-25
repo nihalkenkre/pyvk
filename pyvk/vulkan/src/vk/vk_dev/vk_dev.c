@@ -299,6 +299,18 @@ PyObject *vk_dev_destroy_sem(PyObject *self_obj, PyObject *args)
 
     Py_RETURN_NONE;
 }
+void get_fences_from_list(PyObject *obj, VkFence **fences, uint32_t *fences_count)
+{
+    DEBUG_LOG("get_fence_from_list\n");
+
+    *fences_count = (uint32_t)PyList_Size(obj);
+    *fences = (VkFence *)malloc(sizeof(VkFence) * *fences_count);
+
+    for (uint32_t idx = 0; idx < *fences_count; ++idx)
+    {
+        *(*fences + idx) = ((vk_fence *)PyList_GetItem(obj, idx))->fence;
+    }
+}
 
 PyObject *vk_dev_create_fence(PyObject *self_obj, PyObject *args)
 {
@@ -325,6 +337,34 @@ PyObject *vk_dev_create_fence(PyObject *self_obj, PyObject *args)
     PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
 
     return return_obj;
+}
+
+PyObject *vk_dev_reset_fences(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_reset_fences\n");
+
+    PyObject *fences_obj = NULL;
+
+    PyArg_Parse(args, "O", &fences_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    VkFence *fences = NULL;
+    uint32_t fences_count = 0;
+    get_fences_from_list(fences_obj, &fences, &fences_count);
+
+    VkResult result = vkResetFences(self->device, fences_count, fences);
+
+    if (fences != NULL)
+    {
+        free((void *)fences);
+    }
+
+    return PyLong_FromLong(result);
 }
 
 PyObject *vk_dev_destroy_fence(PyObject *self_obj, PyObject *args)
@@ -484,6 +524,7 @@ PyObject *vk_dev_bind_img_memory(PyObject *self_obj, PyObject *args, PyObject *k
     vk_dev_mem *mem = (vk_dev_mem *)mem_obj;
 
     VkResult result = vkBindImageMemory(self->device, img->image, mem->device_memory, (VkDeviceSize)offset);
+    ;
 
     return PyLong_FromLong(result);
 }
@@ -507,9 +548,9 @@ PyObject *vk_dev_get_img_mem_req(PyObject *self_obj, PyObject *args)
     VkMemoryRequirements mem_req;
     vkGetImageMemoryRequirements(self->device, img->image, &mem_req);
 
-    vk_mem_req *mr_obj = PyObject_NEW(vk_mem_req, &vk_mem_req_type);
-    mr_obj->size = mem_req.size;
-    mr_obj->alignment = mem_req.alignment;
+    vk_mem_req *mr_obj = (vk_mem_req *)PyObject_NEW(vk_mem_req, &vk_mem_req_type);
+    mr_obj->size = (unsigned long)mem_req.size;
+    mr_obj->alignment = (unsigned long)mem_req.alignment;
     mr_obj->mem_type_bits = mem_req.memoryTypeBits;
 
     return (PyObject *)mr_obj;
@@ -613,19 +654,6 @@ PyObject *vk_dev_acquire_next_image(PyObject *self_obj, PyObject *args, PyObject
     return return_obj;
 }
 
-void get_fences_from_obj(PyObject *obj, VkFence **fences, uint32_t *fences_count)
-{
-    DEBUG_LOG("get_fence_from_obj\n");
-
-    *fences_count = (uint32_t)PyList_Size(obj);
-    *fences = (VkFence *)malloc(sizeof(VkFence) * *fences_count);
-
-    for (uint32_t idx = 0; idx < *fences_count; ++idx)
-    {
-        *(*fences + idx) = ((vk_fence *)PyList_GetItem(obj, idx))->fence;
-    }
-}
-
 PyObject *vk_dev_wait_for_fences(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_dev_wait_for_fences\n");
@@ -643,7 +671,7 @@ PyObject *vk_dev_wait_for_fences(PyObject *self_obj, PyObject *args, PyObject *k
 
     VkFence *fences = NULL;
     uint32_t fences_count = 0;
-    get_fences_from_obj(fences_obj, &fences, &fences_count);
+    get_fences_from_list(fences_obj, &fences, &fences_count);
 
     vk_dev *self = (vk_dev *)self_obj;
     VkResult result = vkWaitForFences(self->device, fences_count, fences, wait_for_all, timeout);
@@ -654,6 +682,78 @@ PyObject *vk_dev_wait_for_fences(PyObject *self_obj, PyObject *args, PyObject *k
     }
 
     return PyLong_FromLong(result);
+}
+
+PyObject *vk_dev_map_memory(PyObject *self_obj, PyObject *args, PyObject *kwds)
+{
+    DEBUG_LOG("vk_dev_map_memory\n");
+
+    PyObject *dev_mem_obj = NULL;
+    unsigned long offset = 0;
+    unsigned long size = 0;
+    uint32_t flags = 0;
+
+    char *kwlist[] = {"memory", "offset", "size", "flags", NULL};
+
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OKKI", kwlist, &dev_mem_obj, &offset, &size, &flags);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    if (self->mapped_datas == NULL)
+    {
+        self->mapped_datas = (void **)malloc(sizeof(void *) * 1);
+    }
+    else
+    {
+        ++self->mapped_datas_count;
+        self->mapped_datas = (void **)realloc(self->mapped_datas, sizeof(void *) * self->mapped_datas_count);
+    }
+
+    VkResult result = vkMapMemory(self->device, ((vk_dev_mem *)dev_mem_obj)->device_memory, offset, size, flags, &self->mapped_datas[self->mapped_datas_count]);
+
+    memset(self->mapped_datas[self->mapped_datas_count], 255, size);
+
+    PyObject *return_obj = PyTuple_New(2);
+
+    PyTuple_SetItem(return_obj, 0, PyLong_FromLong(self->mapped_datas_count));
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
+}
+
+PyObject *vk_dev_unmap_memory(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_unmap_memory\n");
+
+    PyObject *dev_mem_obj = NULL;
+
+    PyArg_Parse(args, "O", &dev_mem_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vkUnmapMemory(((vk_dev *)self_obj)->device, ((vk_dev_mem *)dev_mem_obj)->device_memory);
+
+    Py_RETURN_NONE;
+}
+
+void vk_dev_dealloc(PyObject *self_obj)
+{
+    DEBUG_LOG("vk_dev_dealloc\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    if (self->mapped_datas != NULL)
+    {
+        free(self->mapped_datas);
+    }
+
+    Py_TYPE(self_obj)->tp_free(self_obj);
 }
 
 PyMethodDef vk_dev_methods[] = {
@@ -667,6 +767,7 @@ PyMethodDef vk_dev_methods[] = {
     {"create_semaphore", (PyCFunction)vk_dev_create_sem, METH_O, NULL},
     {"destroy_semaphore", (PyCFunction)vk_dev_destroy_sem, METH_O, NULL},
     {"create_fence", (PyCFunction)vk_dev_create_fence, METH_O, NULL},
+    {"reset_fences", (PyCFunction)vk_dev_reset_fences, METH_O, NULL},
     {"destroy_fence", (PyCFunction)vk_dev_destroy_fence, METH_O, NULL},
     {"create_image", (PyCFunction)vk_dev_create_image, METH_O, NULL},
     {"destroy_image", (PyCFunction)vk_dev_destroy_image, METH_O, NULL},
@@ -677,6 +778,8 @@ PyMethodDef vk_dev_methods[] = {
     {"get_swapchain_images", (PyCFunction)vk_dev_get_swapchain_images, METH_O, NULL},
     {"acquire_next_image", (PyCFunction)vk_dev_acquire_next_image, METH_VARARGS | METH_KEYWORDS, NULL},
     {"wait_for_fences", (PyCFunction)vk_dev_wait_for_fences, METH_VARARGS | METH_KEYWORDS, NULL},
+    {"map_memory", (PyCFunction)vk_dev_map_memory, METH_VARARGS | METH_KEYWORDS, NULL},
+    {"unmap_memory", (PyCFunction)vk_dev_unmap_memory, METH_O, NULL},
     {NULL},
 };
 
@@ -686,6 +789,7 @@ PyTypeObject vk_dev_type = {
     .tp_doc = PyDoc_STR("Vulkan Device Docs"),
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_methods = vk_dev_methods,
+    .tp_dealloc = vk_dev_dealloc,
 };
 
 PyObject *add_vk_dev_to_module(PyObject *mod)

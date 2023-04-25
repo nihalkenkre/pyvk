@@ -66,21 +66,6 @@ void get_swapchains_from_list(PyObject *obj, VkSwapchainKHR **sc, uint32_t *sc_c
     }
 }
 
-/*
-void get_semaphores_from_list(PyObject *obj, VkSemaphore **sems, uint32_t *sems_count)
-{
-    DEBUG_LOG("get_semaphores_from_list\n");
-
-    *sems_count = (uint32_t)PyList_Size(obj);
-    *sems = (VkSemaphore *)malloc(sizeof(VkSemaphore) * *sems_count);
-
-    for (uint32_t idx = 0; idx < *sems_count; ++idx)
-    {
-        *(*sems + idx) = ((vk_sem *)PyList_GetItem(obj, idx))->semaphore;
-    }
-}
-*/
-
 void init_q_pi_from_obj(PyObject *obj_obj)
 {
     DEBUG_LOG("init_q_pi_from_obj\n");
@@ -130,7 +115,7 @@ int vk_q_pi_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     {
         self->wait_sems = Py_None;
     }
-    DEBUG_LOG("q_si parsed wait_sems\n");
+    DEBUG_LOG("q_pi parsed wait_sems\n");
 
     if (scs)
     {
@@ -143,7 +128,7 @@ int vk_q_pi_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     {
         self->scs = Py_None;
     }
-    DEBUG_LOG("q_si parsed scs\n");
+    DEBUG_LOG("q_pi parsed scs\n");
 
     if (image_idx)
     {
@@ -156,7 +141,7 @@ int vk_q_pi_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
     {
         self->image_idx = Py_None;
     }
-    DEBUG_LOG("q_si parsed image_idx\n");
+    DEBUG_LOG("q_pi parsed image_idx\n");
 
     init_q_pi_from_obj(self_obj);
 
