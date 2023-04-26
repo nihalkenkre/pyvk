@@ -1199,7 +1199,7 @@ class Device(object):
         return image_view, result
 
     def destroy_image_view(self, image_view=vk.image_view):
-        self._d.destroy_image_view(image_view)   
+        self._d.destroy_image_view(image_view)
         
     def get_image_memory_requirements(self, image=vk.image):
         return self._d.get_image_memory_requirements(image)
