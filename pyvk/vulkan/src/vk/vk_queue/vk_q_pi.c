@@ -37,17 +37,17 @@ void vk_q_pi_dealloc(PyObject *self_obj)
 
     if (self->pi.pWaitSemaphores != NULL)
     {
-        free(self->pi.pWaitSemaphores);
+        free((void *)self->pi.pWaitSemaphores);
     }
 
     if (self->pi.pImageIndices != NULL)
     {
-        free(self->pi.pImageIndices);
+        free((void *)self->pi.pImageIndices);
     }
 
     if (self->pi.pSwapchains != NULL)
     {
-        free(self->pi.pSwapchains);
+        free((void *)self->pi.pSwapchains);
     }
 
     Py_TYPE(self_obj)->tp_free(self_obj);
@@ -75,8 +75,8 @@ void init_q_pi_from_obj(PyObject *obj_obj)
     obj->pi.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     obj->pi.pNext = NULL;
 
-    get_swapchains_from_list(obj->scs, &obj->pi.pSwapchains, &obj->pi.swapchainCount);
-    get_semaphores_from_list(obj->wait_sems, &obj->pi.pWaitSemaphores, &obj->pi.waitSemaphoreCount);
+    get_swapchains_from_list(obj->scs, (VkSwapchainKHR **)&obj->pi.pSwapchains, &obj->pi.swapchainCount);
+    get_semaphores_from_list(obj->wait_sems, (VkSemaphore **)&obj->pi.pWaitSemaphores, &obj->pi.waitSemaphoreCount);
 
     uint32_t image_idx_count = 0;
     get_uint32s_from_list(obj->image_idx, &obj->pi.pImageIndices, &image_idx_count);

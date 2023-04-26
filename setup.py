@@ -53,6 +53,9 @@ setup(
                 './pyvk/vulkan/src/vk/vk_img/vk_img_srr.c',
                 './pyvk/vulkan/src/vk/vk_img/vk_img_ci.c',
                 './pyvk/vulkan/src/vk/vk_img/vk_img.c',
+                './pyvk/vulkan/src/vk/vk_img/vk_img_view_ci.c',
+                './pyvk/vulkan/src/vk/vk_img/vk_img_view.c',
+                './pyvk/vulkan/src/vk/vk_img/vk_comp_map.c',
                 './pyvk/vulkan/src/utils/log.c',
                 './pyvk/vulkan/src/utils/utils.c',
             ],
@@ -82,7 +85,7 @@ setup(
             define_macros=[
                 ('WIN32_LEAN_AND_MEAN', None),
                 ('PY_SSIZE_T_CLEAN', None),
-                # ('DEBUG', None),
+                ('DEBUG', None),
             ],
         )
     ]

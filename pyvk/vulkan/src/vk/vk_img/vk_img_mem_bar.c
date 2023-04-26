@@ -58,7 +58,7 @@ void init_img_mem_bar_from_obj(PyObject *obj_obj)
     obj->memory_barrier.srcQueueFamilyIndex = obj->src_q_fly_idx;
     obj->memory_barrier.dstQueueFamilyIndex = obj->dst_q_fly_idx;
     obj->memory_barrier.image = ((vk_img *)(obj->img))->image;
-    obj->memory_barrier.subresourceRange = ((vk_img_srr *)obj->srr)->subresource;
+    obj->memory_barrier.subresourceRange = ((vk_img_srr *)obj->srr)->subresource_range;
 }
 
 int vk_img_mem_bar_init(PyObject *self_obj, PyObject *args, PyObject *kwds)

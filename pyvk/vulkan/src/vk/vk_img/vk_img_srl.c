@@ -18,10 +18,10 @@ void init_img_srl_from_obj(PyObject *obj_obj)
 
     vk_img_srl *obj = (vk_img_srl *)obj_obj;
 
-    obj->subresource.aspectMask = obj->aspect_mask;
-    obj->subresource.mipLevel = obj->mip_level;
-    obj->subresource.baseArrayLayer = obj->base_array_layer;
-    obj->subresource.layerCount = obj->layer_count;
+    obj->subresource_layers.aspectMask = obj->aspect_mask;
+    obj->subresource_layers.mipLevel = obj->mip_level;
+    obj->subresource_layers.baseArrayLayer = obj->base_array_layer;
+    obj->subresource_layers.layerCount = obj->layer_count;
 }
 
 int vk_img_srl_init(PyObject *self_obj, PyObject *args, PyObject *kwds)

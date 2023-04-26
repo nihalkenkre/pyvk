@@ -49,6 +49,9 @@
 #include "vk_img/vk_img_ci.h"
 #include "vk_img/vk_img_cpy.h"
 #include "vk_img/vk_img.h"
+#include "vk_img/vk_img_view_ci.h"
+#include "vk_img/vk_img_view.h"
+#include "vk_img/vk_comp_map.h"
 
 PyObject *vk_create_instance(PyObject *self, PyObject *args, PyObject *kwds)
 {
@@ -361,6 +364,20 @@ PyMODINIT_FUNC PyInit_vulkan(void)
         goto shutdown;
     }
 
+    mod = add_vk_img_view_ci_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_comp_map_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
     mod = add_vk_img_to_module(mod);
 
     if (mod == NULL)
@@ -368,6 +385,12 @@ PyMODINIT_FUNC PyInit_vulkan(void)
         goto shutdown;
     }
 
+    mod = add_vk_img_view_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
     mod = add_vk_q_si_to_module(mod);
 
     if (mod == NULL)

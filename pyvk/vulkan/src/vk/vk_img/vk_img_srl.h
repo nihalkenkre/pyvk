@@ -12,7 +12,7 @@ typedef struct vk_img_srl
     uint32_t base_array_layer;
     uint32_t layer_count;
 
-    VkImageSubresourceLayers subresource;
+    VkImageSubresourceLayers subresource_layers;
 } vk_img_srl;
 
 PyTypeObject vk_img_srl_type;

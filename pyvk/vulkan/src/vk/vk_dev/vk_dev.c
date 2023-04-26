@@ -19,6 +19,9 @@
 #include "vk_img_ci.h"
 #include "vk_img.h"
 
+#include "vk_img_view_ci.h"
+#include "vk_img_view.h"
+
 #include "vk_mem_ai.h"
 #include "vk_dev_mem.h"
 #include "vk_mem_req.h"
@@ -448,6 +451,59 @@ PyObject *vk_dev_destroy_image(PyObject *self_obj, PyObject *args)
     Py_RETURN_NONE;
 }
 
+PyObject *vk_dev_create_image_view(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_create_image_view\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *ci_obj = NULL;
+
+    PyArg_Parse(args, "O", &ci_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_img_view_ci *ci = (vk_img_view_ci *)ci_obj;
+    vk_img_view *image_view = PyObject_NEW(vk_img_view, &vk_img_view_type);
+
+    VkResult result = vkCreateImageView(self->device, &ci->ci, NULL, &image_view->image_view);
+
+    PyObject *return_obj = PyTuple_New(2);
+    PyTuple_SetItem(return_obj, 0, (PyObject *)image_view);
+    PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
+
+    return return_obj;
+}
+
+PyObject *vk_dev_destroy_image_view(PyObject *self_obj, PyObject *args)
+{
+    DEBUG_LOG("vk_dev_destroy_image_view\n");
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    PyObject *image_view_obj = NULL;
+
+    PyArg_Parse(args, "O", &image_view_obj);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_img_view *image_view = (vk_img_view *)image_view_obj;
+
+    if (image_view->image_view != VK_NULL_HANDLE)
+    {
+        DEBUG_LOG("destroying image_view\n");
+        vkDestroyImageView(self->device, image_view->image_view, NULL);
+    }
+
+    Py_XDECREF(image_view_obj);
+
+    Py_RETURN_NONE;
+}
+
 PyObject *vk_dev_allocate_memory(PyObject *self_obj, PyObject *args)
 {
     DEBUG_LOG("vk_dev_allocate_memory\n");
@@ -771,6 +827,8 @@ PyMethodDef vk_dev_methods[] = {
     {"destroy_fence", (PyCFunction)vk_dev_destroy_fence, METH_O, NULL},
     {"create_image", (PyCFunction)vk_dev_create_image, METH_O, NULL},
     {"destroy_image", (PyCFunction)vk_dev_destroy_image, METH_O, NULL},
+    {"create_image_view", (PyCFunction)vk_dev_create_image_view, METH_O, NULL},
+    {"destroy_image_view", (PyCFunction)vk_dev_destroy_image_view, METH_O, NULL},
     {"allocate_memory", (PyCFunction)vk_dev_allocate_memory, METH_O, NULL},
     {"free_memory", (PyCFunction)vk_dev_free_memory, METH_O, NULL},
     {"get_image_memory_requirements", (PyCFunction)vk_dev_get_img_mem_req, METH_O, NULL},

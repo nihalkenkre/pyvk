@@ -1,5 +1,5 @@
-#ifndef VK_IMG_VIEW
-#define VK_IMG_VIEW
+#ifndef VK_IMG_VIEW_CI
+#define VK_IMG_VIEW_CI
 
 #include <Python.h>
 
@@ -13,7 +13,7 @@ typedef struct vk_img_view_ci
     long view_type;
     long format;
     PyObject *comps;
-    PyObject *sub_re_range;
+    PyObject *srr;
 
     VkImageViewCreateInfo ci;
 } vk_img_view_ci;

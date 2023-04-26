@@ -54,13 +54,13 @@ void init_img_cpy_from_obj(PyObject *obj_obj)
 
     vk_img_cpy *obj = (vk_img_cpy *)obj_obj;
 
-    obj->img_cpy.srcSubresource = ((vk_img_srl *)obj->src_subresource)->subresource;
+    obj->img_cpy.srcSubresource = ((vk_img_srl *)obj->src_subresource)->subresource_layers;
 
     obj->img_cpy.srcOffset.x = (int32_t)PyLong_AsLong(PyTuple_GetItem(obj->src_offset, 0));
     obj->img_cpy.srcOffset.y = (int32_t)PyLong_AsLong(PyTuple_GetItem(obj->src_offset, 1));
     obj->img_cpy.srcOffset.z = (int32_t)PyLong_AsLong(PyTuple_GetItem(obj->src_offset, 2));
 
-    obj->img_cpy.dstSubresource = ((vk_img_srl *)obj->dst_subresource)->subresource;
+    obj->img_cpy.dstSubresource = ((vk_img_srl *)obj->dst_subresource)->subresource_layers;
 
     obj->img_cpy.dstOffset.x = PyLong_AsLong(PyTuple_GetItem(obj->dst_offset, 0));
     obj->img_cpy.dstOffset.y = PyLong_AsLong(PyTuple_GetItem(obj->dst_offset, 1));

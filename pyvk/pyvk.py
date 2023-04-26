@@ -599,6 +599,16 @@ class ImageType(Enum):
     THREE_3D = 2
 
 
+class ImageViewType(Enum):
+    ONE_1D = 0
+    TWO_2D = 1
+    THREE_3D = 2
+    CUBE = 3
+    ONE_1D_ARRAY = 4
+    TWO_2D_ARRAY = 5
+    CUBE_ARRAY = 6
+
+
 class ImageTiling(Enum):
     OPTIMAL = 0
     LINEAR = 1
@@ -750,6 +760,23 @@ class DependencyFlagBits(Enum):
     FEEDBACK_LOOP_BIT_EXT = 0x00000008
     VIEW_LOCAL_BIT_KHR = VIEW_LOCAL_BIT
     DEVICE_GROUP_BIT_KHR = DEVICE_GROUP_BIT
+
+
+class ComponentSwizzle(Enum):
+    IDENTITY = 0
+    ZERO = 1
+    ONE = 2
+    R = 3
+    G = 4
+    B = 5
+    A = 6
+
+
+class ImageViewCreateFlagBits(Enum):
+    NONE = 0x00000000
+    FRAGMENT_DENSITY_MAP_DYNAMIC_BIT_EXT = 0x00000001
+    DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT = 0x00000004
+    FRAGMENT_DENSITY_MAP_DEFERRED_BIT_EXT = 0x00000002
 
 
 class ApplicationInfo(vk.application_info):
@@ -993,6 +1020,23 @@ class ImageCreateInfo(vk.image_create_info):
                                               initial_layout_value)
 
 
+class ComponentMapping(vk.component_mapping):
+    def __init__(self, r=0, g=0, b=0, a=0):
+        super(ComponentMapping, self).__init__(r, g, b, a)
+
+
+class ImageViewCreateInfo(vk.image_view_create_info):
+    def __init__(self, flags=ImageViewCreateFlagBits.NONE, image=vk.image, view_type=ImageViewType.TWO_2D, 
+                 format=Format, components=vk.component_mapping, subresource_range=vk.image_subresource_range):
+        
+        flags_value = flags.value if isinstance(flags, ImageViewCreateFlagBits) else flags
+        view_type_value = view_type.value if isinstance(view_type, ImageViewType) else view_type
+        format_value = format.value if isinstance(format, Format) else format
+
+        super(ImageViewCreateInfo, self).__init__(flags_value, image, view_type_value, format_value, 
+                                                  components, subresource_range)
+
+
 class ImageCopy(vk.image_copy):
     def __init__(self, src_subresource_layers=vk.image_subresource_layers, src_offset=(0, 0, 0),
                  dst_subresource_layers=vk.image_subresource_layers, dst_offset=(0, 0, 0), extent=(0, 0, 0)):
@@ -1145,6 +1189,18 @@ class Device(object):
     def destroy_image(self, image=vk.image):
         self._d.destroy_image(image)
 
+    def create_image_view(self, image_view_create_info=ImageViewCreateInfo):
+        image_view, result = self._d.create_image_view(image_view_create_info)
+
+        for r in Result:
+            if result == r.value:
+                return image_view, r
+
+        return image_view, result
+
+    def destroy_image_view(self, image_view=vk.image_view):
+        self._d.destroy_image_view(image_view)   
+        
     def get_image_memory_requirements(self, image=vk.image):
         return self._d.get_image_memory_requirements(image)
 
