@@ -773,15 +773,6 @@ PyObject *vk_dev_map_memory(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     memset(self->mapped_datas[self->mapped_datas_count], 255, size);
 
-    VkMappedMemoryRange mem_range = {
-        .sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
-        .memory = ((vk_dev_mem *)dev_mem_obj)->device_memory,
-        .pNext = NULL,
-        .offset = 0,
-        .size = size};
-
-    vkFlushMappedMemoryRanges(self->device, 1, &mem_range);
-
     PyObject *return_obj = PyTuple_New(2);
 
     PyTuple_SetItem(return_obj, 0, PyLong_FromLong(self->mapped_datas_count));
