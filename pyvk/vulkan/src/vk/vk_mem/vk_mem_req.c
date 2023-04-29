@@ -10,36 +10,6 @@ PyMemberDef vk_mem_req_members[] = {
     {"memory_type_bits", T_UINT, offsetof(vk_mem_req, mem_type_bits), 0, "A bitmask with one bit set of every supported memory type for the resource"},
     {NULL},
 };
-/*
-void init_mem_req_from_obj(PyObject *obj_obj)
-{
-    DEBUG_LOG("init_mem_req_from_obj\n");
-
-    vk_mem_req *obj = (vk_mem_req *)obj_obj;
-
-    obj->mem_req.size = obj->size;
-    obj->mem_req.alignment = obj->alignment;
-    obj->mem_req.memoryTypeBits = obj->mem_type_bits;
-}
-
-int vk_mem_req_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
-{
-    DEBUG_LOG("vk_mem_req_init\n");
-
-    vk_mem_req *self = (vk_mem_req *)self_obj;
-
-    char *kwlist[] = {"size", "alignment", "memory_type_bits", NULL};
-
-    PyArg_ParseTupleAndKeywords(args, kwds, "KKI", kwlist, &self->size, &self->alignment, &self->mem_type_bits);)
-    if (PyErr_Occurred())
-    {
-        return -1;
-    }
-
-    init_mem_req_from_obj(self_obj);
-
-    return 0;
-}*/
 
 PyTypeObject vk_mem_req_type = {
     PyVarObject_HEAD_INIT(NULL, 0)

@@ -519,6 +519,7 @@ PyObject *vk_phy_dev_create_dev(PyObject *self_obj, PyObject *args)
 
     vk_dev *dev = PyObject_NEW(vk_dev, &vk_dev_type);
     dev->mapped_datas = NULL;
+    dev->mapped_data_sizes = NULL;
     dev->mapped_datas_count = 0;
 
     VkResult result = vkCreateDevice(self->phy_dev, &ci_obj->ci, NULL, &dev->device);

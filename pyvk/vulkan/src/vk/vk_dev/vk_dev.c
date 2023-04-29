@@ -28,6 +28,8 @@
 
 #include "log.h"
 
+#include <object.h>
+
 PyObject *vk_dev_get_queue(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_dev_get_queue\n");
@@ -759,26 +761,59 @@ PyObject *vk_dev_map_memory(PyObject *self_obj, PyObject *args, PyObject *kwds)
 
     vk_dev *self = (vk_dev *)self_obj;
 
+    ++self->mapped_datas_count;
     if (self->mapped_datas == NULL)
     {
-        self->mapped_datas = (void **)malloc(sizeof(void *) * 1);
+        self->mapped_datas = (void **)malloc(sizeof(void *) * self->mapped_datas_count);
     }
     else
     {
-        ++self->mapped_datas_count;
         self->mapped_datas = (void **)realloc(self->mapped_datas, sizeof(void *) * self->mapped_datas_count);
     }
 
-    VkResult result = vkMapMemory(self->device, ((vk_dev_mem *)dev_mem_obj)->device_memory, offset, size, flags, &self->mapped_datas[self->mapped_datas_count]);
+    if (self->mapped_data_sizes == NULL)
+    {
+        self->mapped_data_sizes = (uint32_t *)malloc(sizeof(uint32_t) * self->mapped_datas_count);
+    }
+    else
+    {
+        self->mapped_data_sizes = (uint32_t *)realloc(self->mapped_data_sizes, sizeof(uint32_t) * self->mapped_datas_count);
+    }
 
-    memset(self->mapped_datas[self->mapped_datas_count], 255, size);
+    uint32_t mapped_data_id = self->mapped_datas_count - 1;
+
+    VkResult result = vkMapMemory(self->device, ((vk_dev_mem *)dev_mem_obj)->device_memory, offset, size, flags, &self->mapped_datas[mapped_data_id]);
+    self->mapped_data_sizes[mapped_data_id] = size;
+
+    memset(self->mapped_datas[mapped_data_id], 255, size);
 
     PyObject *return_obj = PyTuple_New(2);
 
-    PyTuple_SetItem(return_obj, 0, PyLong_FromLong(self->mapped_datas_count));
+    PyTuple_SetItem(return_obj, 0, PyLong_FromLong(mapped_data_id));
     PyTuple_SetItem(return_obj, 1, PyLong_FromLong(result));
 
     return return_obj;
+}
+
+PyObject *vk_dev_update_host_mapped_data(PyObject *self_obj, PyObject *args, PyObject *kwds)
+{
+    DEBUG_LOG("vk_dev_update_host_mapped_mem\n");
+
+    Py_buffer *data = NULL;
+    uint32_t mem_id = 0;
+
+    char *kwlist[] = {"data", "mem_id", NULL};
+    PyArg_ParseTupleAndKeywords(args, kwds, "y*|I", kwlist, &data, &mem_id);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_dev *self = (vk_dev *)self_obj;
+
+    printf("ndim: %d\n", data->ndim);
+
+    Py_RETURN_NONE;
 }
 
 PyObject *vk_dev_unmap_memory(PyObject *self_obj, PyObject *args)
@@ -809,6 +844,11 @@ void vk_dev_dealloc(PyObject *self_obj)
         free(self->mapped_datas);
     }
 
+    if (self->mapped_data_sizes != NULL)
+    {
+        free(self->mapped_data_sizes);
+    }
+
     Py_TYPE(self_obj)->tp_free(self_obj);
 }
 
@@ -837,6 +877,7 @@ PyMethodDef vk_dev_methods[] = {
     {"acquire_next_image", (PyCFunction)vk_dev_acquire_next_image, METH_VARARGS | METH_KEYWORDS, NULL},
     {"wait_for_fences", (PyCFunction)vk_dev_wait_for_fences, METH_VARARGS | METH_KEYWORDS, NULL},
     {"map_memory", (PyCFunction)vk_dev_map_memory, METH_VARARGS | METH_KEYWORDS, NULL},
+    {"update_host_mapped_data", (PyCFunction)vk_dev_update_host_mapped_data, METH_VARARGS | METH_KEYWORDS, NULL},
     {"unmap_memory", (PyCFunction)vk_dev_unmap_memory, METH_O, NULL},
     {NULL},
 };

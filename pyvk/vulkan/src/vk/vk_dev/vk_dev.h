@@ -10,6 +10,7 @@ typedef struct vk_dev
         VkDevice device;
 
     void **mapped_datas;
+    uint32_t* mapped_data_sizes;
     uint32_t mapped_datas_count;
 } vk_dev;
 
