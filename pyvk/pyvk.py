@@ -1225,7 +1225,7 @@ class Device(object):
             
         return mem_id, result
 
-    def update_host_mapped_data(self, data=bytes(), mem_id=0):
+    def update_host_mapped_data(self, data=None, mem_id=0):
         self._d.update_host_mapped_data(data, mem_id)
 
     def unmap_memory(self, memory=vk.device_memory):

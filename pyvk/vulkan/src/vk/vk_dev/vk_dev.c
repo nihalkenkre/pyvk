@@ -785,8 +785,6 @@ PyObject *vk_dev_map_memory(PyObject *self_obj, PyObject *args, PyObject *kwds)
     VkResult result = vkMapMemory(self->device, ((vk_dev_mem *)dev_mem_obj)->device_memory, offset, size, flags, &self->mapped_datas[mapped_data_id]);
     self->mapped_data_sizes[mapped_data_id] = size;
 
-    memset(self->mapped_datas[mapped_data_id], 255, size);
-
     PyObject *return_obj = PyTuple_New(2);
 
     PyTuple_SetItem(return_obj, 0, PyLong_FromLong(mapped_data_id));
@@ -799,11 +797,12 @@ PyObject *vk_dev_update_host_mapped_data(PyObject *self_obj, PyObject *args, PyO
 {
     DEBUG_LOG("vk_dev_update_host_mapped_mem\n");
 
-    Py_buffer *data = NULL;
+    PyObject *data_obj = NULL;
+    const char *data = NULL;
     uint32_t mem_id = 0;
 
     char *kwlist[] = {"data", "mem_id", NULL};
-    PyArg_ParseTupleAndKeywords(args, kwds, "y*|I", kwlist, &data, &mem_id);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|SI", kwlist, &data_obj, &mem_id);
     if (PyErr_Occurred())
     {
         return NULL;
@@ -811,7 +810,62 @@ PyObject *vk_dev_update_host_mapped_data(PyObject *self_obj, PyObject *args, PyO
 
     vk_dev *self = (vk_dev *)self_obj;
 
-    printf("ndim: %d\n", data->ndim);
+    /*
+    int is_bytes = PyBytes_Check(data_obj);
+    printf("is_bytes: %d\n", is_bytes);
+
+    if (is_bytes == 1)
+    {
+        char *data = NULL;
+        Py_ssize_t size = 0;
+        if (PyBytes_AsStringAndSize(data_obj, &data, &size) < 0)
+        {
+            return NULL;
+        }
+
+        for (uint32_t idx = 0; idx < size; ++idx)
+        {
+            printf("%x %d\n", data[idx], (unsigned char)data[idx]);
+        }
+
+        printf("end of data\n");
+    }
+    */
+    int is_buffer = PyObject_CheckBuffer(data_obj);
+    // printf("is_buffer: %d\n", is_buffer);
+
+    if (is_buffer == 1)
+    {
+        Py_buffer buffer;
+        PyObject_GetBuffer(data_obj, &buffer, 0);
+
+        unsigned char *buff = (unsigned char *)malloc(sizeof(unsigned char) * 640 * 320 * 4);
+
+        uint32_t idx = 0;
+        for (uint32_t y = 0; y < 320; ++y)
+        {
+            for (uint32_t x = 0; x < 640; ++x)
+            {
+                buff[x + (y * 640 * 4)] = 255;     //((unsigned char *)buffer.buf)[idx];
+                buff[x + (y * 640 * 4) + 1] = 0; //((unsigned char *)buffer.buf)[idx];
+                buff[x + (y * 640 * 4) + 2] = 0; //((unsigned char *)buffer.buf)[idx];
+                buff[x + (y * 640 * 4) + 3] = 255; //((unsigned char *)buffer.buf)[idx];
+
+                ++idx;
+            }
+        }
+        printf("idx: %u\n", idx);
+        printf("size: %u\n", self->mapped_data_sizes[mem_id]);
+
+        memcpy(self->mapped_datas[mem_id], buff, self->mapped_data_sizes[mem_id]);
+
+        if (buff != NULL)
+        {
+            free(buff);
+        }
+
+        PyBuffer_Release(&buffer);
+    }
 
     Py_RETURN_NONE;
 }
