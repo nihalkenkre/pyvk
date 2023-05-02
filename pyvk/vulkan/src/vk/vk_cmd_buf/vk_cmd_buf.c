@@ -3,14 +3,15 @@
 
 #include "vk_img.h"
 #include "vk_img_cpy.h"
+#include "vk_img_blit.h"
 
 #include "vk_img_mem_bar.h"
 
 #include "log.h"
 
-void get_regions_from_list(PyObject *obj, VkImageCopy **regions, uint32_t *regions_count)
+void get_img_cpys_from_list(PyObject *obj, VkImageCopy **regions, uint32_t *regions_count)
 {
-    DEBUG_LOG("get_regions_from_list\n");
+    DEBUG_LOG("get_img_cpys_from_list\n");
 
     *regions_count = (uint32_t)PyList_Size(obj);
     *regions = (VkImageCopy *)malloc(sizeof(VkImageCopy) * *regions_count);
@@ -18,6 +19,19 @@ void get_regions_from_list(PyObject *obj, VkImageCopy **regions, uint32_t *regio
     for (uint32_t idx = 0; idx < *regions_count; ++idx)
     {
         *(*regions + idx) = ((vk_img_cpy *)PyList_GetItem(obj, idx))->img_cpy;
+    }
+}
+
+void get_img_blits_from_list(PyObject *obj, VkImageBlit **regions, uint32_t *regions_count)
+{
+    DEBUG_LOG("get_img_blits_from_list\n");
+
+    *regions_count = (uint32_t)PyList_Size(obj);
+    *regions = (VkImageBlit *)malloc(sizeof(VkImageBlit) * *regions_count);
+
+    for (uint32_t idx = 0; idx < *regions_count; ++idx)
+    {
+        *(*regions + idx) = ((vk_img_blit *)PyList_GetItem(obj, idx))->image_blit;
     }
 }
 
@@ -38,6 +52,38 @@ PyObject *vk_cmd_buf_begin(PyObject *self_obj, PyObject *args)
     VkResult result = vkBeginCommandBuffer(self->command_buffer, &((vk_cmd_buf_bi *)cmd_buf_bi_obj)->bi);
 
     return PyLong_FromLong(result);
+}
+
+PyObject *vk_cmd_blit_img(PyObject *self_obj, PyObject *args, PyObject *kwds)
+{
+    DEBUG_LOG("vk_cmd_blit_img\n");
+
+    PyObject *src_img_obj = NULL;
+    long src_img_layout = 0;
+    PyObject *dst_img_obj = NULL;
+    long dst_img_layout = 0;
+    PyObject *regions_obj = NULL;
+    long filter = 0;
+
+    char *kwlist[] = {"src_image", "src_image_layout", "dst_image", "dst_image_layout", "regions", "filter", NULL};
+
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OkOkOk", kwlist, &src_img_obj, &src_img_layout, &dst_img_obj, &dst_img_layout, &regions_obj, &filter);
+    if (PyErr_Occurred())
+    {
+        return NULL;
+    }
+
+    vk_cmd_buf *self = (vk_cmd_buf *)self_obj;
+
+    uint32_t regions_count = 0;
+    VkImageBlit *regions = NULL;
+
+    get_img_blits_from_list(regions_obj, &regions, &regions_count);
+
+    vkCmdBlitImage(self->command_buffer, ((vk_img *)src_img_obj)->image, src_img_layout, ((vk_img *)dst_img_obj)->image,
+                   dst_img_layout, regions_count, regions, filter);
+
+    Py_RETURN_NONE;
 }
 
 PyObject *vk_cmd_buf_cpy_img(PyObject *self_obj, PyObject *args, PyObject *kwds)
@@ -63,7 +109,7 @@ PyObject *vk_cmd_buf_cpy_img(PyObject *self_obj, PyObject *args, PyObject *kwds)
     uint32_t regions_count = 0;
     VkImageCopy *regions = NULL;
 
-    get_regions_from_list(regions_obj, &regions, &regions_count);
+    get_img_cpys_from_list(regions_obj, &regions, &regions_count);
 
     vkCmdCopyImage(self->command_buffer, ((vk_img *)src_img_obj)->image, src_img_layout,
                    ((vk_img *)dst_img_obj)->image, dst_img_layout, regions_count, regions);
@@ -137,6 +183,7 @@ PyObject *vk_cmd_buf_pipe_barrier(PyObject *self_obj, PyObject *args, PyObject *
 
 PyMethodDef vk_cmd_buf_methods[] = {
     {"begin", (PyCFunction)vk_cmd_buf_begin, METH_O, NULL},
+    {"blit_image", (PyCFunction)vk_cmd_blit_img, METH_VARARGS | METH_KEYWORDS, NULL},
     {"copy_image", (PyCFunction)vk_cmd_buf_cpy_img, METH_VARARGS | METH_KEYWORDS, NULL},
     {"pipeline_barrier", (PyCFunction)vk_cmd_buf_pipe_barrier, METH_VARARGS | METH_KEYWORDS, NULL},
     {"end", (PyCFunction)vk_cmd_buf_end, METH_NOARGS, NULL},

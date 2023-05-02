@@ -779,6 +779,13 @@ class ImageViewCreateFlagBits(Enum):
     FRAGMENT_DENSITY_MAP_DEFERRED_BIT_EXT = 0x00000002
 
 
+class Filter(Enum):
+    NEAREST = 0
+    LINEAR = 1
+    CUBIC_EXT = 1000015000
+    CUBIC_IMG = CUBIC_EXT
+
+
 class ApplicationInfo(vk.application_info):
     def __init__(self, p_next=None,
                  app_name='', app_ver=(1, 0, 0, 0),
@@ -1052,6 +1059,18 @@ class ImageCopy(vk.image_copy):
 
         super(ImageCopy, self).__init__(src_subresource_layers, src_offset, dst_subresource_layers,
                                          dst_offset, extent)
+
+class ImageBlit(vk.image_blit):
+    def __init__(self, src_subresrouce=vk.image_subresource_layers, src_offsets=[],
+                 dst_subresource=vk.image_subresource_layers, dst_offsets=[]):
+
+        if len(src_offsets) != 2:
+            raise ValueError('Please pass a list of 2 tuples of 3 values each for src_offsets in vk.ImageBlit')
+
+        if len(dst_offsets) != 2:
+            raise ValueError('Please pass a list of 2 tuples of 3 values each for dst_offsets in vk.ImageBlit')
+
+        super(ImageBlit, self).__init__(src_subresrouce, dst_offsets, dst_subresource, dst_offsets)
 
 
 class MemoryAllocateInfo(vk.memory_allocate_info):
@@ -1355,6 +1374,16 @@ class CommandBuffer(object):
         dst_image_layout_value = dst_image_layout.value if isinstance(dst_image_layout, ImageLayout) else dst_image_layout
 
         self._cb.copy_image(src_image, src_image_layout_value, dst_image, dst_image_layout_value, regions)
+
+    def blit_image(self, src_image=vk.image, src_image_layout=ImageLayout.UNDEFINED, 
+                   dst_image=vk.image, dst_image_layout=ImageLayout.UNDEFINED,
+                   regions=[], filter=Filter.NEAREST):
+
+        src_image_layout_value = src_image_layout.value if isinstance(src_image_layout, ImageLayout) else src_image_layout
+        dst_image_layout_value = dst_image_layout.value if isinstance(dst_image_layout, ImageLayout) else dst_image_layout
+        filter_value = filter.value if isinstance(filter, Filter) else filter
+
+        self._cb.blit_image(src_image, src_image_layout_value, dst_image, dst_image_layout_value, regions, filter_value)
 
     def end(self):
         result = self._cb.end() 

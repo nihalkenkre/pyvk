@@ -49,6 +49,7 @@ setup(
                 './pyvk/vulkan/src/vk/vk_fence/vk_fence.c',
                 './pyvk/vulkan/src/vk/vk_img/vk_img_mem_bar.c',
                 './pyvk/vulkan/src/vk/vk_img/vk_img_cpy.c',
+                './pyvk/vulkan/src/vk/vk_img/vk_img_blit.c',
                 './pyvk/vulkan/src/vk/vk_img/vk_img_srl.c',
                 './pyvk/vulkan/src/vk/vk_img/vk_img_srr.c',
                 './pyvk/vulkan/src/vk/vk_img/vk_img_ci.c',
@@ -74,18 +75,21 @@ setup(
                 './pyvk/vulkan/src/vk/vk_fence',
                 './pyvk/vulkan/src/vk/vk_img',
                 './pyvk/vulkan/src/utils',
+                './env/Lib/site-packages/numpy/core/include',
                 os.path.join(vulkan_sdk, 'Include'),
             ],
             library_dirs=[
                 os.path.join(vulkan_sdk, 'Lib'),
+                './env/Lib/site-packages/numpy/core/lib',
             ],
             libraries=[
-                'vulkan-1'
+                'vulkan-1',
+                'npymath',
             ],
             define_macros=[
                 ('WIN32_LEAN_AND_MEAN', None),
                 ('PY_SSIZE_T_CLEAN', None),
-                # ('DEBUG', None),
+                ('DEBUG', None),
             ],
         )
     ]

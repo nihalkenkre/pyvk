@@ -48,6 +48,7 @@
 #include "vk_img/vk_img_srr.h"
 #include "vk_img/vk_img_ci.h"
 #include "vk_img/vk_img_cpy.h"
+#include "vk_img/vk_img_blit.h"
 #include "vk_img/vk_img.h"
 #include "vk_img/vk_img_view_ci.h"
 #include "vk_img/vk_img_view.h"
@@ -434,6 +435,13 @@ PyMODINIT_FUNC PyInit_vulkan(void)
     }
 
     mod = add_vk_img_cpy_to_module(mod);
+
+    if (mod == NULL)
+    {
+        goto shutdown;
+    }
+
+    mod = add_vk_img_blit_to_module(mod);
 
     if (mod == NULL)
     {

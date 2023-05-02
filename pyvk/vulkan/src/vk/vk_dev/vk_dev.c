@@ -30,6 +30,8 @@
 
 #include <object.h>
 
+#include <numpy/arrayobject.h>
+
 PyObject *vk_dev_get_queue(PyObject *self_obj, PyObject *args, PyObject *kwds)
 {
     DEBUG_LOG("vk_dev_get_queue\n");
@@ -797,12 +799,11 @@ PyObject *vk_dev_update_host_mapped_data(PyObject *self_obj, PyObject *args, PyO
 {
     DEBUG_LOG("vk_dev_update_host_mapped_mem\n");
 
-    PyObject *data_obj = NULL;
-    const char *data = NULL;
+    PyArrayObject *data_obj = NULL;
     uint32_t mem_id = 0;
 
     char *kwlist[] = {"data", "mem_id", NULL};
-    PyArg_ParseTupleAndKeywords(args, kwds, "|SI", kwlist, &data_obj, &mem_id);
+    PyArg_ParseTupleAndKeywords(args, kwds, "|OI", kwlist, &data_obj, &mem_id);
     if (PyErr_Occurred())
     {
         return NULL;
@@ -830,14 +831,19 @@ PyObject *vk_dev_update_host_mapped_data(PyObject *self_obj, PyObject *args, PyO
 
         printf("end of data\n");
     }
-    */
+*/
+
+    /*
     int is_buffer = PyObject_CheckBuffer(data_obj);
-    // printf("is_buffer: %d\n", is_buffer);
+    printf("is_buffer: %d\n", is_buffer);
 
     if (is_buffer == 1)
     {
         Py_buffer buffer;
         PyObject_GetBuffer(data_obj, &buffer, 0);
+
+        printf("ndim: %d\n", buffer.ndim);
+        printf("len: %d\n", buffer.len);
 
         unsigned char *buff = (unsigned char *)malloc(sizeof(unsigned char) * 640 * 320 * 4);
 
@@ -847,8 +853,8 @@ PyObject *vk_dev_update_host_mapped_data(PyObject *self_obj, PyObject *args, PyO
             for (uint32_t x = 0; x < 640; ++x)
             {
                 buff[x + (y * 640 * 4)] = 255;     //((unsigned char *)buffer.buf)[idx];
-                buff[x + (y * 640 * 4) + 1] = 0; //((unsigned char *)buffer.buf)[idx];
-                buff[x + (y * 640 * 4) + 2] = 0; //((unsigned char *)buffer.buf)[idx];
+                buff[x + (y * 640 * 4) + 1] = 0;   //((unsigned char *)buffer.buf)[idx];
+                buff[x + (y * 640 * 4) + 2] = 0;   //((unsigned char *)buffer.buf)[idx];
                 buff[x + (y * 640 * 4) + 3] = 255; //((unsigned char *)buffer.buf)[idx];
 
                 ++idx;
@@ -865,6 +871,23 @@ PyObject *vk_dev_update_host_mapped_data(PyObject *self_obj, PyObject *args, PyO
         }
 
         PyBuffer_Release(&buffer);
+    }
+    */
+
+    int is_array = PyArray_Check(data_obj);
+
+    printf("is_array: %d\n", is_array);
+
+    if (is_array)
+    {
+        printf("ndim: %d\n", PyArray_NDIM(data_obj));
+        printf("stride 0: %d stride 1: %d\n", PyArray_STRIDE(data_obj, 0), PyArray_STRIDE(data_obj, 1));
+        printf("dim 0: %d dim 1: %d\n", PyArray_DIM(data_obj, 0), PyArray_DIM(data_obj, 1));
+
+        uint32_t cols = (uint32_t)PyArray_DIM(data_obj, 0);
+        uint32_t rows = (uint32_t)PyArray_DIM(data_obj, 1);
+
+        memcpy(self->mapped_datas[mem_id], PyArray_DATA(data_obj), self->mapped_data_sizes[mem_id]);
     }
 
     Py_RETURN_NONE;
@@ -948,6 +971,8 @@ PyTypeObject vk_dev_type = {
 PyObject *add_vk_dev_to_module(PyObject *mod)
 {
     DEBUG_LOG("adding device object\n");
+
+    import_array();
 
     if (PyType_Ready(&vk_dev_type) < 0)
     {
