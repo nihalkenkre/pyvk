@@ -89,7 +89,7 @@ setup(
             define_macros=[
                 ('WIN32_LEAN_AND_MEAN', None),
                 ('PY_SSIZE_T_CLEAN', None),
-                ('DEBUG', None),
+                # ('DEBUG', None),
             ],
         )
     ]

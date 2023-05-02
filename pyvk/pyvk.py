@@ -1061,7 +1061,7 @@ class ImageCopy(vk.image_copy):
                                          dst_offset, extent)
 
 class ImageBlit(vk.image_blit):
-    def __init__(self, src_subresrouce=vk.image_subresource_layers, src_offsets=[],
+    def __init__(self, src_subresource=vk.image_subresource_layers, src_offsets=[],
                  dst_subresource=vk.image_subresource_layers, dst_offsets=[]):
 
         if len(src_offsets) != 2:
@@ -1070,7 +1070,7 @@ class ImageBlit(vk.image_blit):
         if len(dst_offsets) != 2:
             raise ValueError('Please pass a list of 2 tuples of 3 values each for dst_offsets in vk.ImageBlit')
 
-        super(ImageBlit, self).__init__(src_subresrouce, dst_offsets, dst_subresource, dst_offsets)
+        super(ImageBlit, self).__init__(src_subresource, src_offsets, dst_subresource, dst_offsets)
 
 
 class MemoryAllocateInfo(vk.memory_allocate_info):

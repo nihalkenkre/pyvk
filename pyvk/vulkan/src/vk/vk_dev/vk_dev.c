@@ -811,83 +811,44 @@ PyObject *vk_dev_update_host_mapped_data(PyObject *self_obj, PyObject *args, PyO
 
     vk_dev *self = (vk_dev *)self_obj;
 
-    /*
-    int is_bytes = PyBytes_Check(data_obj);
-    printf("is_bytes: %d\n", is_bytes);
-
-    if (is_bytes == 1)
-    {
-        char *data = NULL;
-        Py_ssize_t size = 0;
-        if (PyBytes_AsStringAndSize(data_obj, &data, &size) < 0)
-        {
-            return NULL;
-        }
-
-        for (uint32_t idx = 0; idx < size; ++idx)
-        {
-            printf("%x %d\n", data[idx], (unsigned char)data[idx]);
-        }
-
-        printf("end of data\n");
-    }
-*/
-
-    /*
-    int is_buffer = PyObject_CheckBuffer(data_obj);
-    printf("is_buffer: %d\n", is_buffer);
-
-    if (is_buffer == 1)
-    {
-        Py_buffer buffer;
-        PyObject_GetBuffer(data_obj, &buffer, 0);
-
-        printf("ndim: %d\n", buffer.ndim);
-        printf("len: %d\n", buffer.len);
-
-        unsigned char *buff = (unsigned char *)malloc(sizeof(unsigned char) * 640 * 320 * 4);
-
-        uint32_t idx = 0;
-        for (uint32_t y = 0; y < 320; ++y)
-        {
-            for (uint32_t x = 0; x < 640; ++x)
-            {
-                buff[x + (y * 640 * 4)] = 255;     //((unsigned char *)buffer.buf)[idx];
-                buff[x + (y * 640 * 4) + 1] = 0;   //((unsigned char *)buffer.buf)[idx];
-                buff[x + (y * 640 * 4) + 2] = 0;   //((unsigned char *)buffer.buf)[idx];
-                buff[x + (y * 640 * 4) + 3] = 255; //((unsigned char *)buffer.buf)[idx];
-
-                ++idx;
-            }
-        }
-        printf("idx: %u\n", idx);
-        printf("size: %u\n", self->mapped_data_sizes[mem_id]);
-
-        memcpy(self->mapped_datas[mem_id], buff, self->mapped_data_sizes[mem_id]);
-
-        if (buff != NULL)
-        {
-            free(buff);
-        }
-
-        PyBuffer_Release(&buffer);
-    }
-    */
-
     int is_array = PyArray_Check(data_obj);
-
-    printf("is_array: %d\n", is_array);
 
     if (is_array)
     {
-        printf("ndim: %d\n", PyArray_NDIM(data_obj));
-        printf("stride 0: %d stride 1: %d\n", PyArray_STRIDE(data_obj, 0), PyArray_STRIDE(data_obj, 1));
-        printf("dim 0: %d dim 1: %d\n", PyArray_DIM(data_obj, 0), PyArray_DIM(data_obj, 1));
+        uint8_t **data = NULL;
 
-        uint32_t cols = (uint32_t)PyArray_DIM(data_obj, 0);
-        uint32_t rows = (uint32_t)PyArray_DIM(data_obj, 1);
+        PyArray_AsCArray(&data_obj, &data, PyArray_DIMS(data_obj), PyArray_NDIM(data_obj), PyArray_DescrFromType(NPY_UINT8));
+        if (PyErr_Occurred())
+        {
+            return NULL;
 
-        memcpy(self->mapped_datas[mem_id], PyArray_DATA(data_obj), self->mapped_data_sizes[mem_id]);
+        }
+        uint32_t width = (uint32_t)PyArray_DIM(data_obj, 0);
+        uint32_t height = (uint32_t)PyArray_DIM(data_obj, 1);
+
+        uint8_t *staging_mem = (uint8_t *)malloc(sizeof(uint8_t) * width * height * 4);
+
+        for (uint32_t y = 0; y < height; ++y)
+        {
+            for (uint32_t x = 0; x < width; ++x)
+            {
+                uint32_t offset = (x + (y * width)) * 4;
+
+                staging_mem[offset] = data[x][y];
+                staging_mem[offset + 1] = data[x][y];
+                staging_mem[offset + 2] = data[x][y];
+                staging_mem[offset + 3] = 255;
+            }
+        }
+
+        memcpy(self->mapped_datas[mem_id], staging_mem, self->mapped_data_sizes[mem_id]);
+
+        if (staging_mem != NULL)
+        {
+            free(staging_mem);
+        }
+
+        PyArray_Free(data_obj, data);
     }
 
     Py_RETURN_NONE;

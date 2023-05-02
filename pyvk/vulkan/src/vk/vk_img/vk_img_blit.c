@@ -42,25 +42,6 @@ void vk_img_blit_dealloc(PyObject *self_obj)
     Py_TYPE(self_obj)->tp_free(self_obj);
 }
 
-void get_vkoffsets_from_list(PyObject *list, VkOffset3D **offsets)
-{
-    DEBUG_LOG("get_vkoffsets_from_list\n");
-
-    uint32_t length = PyList_Size(list);
-
-    *offsets = (VkOffset3D *)malloc(sizeof(VkOffset3D) * length);
-
-    for (uint32_t idx = 0; idx < length; ++idx)
-    {
-        VkOffset3D offset;
-        offset.x = PyTuple_GetItem(PyList_GetItem(list, idx), 0);
-        offset.y = PyTuple_GetItem(PyList_GetItem(list, idx), 1);
-        offset.z = PyTuple_GetItem(PyList_GetItem(list, idx), 2);
-
-        *(*offsets + idx) = offset;
-    }
-}
-
 void init_img_blit_from_obj(PyObject *obj_obj)
 {
     DEBUG_LOG("init_img_blit_from_obj\n");
@@ -68,10 +49,24 @@ void init_img_blit_from_obj(PyObject *obj_obj)
     vk_img_blit *obj = (vk_img_blit *)obj_obj;
 
     obj->image_blit.srcSubresource = ((vk_img_srl *)obj->src_srl)->subresource_layers;
-    get_vkoffsets_from_list(obj->src_offsets, &obj->image_blit.srcOffsets);
+
+    obj->image_blit.srcOffsets[0].x = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->src_offsets, 0), 0));
+    obj->image_blit.srcOffsets[0].y = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->src_offsets, 0), 1));
+    obj->image_blit.srcOffsets[0].z = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->src_offsets, 0), 2));
+
+    obj->image_blit.srcOffsets[1].x = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->src_offsets, 1), 0));
+    obj->image_blit.srcOffsets[1].y = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->src_offsets, 1), 1));
+    obj->image_blit.srcOffsets[1].z = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->src_offsets, 1), 2));
 
     obj->image_blit.dstSubresource = ((vk_img_srl *)obj->dst_srl)->subresource_layers;
-    get_vkoffsets_from_list(obj->dst_offsets, &obj->image_blit.dstOffsets);
+
+    obj->image_blit.dstOffsets[0].x = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->dst_offsets, 0), 0));
+    obj->image_blit.dstOffsets[0].y = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->dst_offsets, 0), 1));
+    obj->image_blit.dstOffsets[0].z = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->dst_offsets, 0), 2));
+
+    obj->image_blit.dstOffsets[1].x = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->dst_offsets, 1), 0));
+    obj->image_blit.dstOffsets[1].y = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->dst_offsets, 1), 1));
+    obj->image_blit.dstOffsets[1].z = PyLong_AsLong(PyTuple_GetItem(PyList_GetItem(obj->dst_offsets, 1), 2));
 }
 
 int vk_img_blit_init(PyObject *self_obj, PyObject *args, PyObject *kwds)
