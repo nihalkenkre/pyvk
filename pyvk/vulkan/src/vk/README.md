@@ -1,8 +1,4 @@
-# C Extension
-
-The C extension exposes vulkan structures and functions to CPython via the Python C API.
-
-The `vk_module.c` initializes the module and adds all the required objects to be made available to Python.
+# Preamble
 
 The folders are based on object/structure types. They contain the files that operate on and around the object types.
 
